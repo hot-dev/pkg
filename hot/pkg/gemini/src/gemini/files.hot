@@ -1,0 +1,121 @@
+::gemini::files ns
+
+api-request ::gemini::api/request
+HttpError ::gemini::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+Status type {
+    code: Int?,
+    message: Str?,
+    details: Vec<Map>?
+}
+
+VideoMetadata type {
+    videoDuration: Str?
+}
+
+UploadFileResponse type {
+    file: File?
+}
+
+File type {
+    name: Str?,
+    displayName: Str?,
+    mimeType: Str?,
+    sizeBytes: Str?,
+    createTime: Str?,
+    updateTime: Str?,
+    expirationTime: Str?,
+    sha256Hash: Str?,
+    uri: Str?,
+    state: "STATE_UNSPECIFIED" | "PROCESSING" | "ACTIVE" | "FAILED"?,
+    error: Status?,
+    videoMetadata: VideoMetadata?
+}
+
+ErrorResponse type {
+    error: Status?
+}
+
+ListFilesResponse type {
+    files: Vec<File>?,
+    nextPageToken: Str?
+}
+
+FilesGetRequest type {
+  name: Str
+}
+
+FilesGetResponse type {
+    name: Str?,
+    displayName: Str?,
+    mimeType: Str?,
+    sizeBytes: Str?,
+    createTime: Str?,
+    updateTime: Str?,
+    expirationTime: Str?,
+    sha256Hash: Str?,
+    uri: Str?,
+    state: "STATE_UNSPECIFIED" | "PROCESSING" | "ACTIVE" | "FAILED"?,
+    error: Status?,
+    videoMetadata: VideoMetadata?
+}
+
+
+get
+meta {doc: "GET /v1/{name} - Get File"}
+fn (request: FilesGetRequest): FilesGetResponse {
+  response api-request("GET", `${::gemini/BASE_URL}/v1/${request.name}`)
+  if(is-ok-response(response), FilesGetResponse(response.body), err(HttpError(response)))
+}
+
+FilesDeleteRequest type {
+  name: Str
+}
+
+FilesDeleteResponse type {
+    value: Map
+}
+
+
+delete
+meta {doc: "DELETE /v1/{name} - Delete File"}
+fn (request: FilesDeleteRequest): FilesDeleteResponse {
+  response api-request("DELETE", `${::gemini/BASE_URL}/v1/${request.name}`)
+  if(is-ok-response(response), FilesDeleteResponse(response.body), err(HttpError(response)))
+}
+
+FilesListRequest type {
+  page-size: Str,
+  page-token: Str
+}
+
+FilesListResponse type {
+    files: Vec<File>?,
+    nextPageToken: Str?
+}
+
+
+list
+meta {doc: "GET /v1/files - List Files"}
+fn (request: FilesListRequest): FilesListResponse {
+  response api-request("GET", `${::gemini/BASE_URL}/v1/files?pageSize=${request.page-size}&pageToken=${request.page-token}`)
+  if(is-ok-response(response), FilesListResponse(response.body), err(HttpError(response)))
+}
+
+FilesUploadRequest type {
+    file: Str?,
+    metadata: Map?
+}
+
+FilesUploadResponse type {
+    file: File?
+}
+
+
+upload
+meta {doc: "POST /upload/v1/files - Upload File"}
+fn (request: FilesUploadRequest): FilesUploadResponse {
+  response api-request("POST", `${::gemini/BASE_URL}/upload/v1/files`, {}, request)
+  if(is-ok-response(response), FilesUploadResponse(response.body), err(HttpError(response)))
+}

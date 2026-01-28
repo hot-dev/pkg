@@ -1,0 +1,53 @@
+::postmark::list ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+TemplateListingResponse type {
+    TotalCount: Float?,
+    Templates_API: Vec<TemplateRecordResponse>?
+}
+
+TemplateRecordResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateId: Float?,
+    Active: Bool?
+}
+
+ListTemplatesRequest type {
+  count: Str,
+  offset: Str
+}
+
+ListTemplatesResponse type {
+    TotalCount: Float?,
+    Templates_API: Vec<TemplateRecordResponse>?
+}
+
+
+get-templates-associated-with-this-server
+meta {doc: "GET /templates - Get the Templates associated with this Server"}
+fn (request: ListTemplatesRequest): ListTemplatesResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/templates?Count=${request.count}&Offset=${request.offset}`)
+  if(is-ok-response(response), ListTemplatesResponse(response.body), err(HttpError(response)))
+}
+
+ListInboundRulesRequest type {
+  count: Str,
+  offset: Str
+}
+
+ListInboundRulesResponse type {
+    TotalCount: Int?,
+    InboundRules: Vec<Map>?
+}
+
+
+list-inbound-rule-triggers
+meta {doc: "GET /triggers/inboundrules - List inbound rule triggers"}
+fn (request: ListInboundRulesRequest): ListInboundRulesResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/triggers/inboundrules?count=${request.count}&offset=${request.offset}`)
+  if(is-ok-response(response), ListInboundRulesResponse(response.body), err(HttpError(response)))
+}

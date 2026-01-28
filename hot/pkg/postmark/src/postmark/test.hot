@@ -1,0 +1,57 @@
+::postmark::test ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+TemplateValidationResult type {
+    ContentIsValid: Bool?,
+    ValidationErrors: Vec<TemplateValidationError>?,
+    RenderedContent: Str?
+}
+
+TemplateValidationResponse type {
+    AllContentIsValid: Bool?,
+    TextBody: TemplateValidationResult?,
+    HtmlBody: TemplateValidationResult?,
+    Subject: TemplateValidationResult?,
+    SuggestedTemplateModel: Map?
+}
+
+TemplateValidationError type {
+    Message: Str?,
+    Line: Int?,
+    CharacterPosition: Int?
+}
+
+TemplateValidationRequest type {
+    Subject: Str?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    TestRenderModel: Map?,
+    InlineCssForHtmlTestRender: Bool?
+}
+
+TestTemplateContentRequest type {
+    Subject: Str?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    TestRenderModel: Map?,
+    InlineCssForHtmlTestRender: Bool?
+}
+
+TestTemplateContentResponse type {
+    AllContentIsValid: Bool?,
+    TextBody: TemplateValidationResult?,
+    HtmlBody: TemplateValidationResult?,
+    Subject: TemplateValidationResult?,
+    SuggestedTemplateModel: Map?
+}
+
+
+test-template-content
+meta {doc: "POST /templates/validate - Test Template Content"}
+fn (request: TestTemplateContentRequest): TestTemplateContentResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/templates/validate`, {}, request)
+  if(is-ok-response(response), TestTemplateContentResponse(response.body), err(HttpError(response)))
+}

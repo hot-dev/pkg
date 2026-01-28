@@ -1,0 +1,62 @@
+::anthropic::complete ns
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+CompletionResponse type {
+    type: "completion",
+    id: Str,
+    completion: Str,
+    stop_reason: Any,
+    model: Model
+}
+
+CompletionRequest type {
+    model: Model,
+    prompt: Str,
+    max_tokens_to_sample: Int,
+    stop_sequences: Vec<Str>?,
+    temperature: Float?,
+    top_p: Float?,
+    top_k: Int?,
+    metadata: Any?,
+    stream: Bool?
+}
+
+Model type {
+
+}
+
+ErrorResponse type {
+    type: "error",
+    error: Any
+}
+
+CompletePostRequest type {
+    model: Model,
+    prompt: Str,
+    max_tokens_to_sample: Int,
+    stop_sequences: Vec<Str>?,
+    temperature: Float?,
+    top_p: Float?,
+    top_k: Int?,
+    metadata: Any?,
+    stream: Bool?
+}
+
+CompletePostResponse type {
+    type: "completion",
+    id: Str,
+    completion: Str,
+    stop_reason: Any,
+    model: Model
+}
+
+
+post
+meta {doc: "POST /v1/complete - Create a Text Completion"}
+fn (request: CompletePostRequest): CompletePostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/complete`, {}, request)
+  if(is-ok-response(response), CompletePostResponse(response.body), err(HttpError(response)))
+}

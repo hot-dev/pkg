@@ -1,0 +1,94 @@
+::anthropic::prompt::caching ns
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+ToolChoice type {
+
+}
+
+PromptCachingBetaCreateMessageParams type {
+    model: Model,
+    messages: Vec<PromptCachingBetaInputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: ToolChoice?,
+    tools: Vec<PromptCachingBetaTool>?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+PromptCachingBetaTool type {
+    description: Str?,
+    name: Str,
+    input_schema: Any,
+    cache_control: Any?
+}
+
+ContentBlock type {
+
+}
+
+Model type {
+
+}
+
+ErrorResponse type {
+    type: "error",
+    error: Any
+}
+
+PromptCachingBetaMessage type {
+    id: Str,
+    type: "message",
+    role: "assistant",
+    content: Vec<ContentBlock>,
+    model: Model,
+    stop_reason: Any,
+    stop_sequence: Any,
+    usage: Any
+}
+
+PromptCachingBetaInputMessage type {
+    role: "user" | "assistant",
+    content: Any
+}
+
+PromptCachingBetaMessagesPostRequest type {
+    model: Model,
+    messages: Vec<PromptCachingBetaInputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: ToolChoice?,
+    tools: Vec<PromptCachingBetaTool>?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+PromptCachingBetaMessagesPostResponse type {
+    id: Str,
+    type: "message",
+    role: "assistant",
+    content: Vec<ContentBlock>,
+    model: Model,
+    stop_reason: Any,
+    stop_sequence: Any,
+    usage: Any
+}
+
+
+beta-messages-post
+meta {doc: "POST /v1/messages?beta=prompt_caching - Create a Message"}
+fn (request: PromptCachingBetaMessagesPostRequest): PromptCachingBetaMessagesPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages?beta=prompt_caching`, {}, request)
+  if(is-ok-response(response), PromptCachingBetaMessagesPostResponse(response.body), err(HttpError(response)))
+}

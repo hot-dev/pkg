@@ -1,0 +1,14 @@
+::hot::pkg ns
+
+hot.pkg.anthropic {
+  name: "hot.dev/anthropic",
+  version: "0.9.2",
+  description: "anthropic API bindings for Hot.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["ai"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

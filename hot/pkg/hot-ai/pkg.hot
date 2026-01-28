@@ -1,0 +1,14 @@
+::hot::pkg ns
+
+hot.pkg.hot-ai {
+  name: "hot.dev/hot-ai",
+  version: "0.9.2",
+  description: "AI types and utilities for Hot. Provides unified types for AI-generated content, chat, embeddings, and more.",
+  author: "Hot Dev",
+  email: "hi@hot.dev",
+  license: "Hot Dev Software License Agreement",
+  tags: ["ai", "hot"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

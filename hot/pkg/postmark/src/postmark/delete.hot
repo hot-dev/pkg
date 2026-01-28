@@ -1,0 +1,61 @@
+::postmark::delete ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+StandardPostmarkResponse type {
+    ErrorCode: Int?,
+    Message: Str?
+}
+
+TemplateDetailResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateID: Int?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    AssociatedServerId: Int?,
+    Subject: Str?,
+    Active: Bool?
+}
+
+DeleteTemplateRequest type {
+  template-id-or-alias: Str
+}
+
+DeleteTemplateResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateID: Int?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    AssociatedServerId: Int?,
+    Subject: Str?,
+    Active: Bool?
+}
+
+
+delete-template
+meta {doc: "DELETE /templates/{templateIdOrAlias} - Delete a Template"}
+fn (request: DeleteTemplateRequest): DeleteTemplateResponse {
+  response api-request("DELETE", `${::postmark/BASE_URL}/templates/${request.template-id-or-alias}`)
+  if(is-ok-response(response), DeleteTemplateResponse(response.body), err(HttpError(response)))
+}
+
+DeleteInboundRuleRequest type {
+  triggerid: Str
+}
+
+DeleteInboundRuleResponse type {
+    ErrorCode: Int?,
+    Message: Str?
+}
+
+
+delete-single-trigger
+meta {doc: "DELETE /triggers/inboundrules/{triggerid} - Delete a single trigger"}
+fn (request: DeleteInboundRuleRequest): DeleteInboundRuleResponse {
+  response api-request("DELETE", `${::postmark/BASE_URL}/triggers/inboundrules/${request.triggerid}`)
+  if(is-ok-response(response), DeleteInboundRuleResponse(response.body), err(HttpError(response)))
+}

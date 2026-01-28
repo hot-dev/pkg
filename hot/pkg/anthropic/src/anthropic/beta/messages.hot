@@ -1,0 +1,139 @@
+::anthropic::beta::messages ns
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+BetaMessage type {
+    id: Str,
+    type: "message",
+    role: "assistant",
+    content: Vec<BetaContentBlock>,
+    model: Model,
+    stop_reason: Any,
+    stop_sequence: Any,
+    usage: Any
+}
+
+BetaCreateMessageParams type {
+    model: Model,
+    messages: Vec<BetaInputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: BetaToolChoice?,
+    tools: Vec?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+BetaToolChoice type {
+
+}
+
+BetaContentBlock type {
+
+}
+
+BetaErrorResponse type {
+    type: "error",
+    error: Any
+}
+
+BetaInputMessage type {
+    role: "user" | "assistant",
+    content: Any
+}
+
+BetaCountMessageTokensParams type {
+    tool_choice: BetaToolChoice?,
+    tools: Vec?,
+    messages: Vec<BetaInputMessage>,
+    system: Any?,
+    model: Model
+}
+
+BetaCountMessageTokensResponse type {
+    input_tokens: Int
+}
+
+Model type {
+
+}
+
+BetaMessagesPostRequest type {
+    model: Model,
+    messages: Vec<BetaInputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: BetaToolChoice?,
+    tools: Vec?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+BetaMessagesPostResponse type {
+    id: Str,
+    type: "message",
+    role: "assistant",
+    content: Vec<BetaContentBlock>,
+    model: Model,
+    stop_reason: Any,
+    stop_sequence: Any,
+    usage: Any
+}
+
+
+post
+meta {doc: "POST /v1/messages?beta=true - Create a Message"}
+fn (request: BetaMessagesPostRequest): BetaMessagesPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages?beta=true`, {}, request)
+  if(is-ok-response(response), BetaMessagesPostResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessagesCountTokensPostRequest type {
+    tool_choice: BetaToolChoice?,
+    tools: Vec?,
+    messages: Vec<BetaInputMessage>,
+    system: Any?,
+    model: Model
+}
+
+BetaMessagesCountTokensPostResponse type {
+    input_tokens: Int
+}
+
+
+count-tokens-post
+meta {doc: "POST /v1/messages/count_tokens?beta=true - Count tokens in a Message"}
+fn (request: BetaMessagesCountTokensPostRequest): BetaMessagesCountTokensPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/count_tokens?beta=true`, {}, request)
+  if(is-ok-response(response), BetaMessagesCountTokensPostResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessagesCountTokensPostRequest type {
+    tool_choice: BetaToolChoice?,
+    tools: Vec?,
+    messages: Vec<BetaInputMessage>,
+    system: Any?,
+    model: Model
+}
+
+BetaMessagesCountTokensPostResponse type {
+    input_tokens: Int
+}
+
+
+count-tokens-post
+meta {doc: "POST /v1/messages/count_tokens - Count tokens in a Message"}
+fn (request: BetaMessagesCountTokensPostRequest): BetaMessagesCountTokensPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/count_tokens`, {}, request)
+  if(is-ok-response(response), BetaMessagesCountTokensPostResponse(response.body), err(HttpError(response)))
+}

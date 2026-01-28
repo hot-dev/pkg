@@ -1,0 +1,14 @@
+::hot::pkg ns
+
+hot.pkg.postmark {
+  name: "hot.dev/postmark",
+  version: "0.9.2",
+  description: "postmark API bindings for Hot.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["email"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

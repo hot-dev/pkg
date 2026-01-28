@@ -1,0 +1,1482 @@
+::openai::create ns
+
+api-request ::openai::api/request
+HttpError ::openai::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+StopConfiguration type {
+
+}
+
+CreateEvalRequest type {
+    name: Str?,
+    metadata: Metadata?,
+    data_source_config: Map,
+    testing_criteria: Vec
+}
+
+CreateFileRequest type {
+    file: Str,
+    purpose: FilePurpose
+}
+
+ImagesResponse type {
+    created: Int,
+    data: Vec<Image>?,
+    background: "transparent" | "opaque"?,
+    output_format: "png" | "webp" | "jpeg"?,
+    size: "1024x1024" | "1024x1536" | "1536x1024"?,
+    quality: "low" | "medium" | "high"?,
+    usage: ImageGenUsage?
+}
+
+CreateResponse type {
+
+}
+
+VectorStoreFileBatchObject type {
+    id: Str,
+    object: "vector_store.files_batch",
+    created_at: Int,
+    vector_store_id: Str,
+    status: "in_progress" | "completed" | "cancelled" | "failed",
+    file_counts: Map
+}
+
+ListFineTuningCheckpointPermissionResponse type {
+    data: Vec<FineTuningCheckpointPermission>,
+    object: "list",
+    first_id: Str?,
+    last_id: Str?,
+    has_more: Bool
+}
+
+FineTuningJob type {
+    id: Str,
+    created_at: Int,
+    error: Map,
+    fine_tuned_model: Str,
+    finished_at: Int,
+    hyperparameters: Map,
+    model: Str,
+    object: "fine_tuning.job",
+    organization_id: Str,
+    result_files: Vec<Str>,
+    status: "validating_files" | "queued" | "running" | "succeeded" | "failed" | "cancelled",
+    trained_tokens: Int,
+    training_file: Str,
+    validation_file: Str,
+    integrations: Vec?,
+    seed: Int,
+    estimated_finish: Int?,
+    method: FineTuneMethod?,
+    metadata: Metadata?
+}
+
+EvalApiError type {
+    code: Str,
+    message: Str
+}
+
+ImageGenInputUsageDetails type {
+    text_tokens: Int,
+    image_tokens: Int
+}
+
+ImageInputFidelity type {
+
+}
+
+CreateUploadRequest type {
+    filename: Str,
+    purpose: "assistants" | "batch" | "fine-tune" | "vision",
+    bytes: Int,
+    mime_type: Str
+}
+
+Batch type {
+    id: Str,
+    object: "batch",
+    endpoint: Str,
+    errors: Map?,
+    input_file_id: Str,
+    completion_window: Str,
+    status: "validating" | "failed" | "in_progress" | "finalizing" | "completed" | "expired" | "cancelling" | "cancelled",
+    output_file_id: Str?,
+    error_file_id: Str?,
+    created_at: Int,
+    in_progress_at: Int?,
+    expires_at: Int?,
+    finalizing_at: Int?,
+    completed_at: Int?,
+    failed_at: Int?,
+    expired_at: Int?,
+    cancelling_at: Int?,
+    cancelled_at: Int?,
+    request_counts: BatchRequestCounts?,
+    metadata: Metadata?
+}
+
+CreateEmbeddingRequest type {
+    input: Any,
+    model: Any,
+    encoding_format: "float" | "base64"?,
+    dimensions: Int?,
+    user: Str?
+}
+
+MessageContent type {
+
+}
+
+ParallelToolCalls type {
+
+}
+
+CreateThreadRequest type {
+    messages: Vec<CreateMessageRequest>?,
+    tool_resources: Map?,
+    metadata: Metadata?
+}
+
+ImageGenUsage type {
+    input_tokens: Int,
+    total_tokens: Int,
+    output_tokens: Int,
+    input_tokens_details: ImageGenInputUsageDetails
+}
+
+CreateTranscriptionRequest type {
+    file: Str,
+    model: Any,
+    language: Str?,
+    prompt: Str?,
+    response_format: AudioResponseFormat?,
+    temperature: Float?,
+    stream: Bool?,
+    chunking_strategy: TranscriptionChunkingStrategy?,
+    timestamp_granularities: Vec<"word" | "segment">?,
+    include: Vec<TranscriptionInclude>?
+}
+
+Upload type {
+    id: Str,
+    created_at: Int,
+    filename: Str,
+    bytes: Int,
+    purpose: Str,
+    status: "pending" | "completed" | "cancelled" | "expired",
+    expires_at: Int,
+    object: "upload",
+    file: Any?
+}
+
+CreateMessageRequest type {
+    role: "user" | "assistant",
+    content: Any,
+    attachments: Vec<Map>?,
+    metadata: Metadata?
+}
+
+Response type {
+
+}
+
+FineTuneSupervisedMethod type {
+    hyperparameters: FineTuneSupervisedHyperparameters?
+}
+
+CreateImageEditRequest type {
+    image: Any,
+    prompt: Str,
+    mask: Str?,
+    background: "transparent" | "opaque" | "auto"?,
+    model: Any?,
+    n: Int?,
+    size: "256x256" | "512x512" | "1024x1024" | "1536x1024" | "1024x1536" | "auto"?,
+    response_format: "url" | "b64_json"?,
+    output_format: "png" | "jpeg" | "webp"?,
+    output_compression: Int?,
+    user: Str?,
+    input_fidelity: ImageInputFidelity?,
+    stream: Bool?,
+    partial_images: PartialImages?,
+    quality: "standard" | "low" | "medium" | "high" | "auto"?
+}
+
+RunObject type {
+    id: Str,
+    object: "thread.run",
+    created_at: Int,
+    thread_id: Str,
+    assistant_id: Str,
+    status: RunStatus,
+    required_action: Map,
+    last_error: Map,
+    expires_at: Int,
+    started_at: Int,
+    cancelled_at: Int,
+    failed_at: Int,
+    completed_at: Int,
+    incomplete_details: Map,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    metadata: Metadata,
+    usage: RunCompletionUsage,
+    temperature: Float?,
+    top_p: Float?,
+    max_prompt_tokens: Int,
+    max_completion_tokens: Int,
+    truncation_strategy: Any,
+    tool_choice: Any,
+    parallel_tool_calls: ParallelToolCalls,
+    response_format: AssistantsApiResponseFormatOption
+}
+
+RunCompletionUsage type {
+    completion_tokens: Int,
+    prompt_tokens: Int,
+    total_tokens: Int
+}
+
+CreateChatCompletionResponse type {
+    id: Str,
+    choices: Vec<Map>,
+    created: Int,
+    model: Str,
+    service_tier: ServiceTier?,
+    system_fingerprint: Str?,
+    object: "chat.completion",
+    usage: CompletionUsage?
+}
+
+FilePurpose type {
+
+}
+
+CompletionUsage type {
+    completion_tokens: Int,
+    prompt_tokens: Int,
+    total_tokens: Int,
+    completion_tokens_details: Map?,
+    prompt_tokens_details: Map?
+}
+
+ReasoningEffort type {
+
+}
+
+FineTuningCheckpointPermission type {
+    id: Str,
+    created_at: Int,
+    project_id: Str,
+    object: "checkpoint.permission"
+}
+
+MessageObject type {
+    id: Str,
+    object: "thread.message",
+    created_at: Int,
+    thread_id: Str,
+    status: "in_progress" | "incomplete" | "completed",
+    incomplete_details: Map,
+    completed_at: Int,
+    incomplete_at: Int,
+    role: "user" | "assistant",
+    content: Vec<MessageContent>,
+    assistant_id: Str,
+    run_id: Str,
+    attachments: Vec<Map>,
+    metadata: Metadata
+}
+
+CreateVectorStoreFileRequest type {
+    file_id: Str,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    attributes: VectorStoreFileAttributes?
+}
+
+VectorStoreFileObject type {
+    id: Str,
+    object: "vector_store.file",
+    usage_bytes: Int,
+    created_at: Int,
+    vector_store_id: Str,
+    status: "in_progress" | "completed" | "cancelled" | "failed",
+    last_error: Map,
+    chunking_strategy: ChunkingStrategyResponse?,
+    attributes: VectorStoreFileAttributes?
+}
+
+RunStatus type {
+
+}
+
+FineTuneReinforcementHyperparameters type {
+    batch_size: Any?,
+    learning_rate_multiplier: Any?,
+    n_epochs: Any?,
+    reasoning_effort: "default" | "low" | "medium" | "high"?,
+    compute_multiplier: Any?,
+    eval_interval: Any?,
+    eval_samples: Any?
+}
+
+TranscriptionChunkingStrategy type {
+
+}
+
+CreateModerationRequest type {
+    input: Any,
+    model: Any?
+}
+
+OpenAIFile type {
+    id: Str,
+    bytes: Int,
+    created_at: Int,
+    expires_at: Int?,
+    filename: Str,
+    object: "file",
+    purpose: "assistants" | "assistants_output" | "batch" | "batch_output" | "fine-tune" | "fine-tune-results" | "vision" | "user_data",
+    status: "uploaded" | "processed" | "error",
+    status_details: Str?
+}
+
+CreateEvalRunRequest type {
+    name: Str?,
+    metadata: Metadata?,
+    data_source: Map
+}
+
+FineTuneMethod type {
+    type: "supervised" | "dpo" | "reinforcement",
+    supervised: FineTuneSupervisedMethod?,
+    dpo: FineTuneDPOMethod?,
+    reinforcement: FineTuneReinforcementMethod?
+}
+
+Error type {
+    code: Str,
+    message: Str,
+    param: Str,
+    type: Str
+}
+
+AudioResponseFormat type {
+
+}
+
+FineTuneSupervisedHyperparameters type {
+    batch_size: Any?,
+    learning_rate_multiplier: Any?,
+    n_epochs: Any?
+}
+
+Image type {
+    b64_json: Str?,
+    url: Str?,
+    revised_prompt: Str?
+}
+
+CreateImageVariationRequest type {
+    image: Str,
+    model: Any?,
+    n: Int?,
+    response_format: "url" | "b64_json"?,
+    size: "256x256" | "512x512" | "1024x1024"?,
+    user: Str?
+}
+
+VectorStoreObject type {
+    id: Str,
+    object: "vector_store",
+    created_at: Int,
+    name: Str,
+    usage_bytes: Int,
+    file_counts: Map,
+    status: "expired" | "in_progress" | "completed",
+    expires_after: VectorStoreExpirationAfter?,
+    expires_at: Int?,
+    last_active_at: Int,
+    metadata: Metadata
+}
+
+VectorStoreFileAttributes type {
+
+}
+
+Eval type {
+    object: "eval",
+    id: Str,
+    name: Str,
+    data_source_config: Map,
+    testing_criteria: Vec,
+    created_at: Int,
+    metadata: Metadata
+}
+
+ChunkingStrategyResponse type {
+
+}
+
+TranscriptionInclude type {
+
+}
+
+ServiceTier type {
+
+}
+
+ThreadObject type {
+    id: Str,
+    object: "thread",
+    created_at: Int,
+    tool_resources: Map,
+    metadata: Metadata
+}
+
+ChunkingStrategyRequestParam type {
+
+}
+
+Embedding type {
+    index: Int,
+    embedding: Vec<Float>,
+    object: "embedding"
+}
+
+CreateCompletionRequest type {
+    model: Any,
+    prompt: Any,
+    best_of: Int?,
+    echo: Bool?,
+    frequency_penalty: Float?,
+    logit_bias: Map?,
+    logprobs: Int?,
+    max_tokens: Int?,
+    n: Int?,
+    presence_penalty: Float?,
+    seed: Int?,
+    stop: StopConfiguration?,
+    stream: Bool?,
+    stream_options: ChatCompletionStreamOptions?,
+    suffix: Str?,
+    temperature: Float?,
+    top_p: Float?,
+    user: Str?
+}
+
+CreateEmbeddingResponse type {
+    data: Vec<Embedding>,
+    model: Str,
+    object: "list",
+    usage: Map
+}
+
+AssistantTool type {
+
+}
+
+FineTuneDPOHyperparameters type {
+    beta: Any?,
+    batch_size: Any?,
+    learning_rate_multiplier: Any?,
+    n_epochs: Any?
+}
+
+FineTuneReinforcementMethod type {
+    grader: Map,
+    hyperparameters: FineTuneReinforcementHyperparameters?
+}
+
+CreateThreadAndRunRequest type {
+    assistant_id: Str,
+    thread: CreateThreadRequest?,
+    model: Any?,
+    instructions: Str?,
+    tools: Vec<AssistantTool>?,
+    tool_resources: Map?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    stream: Bool?,
+    max_prompt_tokens: Int?,
+    max_completion_tokens: Int?,
+    truncation_strategy: Any?,
+    tool_choice: Any?,
+    parallel_tool_calls: ParallelToolCalls?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+CreateFineTuningJobRequest type {
+    model: Any,
+    training_file: Str,
+    hyperparameters: Map?,
+    suffix: Str?,
+    validation_file: Str?,
+    integrations: Vec<Map>?,
+    seed: Int?,
+    method: FineTuneMethod?,
+    metadata: Metadata?
+}
+
+CreateVectorStoreFileBatchRequest type {
+    file_ids: Vec<Str>,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    attributes: VectorStoreFileAttributes?
+}
+
+VoiceIdsShared type {
+
+}
+
+CreateVectorStoreRequest type {
+    file_ids: Vec<Str>?,
+    name: Str?,
+    expires_after: VectorStoreExpirationAfter?,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    metadata: Metadata?
+}
+
+CreateChatCompletionRequest type {
+
+}
+
+CreateRunRequest type {
+    assistant_id: Str,
+    model: Any?,
+    reasoning_effort: ReasoningEffort?,
+    instructions: Str?,
+    additional_instructions: Str?,
+    additional_messages: Vec<CreateMessageRequest>?,
+    tools: Vec<AssistantTool>?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    stream: Bool?,
+    max_prompt_tokens: Int?,
+    max_completion_tokens: Int?,
+    truncation_strategy: Any?,
+    tool_choice: Any?,
+    parallel_tool_calls: ParallelToolCalls?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+EvalRun type {
+    object: "eval.run",
+    id: Str,
+    eval_id: Str,
+    status: Str,
+    model: Str,
+    name: Str,
+    created_at: Int,
+    report_url: Str,
+    result_counts: Map,
+    per_model_usage: Vec<Map>,
+    per_testing_criteria_results: Vec<Map>,
+    data_source: Map,
+    metadata: Metadata,
+    error: EvalApiError
+}
+
+CreateImageRequest type {
+    prompt: Str,
+    model: Any?,
+    n: Int?,
+    quality: "standard" | "hd" | "low" | "medium" | "high" | "auto"?,
+    response_format: "url" | "b64_json"?,
+    output_format: "png" | "jpeg" | "webp"?,
+    output_compression: Int?,
+    stream: Bool?,
+    partial_images: PartialImages?,
+    size: "auto" | "1024x1024" | "1536x1024" | "1024x1536" | "256x256" | "512x512" | "1792x1024" | "1024x1792"?,
+    moderation: "low" | "auto"?,
+    background: "transparent" | "opaque" | "auto"?,
+    style: "vivid" | "natural"?,
+    user: Str?
+}
+
+CreateAssistantRequest type {
+    model: Any,
+    name: Str?,
+    description: Str?,
+    instructions: Str?,
+    reasoning_effort: ReasoningEffort?,
+    tools: Vec<AssistantTool>?,
+    tool_resources: Map?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+CreateSpeechRequest type {
+    model: Any,
+    input: Str,
+    instructions: Str?,
+    voice: VoiceIdsShared,
+    response_format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"?,
+    speed: Float?,
+    stream_format: "sse" | "audio"?
+}
+
+FineTuneDPOMethod type {
+    hyperparameters: FineTuneDPOHyperparameters?
+}
+
+AssistantsApiResponseFormatOption type {
+
+}
+
+CreateCompletionResponse type {
+    id: Str,
+    choices: Vec<Map>,
+    created: Int,
+    model: Str,
+    system_fingerprint: Str?,
+    object: "text_completion",
+    usage: CompletionUsage?
+}
+
+CreateFineTuningCheckpointPermissionRequest type {
+    project_ids: Vec<Str>
+}
+
+PartialImages type {
+
+}
+
+ChatCompletionStreamOptions type {
+    include_usage: Bool?,
+    include_obfuscation: Bool?
+}
+
+CreateModerationResponse type {
+    id: Str,
+    model: Str,
+    results: Vec<Map>
+}
+
+AssistantObject type {
+    id: Str,
+    object: "assistant",
+    created_at: Int,
+    name: Str,
+    description: Str,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    tool_resources: Map?,
+    metadata: Metadata,
+    temperature: Float?,
+    top_p: Float?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+Metadata type {
+
+}
+
+VectorStoreExpirationAfter type {
+    anchor: "last_active_at",
+    days: Int
+}
+
+BatchRequestCounts type {
+    total: Int,
+    completed: Int,
+    failed: Int
+}
+
+CreateTranslationRequest type {
+    file: Str,
+    model: Any,
+    prompt: Str?,
+    response_format: "json" | "text" | "srt" | "verbose_json" | "vtt"?,
+    temperature: Float?
+}
+
+CreateAssistantRequest type {
+    model: Any,
+    name: Str?,
+    description: Str?,
+    instructions: Str?,
+    reasoning_effort: ReasoningEffort?,
+    tools: Vec<AssistantTool>?,
+    tool_resources: Map?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+CreateAssistantResponse type {
+    id: Str,
+    object: "assistant",
+    created_at: Int,
+    name: Str,
+    description: Str,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    tool_resources: Map?,
+    metadata: Metadata,
+    temperature: Float?,
+    top_p: Float?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+
+create-assistant
+meta {doc: "POST /assistants - Create assistant"}
+fn (request: CreateAssistantRequest): CreateAssistantResponse {
+  response api-request("POST", `${::openai/BASE_URL}/assistants`, {}, request)
+  if(is-ok-response(response), CreateAssistantResponse(response.body), err(HttpError(response)))
+}
+
+CreateSpeechRequest type {
+    model: Any,
+    input: Str,
+    instructions: Str?,
+    voice: VoiceIdsShared,
+    response_format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"?,
+    speed: Float?,
+    stream_format: "sse" | "audio"?
+}
+
+CreateSpeechResponse type {
+    value: Str
+}
+
+
+create-speech
+meta {doc: "POST /audio/speech - Create speech"}
+fn (request: CreateSpeechRequest): CreateSpeechResponse {
+  response api-request("POST", `${::openai/BASE_URL}/audio/speech`, {}, request)
+  if(is-ok-response(response), CreateSpeechResponse(response.body), err(HttpError(response)))
+}
+
+CreateTranscriptionRequest type {
+    file: Str,
+    model: Any,
+    language: Str?,
+    prompt: Str?,
+    response_format: AudioResponseFormat?,
+    temperature: Float?,
+    stream: Bool?,
+    chunking_strategy: TranscriptionChunkingStrategy?,
+    timestamp_granularities: Vec<"word" | "segment">?,
+    include: Vec<TranscriptionInclude>?
+}
+
+CreateTranscriptionResponse type {
+    value: Any
+}
+
+
+create-transcription
+meta {doc: "POST /audio/transcriptions - Create transcription"}
+fn (request: CreateTranscriptionRequest): CreateTranscriptionResponse {
+  response api-request("POST", `${::openai/BASE_URL}/audio/transcriptions`, {}, request)
+  if(is-ok-response(response), CreateTranscriptionResponse(response.body), err(HttpError(response)))
+}
+
+CreateTranslationRequest type {
+    file: Str,
+    model: Any,
+    prompt: Str?,
+    response_format: "json" | "text" | "srt" | "verbose_json" | "vtt"?,
+    temperature: Float?
+}
+
+CreateTranslationResponse type {
+    value: Any
+}
+
+
+create-translation
+meta {doc: "POST /audio/translations - Create translation"}
+fn (request: CreateTranslationRequest): CreateTranslationResponse {
+  response api-request("POST", `${::openai/BASE_URL}/audio/translations`, {}, request)
+  if(is-ok-response(response), CreateTranslationResponse(response.body), err(HttpError(response)))
+}
+
+CreateBatchRequest type {
+    input_file_id: Str,
+    endpoint: "/v1/responses" | "/v1/chat/completions" | "/v1/embeddings" | "/v1/completions",
+    completion_window: "24h",
+    metadata: Metadata?
+}
+
+CreateBatchResponse type {
+    id: Str,
+    object: "batch",
+    endpoint: Str,
+    errors: Map?,
+    input_file_id: Str,
+    completion_window: Str,
+    status: "validating" | "failed" | "in_progress" | "finalizing" | "completed" | "expired" | "cancelling" | "cancelled",
+    output_file_id: Str?,
+    error_file_id: Str?,
+    created_at: Int,
+    in_progress_at: Int?,
+    expires_at: Int?,
+    finalizing_at: Int?,
+    completed_at: Int?,
+    failed_at: Int?,
+    expired_at: Int?,
+    cancelling_at: Int?,
+    cancelled_at: Int?,
+    request_counts: BatchRequestCounts?,
+    metadata: Metadata?
+}
+
+
+create-batch
+meta {doc: "POST /batches - Create batch"}
+fn (request: CreateBatchRequest): CreateBatchResponse {
+  response api-request("POST", `${::openai/BASE_URL}/batches`, {}, request)
+  if(is-ok-response(response), CreateBatchResponse(response.body), err(HttpError(response)))
+}
+
+CreateChatCompletionRequest type {
+
+}
+
+CreateChatCompletionResponse type {
+    id: Str,
+    choices: Vec<Map>,
+    created: Int,
+    model: Str,
+    service_tier: ServiceTier?,
+    system_fingerprint: Str?,
+    object: "chat.completion",
+    usage: CompletionUsage?
+}
+
+
+create-chat-completion
+meta {doc: "POST /chat/completions - Create chat completion"}
+fn (request: CreateChatCompletionRequest): CreateChatCompletionResponse {
+  response api-request("POST", `${::openai/BASE_URL}/chat/completions`, {}, request)
+  if(is-ok-response(response), CreateChatCompletionResponse(response.body), err(HttpError(response)))
+}
+
+CreateCompletionRequest type {
+    model: Any,
+    prompt: Any,
+    best_of: Int?,
+    echo: Bool?,
+    frequency_penalty: Float?,
+    logit_bias: Map?,
+    logprobs: Int?,
+    max_tokens: Int?,
+    n: Int?,
+    presence_penalty: Float?,
+    seed: Int?,
+    stop: StopConfiguration?,
+    stream: Bool?,
+    stream_options: ChatCompletionStreamOptions?,
+    suffix: Str?,
+    temperature: Float?,
+    top_p: Float?,
+    user: Str?
+}
+
+CreateCompletionResponse type {
+    id: Str,
+    choices: Vec<Map>,
+    created: Int,
+    model: Str,
+    system_fingerprint: Str?,
+    object: "text_completion",
+    usage: CompletionUsage?
+}
+
+
+create-completion
+meta {doc: "POST /completions - Create completion"}
+fn (request: CreateCompletionRequest): CreateCompletionResponse {
+  response api-request("POST", `${::openai/BASE_URL}/completions`, {}, request)
+  if(is-ok-response(response), CreateCompletionResponse(response.body), err(HttpError(response)))
+}
+
+CreateEmbeddingRequest type {
+    input: Any,
+    model: Any,
+    encoding_format: "float" | "base64"?,
+    dimensions: Int?,
+    user: Str?
+}
+
+CreateEmbeddingResponse type {
+    data: Vec<Embedding>,
+    model: Str,
+    object: "list",
+    usage: Map
+}
+
+
+create-embeddings
+meta {doc: "POST /embeddings - Create embeddings"}
+fn (request: CreateEmbeddingRequest): CreateEmbeddingResponse {
+  response api-request("POST", `${::openai/BASE_URL}/embeddings`, {}, request)
+  if(is-ok-response(response), CreateEmbeddingResponse(response.body), err(HttpError(response)))
+}
+
+CreateEvalRequest type {
+    name: Str?,
+    metadata: Metadata?,
+    data_source_config: Map,
+    testing_criteria: Vec
+}
+
+CreateEvalResponse type {
+    object: "eval",
+    id: Str,
+    name: Str,
+    data_source_config: Map,
+    testing_criteria: Vec,
+    created_at: Int,
+    metadata: Metadata
+}
+
+
+create-eval
+meta {doc: "POST /evals - Create eval"}
+fn (request: CreateEvalRequest): CreateEvalResponse {
+  response api-request("POST", `${::openai/BASE_URL}/evals`, {}, request)
+  if(is-ok-response(response), CreateEvalResponse(response.body), err(HttpError(response)))
+}
+
+CreateEvalRunRequest type {
+    name: Str?,
+    metadata: Metadata?,
+    data_source: Map
+}
+
+CreateEvalRunResponse type {
+    object: "eval.run",
+    id: Str,
+    eval_id: Str,
+    status: Str,
+    model: Str,
+    name: Str,
+    created_at: Int,
+    report_url: Str,
+    result_counts: Map,
+    per_model_usage: Vec<Map>,
+    per_testing_criteria_results: Vec<Map>,
+    data_source: Map,
+    metadata: Metadata,
+    error: EvalApiError
+}
+
+
+create-eval-run
+meta {doc: "POST /evals/{eval_id}/runs - Create eval run"}
+fn (eval-id: Str, request: CreateEvalRunRequest): CreateEvalRunResponse {
+  response api-request("POST", `${::openai/BASE_URL}/evals/${eval-id}/runs`, {}, request)
+  if(is-ok-response(response), CreateEvalRunResponse(response.body), err(HttpError(response)))
+}
+
+CreateFileRequest type {
+    file: Str,
+    purpose: FilePurpose
+}
+
+CreateFileResponse type {
+    id: Str,
+    bytes: Int,
+    created_at: Int,
+    expires_at: Int?,
+    filename: Str,
+    object: "file",
+    purpose: "assistants" | "assistants_output" | "batch" | "batch_output" | "fine-tune" | "fine-tune-results" | "vision" | "user_data",
+    status: "uploaded" | "processed" | "error",
+    status_details: Str?
+}
+
+
+upload-file
+meta {doc: "POST /files - Upload file"}
+fn (request: CreateFileRequest): CreateFileResponse {
+  response api-request("POST", `${::openai/BASE_URL}/files`, {}, request)
+  if(is-ok-response(response), CreateFileResponse(response.body), err(HttpError(response)))
+}
+
+CreateFineTuningCheckpointPermissionRequest type {
+    project_ids: Vec<Str>
+}
+
+CreateFineTuningCheckpointPermissionResponse type {
+    data: Vec<FineTuningCheckpointPermission>,
+    object: "list",
+    first_id: Str?,
+    last_id: Str?,
+    has_more: Bool
+}
+
+
+create-checkpoint-permissions
+meta {
+    doc: "POST /fine_tuning/checkpoints/{fine_tuned_model_checkpoint}/permissions - Create checkpoint permissions"
+}
+fn (fine-tuned-model-checkpoint: Str, request: CreateFineTuningCheckpointPermissionRequest): CreateFineTuningCheckpointPermissionResponse {
+  response api-request("POST", `${::openai/BASE_URL}/fine_tuning/checkpoints/${fine-tuned-model-checkpoint}/permissions`, {}, request)
+  if(is-ok-response(response), CreateFineTuningCheckpointPermissionResponse(response.body), err(HttpError(response)))
+}
+
+CreateFineTuningJobRequest type {
+    model: Any,
+    training_file: Str,
+    hyperparameters: Map?,
+    suffix: Str?,
+    validation_file: Str?,
+    integrations: Vec<Map>?,
+    seed: Int?,
+    method: FineTuneMethod?,
+    metadata: Metadata?
+}
+
+CreateFineTuningJobResponse type {
+    id: Str,
+    created_at: Int,
+    error: Map,
+    fine_tuned_model: Str,
+    finished_at: Int,
+    hyperparameters: Map,
+    model: Str,
+    object: "fine_tuning.job",
+    organization_id: Str,
+    result_files: Vec<Str>,
+    status: "validating_files" | "queued" | "running" | "succeeded" | "failed" | "cancelled",
+    trained_tokens: Int,
+    training_file: Str,
+    validation_file: Str,
+    integrations: Vec?,
+    seed: Int,
+    estimated_finish: Int?,
+    method: FineTuneMethod?,
+    metadata: Metadata?
+}
+
+
+create-finetuning-job
+meta {doc: "POST /fine_tuning/jobs - Create fine-tuning job"}
+fn (request: CreateFineTuningJobRequest): CreateFineTuningJobResponse {
+  response api-request("POST", `${::openai/BASE_URL}/fine_tuning/jobs`, {}, request)
+  if(is-ok-response(response), CreateFineTuningJobResponse(response.body), err(HttpError(response)))
+}
+
+CreateImageEditRequest type {
+    image: Any,
+    prompt: Str,
+    mask: Str?,
+    background: "transparent" | "opaque" | "auto"?,
+    model: Any?,
+    n: Int?,
+    size: "256x256" | "512x512" | "1024x1024" | "1536x1024" | "1024x1536" | "auto"?,
+    response_format: "url" | "b64_json"?,
+    output_format: "png" | "jpeg" | "webp"?,
+    output_compression: Int?,
+    user: Str?,
+    input_fidelity: ImageInputFidelity?,
+    stream: Bool?,
+    partial_images: PartialImages?,
+    quality: "standard" | "low" | "medium" | "high" | "auto"?
+}
+
+CreateImageEditResponse type {
+    created: Int,
+    data: Vec<Image>?,
+    background: "transparent" | "opaque"?,
+    output_format: "png" | "webp" | "jpeg"?,
+    size: "1024x1024" | "1024x1536" | "1536x1024"?,
+    quality: "low" | "medium" | "high"?,
+    usage: ImageGenUsage?
+}
+
+
+create-image-edit
+meta {doc: "POST /images/edits - Create image edit"}
+fn (request: CreateImageEditRequest): CreateImageEditResponse {
+  response api-request("POST", `${::openai/BASE_URL}/images/edits`, {}, request)
+  if(is-ok-response(response), CreateImageEditResponse(response.body), err(HttpError(response)))
+}
+
+CreateImageRequest type {
+    prompt: Str,
+    model: Any?,
+    n: Int?,
+    quality: "standard" | "hd" | "low" | "medium" | "high" | "auto"?,
+    response_format: "url" | "b64_json"?,
+    output_format: "png" | "jpeg" | "webp"?,
+    output_compression: Int?,
+    stream: Bool?,
+    partial_images: PartialImages?,
+    size: "auto" | "1024x1024" | "1536x1024" | "1024x1536" | "256x256" | "512x512" | "1792x1024" | "1024x1792"?,
+    moderation: "low" | "auto"?,
+    background: "transparent" | "opaque" | "auto"?,
+    style: "vivid" | "natural"?,
+    user: Str?
+}
+
+CreateImageResponse type {
+    created: Int,
+    data: Vec<Image>?,
+    background: "transparent" | "opaque"?,
+    output_format: "png" | "webp" | "jpeg"?,
+    size: "1024x1024" | "1024x1536" | "1536x1024"?,
+    quality: "low" | "medium" | "high"?,
+    usage: ImageGenUsage?
+}
+
+
+create-image
+meta {doc: "POST /images/generations - Create image"}
+fn (request: CreateImageRequest): CreateImageResponse {
+  response api-request("POST", `${::openai/BASE_URL}/images/generations`, {}, request)
+  if(is-ok-response(response), CreateImageResponse(response.body), err(HttpError(response)))
+}
+
+CreateImageVariationRequest type {
+    image: Str,
+    model: Any?,
+    n: Int?,
+    response_format: "url" | "b64_json"?,
+    size: "256x256" | "512x512" | "1024x1024"?,
+    user: Str?
+}
+
+CreateImageVariationResponse type {
+    created: Int,
+    data: Vec<Image>?,
+    background: "transparent" | "opaque"?,
+    output_format: "png" | "webp" | "jpeg"?,
+    size: "1024x1024" | "1024x1536" | "1536x1024"?,
+    quality: "low" | "medium" | "high"?,
+    usage: ImageGenUsage?
+}
+
+
+create-image-variation
+meta {doc: "POST /images/variations - Create image variation"}
+fn (request: CreateImageVariationRequest): CreateImageVariationResponse {
+  response api-request("POST", `${::openai/BASE_URL}/images/variations`, {}, request)
+  if(is-ok-response(response), CreateImageVariationResponse(response.body), err(HttpError(response)))
+}
+
+CreateModerationRequest type {
+    input: Any,
+    model: Any?
+}
+
+CreateModerationResponse type {
+    id: Str,
+    model: Str,
+    results: Vec<Map>
+}
+
+
+create-moderation
+meta {doc: "POST /moderations - Create moderation"}
+fn (request: CreateModerationRequest): CreateModerationResponse {
+  response api-request("POST", `${::openai/BASE_URL}/moderations`, {}, request)
+  if(is-ok-response(response), CreateModerationResponse(response.body), err(HttpError(response)))
+}
+
+CreateResponseRequest type {
+
+}
+
+CreateResponseResponse type {
+
+}
+
+
+create-model-response
+meta {doc: "POST /responses - Create a model response"}
+fn (request: CreateResponseRequest): CreateResponseResponse {
+  response api-request("POST", `${::openai/BASE_URL}/responses`, {}, request)
+  if(is-ok-response(response), CreateResponseResponse(response.body), err(HttpError(response)))
+}
+
+CreateThreadRequest type {
+    messages: Vec<CreateMessageRequest>?,
+    tool_resources: Map?,
+    metadata: Metadata?
+}
+
+CreateThreadResponse type {
+    id: Str,
+    object: "thread",
+    created_at: Int,
+    tool_resources: Map,
+    metadata: Metadata
+}
+
+
+create-thread
+meta {doc: "POST /threads - Create thread"}
+fn (request: CreateThreadRequest): CreateThreadResponse {
+  response api-request("POST", `${::openai/BASE_URL}/threads`, {}, request)
+  if(is-ok-response(response), CreateThreadResponse(response.body), err(HttpError(response)))
+}
+
+CreateThreadAndRunRequest type {
+    assistant_id: Str,
+    thread: CreateThreadRequest?,
+    model: Any?,
+    instructions: Str?,
+    tools: Vec<AssistantTool>?,
+    tool_resources: Map?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    stream: Bool?,
+    max_prompt_tokens: Int?,
+    max_completion_tokens: Int?,
+    truncation_strategy: Any?,
+    tool_choice: Any?,
+    parallel_tool_calls: ParallelToolCalls?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+CreateThreadAndRunResponse type {
+    id: Str,
+    object: "thread.run",
+    created_at: Int,
+    thread_id: Str,
+    assistant_id: Str,
+    status: RunStatus,
+    required_action: Map,
+    last_error: Map,
+    expires_at: Int,
+    started_at: Int,
+    cancelled_at: Int,
+    failed_at: Int,
+    completed_at: Int,
+    incomplete_details: Map,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    metadata: Metadata,
+    usage: RunCompletionUsage,
+    temperature: Float?,
+    top_p: Float?,
+    max_prompt_tokens: Int,
+    max_completion_tokens: Int,
+    truncation_strategy: Any,
+    tool_choice: Any,
+    parallel_tool_calls: ParallelToolCalls,
+    response_format: AssistantsApiResponseFormatOption
+}
+
+
+create-thread-and-run
+meta {doc: "POST /threads/runs - Create thread and run"}
+fn (request: CreateThreadAndRunRequest): CreateThreadAndRunResponse {
+  response api-request("POST", `${::openai/BASE_URL}/threads/runs`, {}, request)
+  if(is-ok-response(response), CreateThreadAndRunResponse(response.body), err(HttpError(response)))
+}
+
+CreateMessageRequest type {
+    role: "user" | "assistant",
+    content: Any,
+    attachments: Vec<Map>?,
+    metadata: Metadata?
+}
+
+CreateMessageResponse type {
+    id: Str,
+    object: "thread.message",
+    created_at: Int,
+    thread_id: Str,
+    status: "in_progress" | "incomplete" | "completed",
+    incomplete_details: Map,
+    completed_at: Int,
+    incomplete_at: Int,
+    role: "user" | "assistant",
+    content: Vec<MessageContent>,
+    assistant_id: Str,
+    run_id: Str,
+    attachments: Vec<Map>,
+    metadata: Metadata
+}
+
+
+create-message
+meta {doc: "POST /threads/{thread_id}/messages - Create message"}
+fn (thread-id: Str, request: CreateMessageRequest): CreateMessageResponse {
+  response api-request("POST", `${::openai/BASE_URL}/threads/${thread-id}/messages`, {}, request)
+  if(is-ok-response(response), CreateMessageResponse(response.body), err(HttpError(response)))
+}
+
+CreateRunRequest type {
+    assistant_id: Str,
+    model: Any?,
+    reasoning_effort: ReasoningEffort?,
+    instructions: Str?,
+    additional_instructions: Str?,
+    additional_messages: Vec<CreateMessageRequest>?,
+    tools: Vec<AssistantTool>?,
+    metadata: Metadata?,
+    temperature: Float?,
+    top_p: Float?,
+    stream: Bool?,
+    max_prompt_tokens: Int?,
+    max_completion_tokens: Int?,
+    truncation_strategy: Any?,
+    tool_choice: Any?,
+    parallel_tool_calls: ParallelToolCalls?,
+    response_format: AssistantsApiResponseFormatOption?
+}
+
+CreateRunResponse type {
+    id: Str,
+    object: "thread.run",
+    created_at: Int,
+    thread_id: Str,
+    assistant_id: Str,
+    status: RunStatus,
+    required_action: Map,
+    last_error: Map,
+    expires_at: Int,
+    started_at: Int,
+    cancelled_at: Int,
+    failed_at: Int,
+    completed_at: Int,
+    incomplete_details: Map,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    metadata: Metadata,
+    usage: RunCompletionUsage,
+    temperature: Float?,
+    top_p: Float?,
+    max_prompt_tokens: Int,
+    max_completion_tokens: Int,
+    truncation_strategy: Any,
+    tool_choice: Any,
+    parallel_tool_calls: ParallelToolCalls,
+    response_format: AssistantsApiResponseFormatOption
+}
+
+
+create-run
+meta {doc: "POST /threads/{thread_id}/runs - Create run"}
+fn (thread-id: Str, include: Str, request: CreateRunRequest): CreateRunResponse {
+  response api-request("POST", `${::openai/BASE_URL}/threads/${thread-id}/runs?include[]=${include}`, {}, request)
+  if(is-ok-response(response), CreateRunResponse(response.body), err(HttpError(response)))
+}
+
+CreateUploadRequest type {
+    filename: Str,
+    purpose: "assistants" | "batch" | "fine-tune" | "vision",
+    bytes: Int,
+    mime_type: Str
+}
+
+CreateUploadResponse type {
+    id: Str,
+    created_at: Int,
+    filename: Str,
+    bytes: Int,
+    purpose: Str,
+    status: "pending" | "completed" | "cancelled" | "expired",
+    expires_at: Int,
+    object: "upload",
+    file: Any?
+}
+
+
+create-upload
+meta {doc: "POST /uploads - Create upload"}
+fn (request: CreateUploadRequest): CreateUploadResponse {
+  response api-request("POST", `${::openai/BASE_URL}/uploads`, {}, request)
+  if(is-ok-response(response), CreateUploadResponse(response.body), err(HttpError(response)))
+}
+
+CreateVectorStoreRequest type {
+    file_ids: Vec<Str>?,
+    name: Str?,
+    expires_after: VectorStoreExpirationAfter?,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    metadata: Metadata?
+}
+
+CreateVectorStoreResponse type {
+    id: Str,
+    object: "vector_store",
+    created_at: Int,
+    name: Str,
+    usage_bytes: Int,
+    file_counts: Map,
+    status: "expired" | "in_progress" | "completed",
+    expires_after: VectorStoreExpirationAfter?,
+    expires_at: Int?,
+    last_active_at: Int,
+    metadata: Metadata
+}
+
+
+create-vector-store
+meta {doc: "POST /vector_stores - Create vector store"}
+fn (request: CreateVectorStoreRequest): CreateVectorStoreResponse {
+  response api-request("POST", `${::openai/BASE_URL}/vector_stores`, {}, request)
+  if(is-ok-response(response), CreateVectorStoreResponse(response.body), err(HttpError(response)))
+}
+
+CreateVectorStoreFileBatchRequest type {
+    file_ids: Vec<Str>,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    attributes: VectorStoreFileAttributes?
+}
+
+CreateVectorStoreFileBatchResponse type {
+    id: Str,
+    object: "vector_store.files_batch",
+    created_at: Int,
+    vector_store_id: Str,
+    status: "in_progress" | "completed" | "cancelled" | "failed",
+    file_counts: Map
+}
+
+
+create-vector-store-file-batch
+meta {
+    doc: "POST /vector_stores/{vector_store_id}/file_batches - Create vector store file batch"
+}
+fn (vector-store-id: Str, request: CreateVectorStoreFileBatchRequest): CreateVectorStoreFileBatchResponse {
+  response api-request("POST", `${::openai/BASE_URL}/vector_stores/${vector-store-id}/file_batches`, {}, request)
+  if(is-ok-response(response), CreateVectorStoreFileBatchResponse(response.body), err(HttpError(response)))
+}
+
+CreateVectorStoreFileRequest type {
+    file_id: Str,
+    chunking_strategy: ChunkingStrategyRequestParam?,
+    attributes: VectorStoreFileAttributes?
+}
+
+CreateVectorStoreFileResponse type {
+    id: Str,
+    object: "vector_store.file",
+    usage_bytes: Int,
+    created_at: Int,
+    vector_store_id: Str,
+    status: "in_progress" | "completed" | "cancelled" | "failed",
+    last_error: Map,
+    chunking_strategy: ChunkingStrategyResponse?,
+    attributes: VectorStoreFileAttributes?
+}
+
+
+create-vector-store-file
+meta {doc: "POST /vector_stores/{vector_store_id}/files - Create vector store file"}
+fn (vector-store-id: Str, request: CreateVectorStoreFileRequest): CreateVectorStoreFileResponse {
+  response api-request("POST", `${::openai/BASE_URL}/vector_stores/${vector-store-id}/files`, {}, request)
+  if(is-ok-response(response), CreateVectorStoreFileResponse(response.body), err(HttpError(response)))
+}

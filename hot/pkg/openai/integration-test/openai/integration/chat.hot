@@ -1,0 +1,66 @@
+::openai::integration::chat ns
+meta ["test"]
+
+::hot::test use
+::env ::hot::env
+
+// Environment variable for API key
+api-key ::env/get("OPENAI_API_KEY", "")
+
+// Helper to skip tests when no API key is configured
+skip-if-no-key fn (test-name: Str): Bool {
+    cond {
+        eq(api-key, "") => {
+            println(`    ⚠ Skipping ${test-name}: OPENAI_API_KEY not set`)
+            true
+        }
+        => { false }
+    }
+}
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
+
+test-chat-completions-simple
+meta ["test"]
+fn () {
+    cond {
+        skip-if-no-key("test-chat-completions-simple") => { true }
+        => {
+            response ::hot::http/post("https://api.openai.com/v1/chat/completions",
+                {
+                    "Authorization": `Bearer ${api-key}`,
+                    "Content-Type": "application/json"
+                },
+                {
+                    "model": "gpt-4o-mini",
+                    "max_tokens": 50,
+                    "messages": [
+                        {"role": "user", "content": "Say 'Hello, Hot!' and nothing else."}
+                    ]
+                }
+            )
+
+            assert-eq(200, response.status, "Should complete chat request successfully")
+            assert(response.body.choices, "Response should have choices")
+            assert(response.body.usage, "Response should have usage info")
+        }
+    }
+}
+
+test-list-models
+meta ["test"]
+fn () {
+    cond {
+        skip-if-no-key("test-list-models") => { true }
+        => {
+            response ::hot::http/get("https://api.openai.com/v1/models", {
+                "Authorization": `Bearer ${api-key}`
+            })
+
+            assert-eq(200, response.status, "Should list models successfully")
+            assert(response.body.data, "Response should have data array")
+        }
+    }
+}

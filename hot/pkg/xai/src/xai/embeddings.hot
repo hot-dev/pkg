@@ -1,0 +1,186 @@
+::xai::embeddings ns
+
+// ============================================================================
+// xAI Embeddings API
+// https://docs.x.ai/api
+// ============================================================================
+
+api-request ::xai::api/request
+HttpError ::xai::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+// ============================================================================
+// Types
+// ============================================================================
+
+// Literal union for encoding formats
+EncodingFormat type "float" | "base64"
+
+// Embedding request
+CreateEmbeddingRequest type {
+    input: Any,
+    model: Str,
+    encoding_format: EncodingFormat?,
+    dimensions: Int?,
+    user: Str?
+}
+
+// Single embedding object
+Embedding type {
+    object: Str,
+    embedding: Vec<Dec>,
+    index: Int
+}
+
+// Embedding response
+CreateEmbeddingResponse type {
+    object: Str,
+    data: Vec<Embedding>,
+    model: Str,
+    usage: EmbeddingUsage
+}
+
+EmbeddingUsage type {
+    prompt_tokens: Int,
+    total_tokens: Int
+}
+
+// ============================================================================
+// API Functions
+// ============================================================================
+
+create
+meta {
+    doc: "Create embeddings for text input(s).
+
+**Example - Single text**
+```hot
+response create({
+    model: \"embedding-beta-v1\",
+    input: \"The quick brown fox jumps over the lazy dog\"
+})
+
+embedding response.data[0].embedding
+// [0.0123, -0.0456, ...]
+```
+
+**Example - Multiple texts**
+```hot
+response create({
+    model: \"embedding-beta-v1\",
+    input: [\"Hello world\", \"Goodbye world\"]
+})
+
+// response.data[0].embedding - embedding for \"Hello world\"
+// response.data[1].embedding - embedding for \"Goodbye world\"
+```"
+}
+fn (request: CreateEmbeddingRequest): CreateEmbeddingResponse | HttpError {
+    response api-request("POST", `${::xai/BASE_URL}/embeddings`, {}, request)
+    if(is-ok-response(response), CreateEmbeddingResponse(response.body), err(HttpError(response)))
+}
+
+// ============================================================================
+// Convenience Functions
+// ============================================================================
+
+embed
+meta {
+    doc: "Simple embedding - get the embedding vector for a single text.
+
+**Example**
+```hot
+vector embed(\"embedding-beta-v1\", \"Hello world\")
+// [0.0123, -0.0456, ...]
+```"
+}
+fn (model: Str, text: Str): Vec<Dec> | HttpError {
+    request CreateEmbeddingRequest({
+        model: model,
+        input: text
+    })
+
+    response create(request)
+
+    match response {
+        HttpError => { response }
+        CreateEmbeddingResponse => {
+            data response.data
+            cond {
+                or(is-null(data), is-zero(length(data))) => { [] }
+                => { data[0].embedding }
+            }
+        }
+    }
+}
+
+embed-batch
+meta {
+    doc: "Batch embedding - get embedding vectors for multiple texts.
+
+**Example**
+```hot
+vectors embed-batch(\"embedding-beta-v1\", [\"Hello\", \"World\"])
+// [[0.0123, ...], [0.0456, ...]]
+```"
+}
+fn (model: Str, texts: Vec<Str>): Vec<Vec<Dec>> | HttpError {
+    request CreateEmbeddingRequest({
+        model: model,
+        input: texts
+    })
+
+    response create(request)
+
+    match response {
+        HttpError => { response }
+        CreateEmbeddingResponse => {
+            map(response.data, (emb) { emb.embedding })
+        }
+    }
+}
+
+// ============================================================================
+// Similarity Functions
+// ============================================================================
+
+cosine-similarity
+meta {
+    doc: "Calculate cosine similarity between two embedding vectors.
+Returns a value between -1 and 1, where 1 means identical.
+
+**Example**
+```hot
+vec1 embed(\"embedding-beta-v1\", \"Hello world\")
+vec2 embed(\"embedding-beta-v1\", \"Hi there\")
+similarity cosine-similarity(vec1, vec2)
+// 0.89
+```"
+}
+fn (a: Vec<Dec>, b: Vec<Dec>): Dec {
+    // Dot product
+    dot-product reduce(
+        map-indexed(a, (i, val) { mul(val, b[i]) }),
+        (acc, x) { add(acc, x) },
+        0.0
+    )
+
+    // Magnitudes (using pow(x, 0.5) for square root)
+    sum-sq-a reduce(map(a, (x) { mul(x, x) }), (acc, x) { add(acc, x) }, 0.0)
+    sum-sq-b reduce(map(b, (x) { mul(x, x) }), (acc, x) { add(acc, x) }, 0.0)
+    mag-a pow(sum-sq-a, 0.5)
+    mag-b pow(sum-sq-b, 0.5)
+
+    // Cosine similarity
+    cond {
+        or(is-zero(mag-a), is-zero(mag-b)) => { 0.0 }
+        => { div(dot-product, mul(mag-a, mag-b)) }
+    }
+}
+
+// ============================================================================
+// Available Models
+// ============================================================================
+
+// Default embedding model
+EMBEDDING_BETA "embedding-beta-v1"

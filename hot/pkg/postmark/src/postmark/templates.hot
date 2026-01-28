@@ -1,0 +1,43 @@
+::postmark::templates ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+CreateTemplateRequest type {
+    Alias: Str?,
+    Name: Str,
+    Subject: Str,
+    HtmlBody: Str?,
+    TextBody: Str?
+}
+
+TemplateRecordResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateId: Float?,
+    Active: Bool?
+}
+
+POSTTemplatesRequest type {
+    Alias: Str?,
+    Name: Str,
+    Subject: Str,
+    HtmlBody: Str?,
+    TextBody: Str?
+}
+
+POSTTemplatesResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateId: Float?,
+    Active: Bool?
+}
+
+
+create-template
+meta {doc: "POST /templates - Create a Template"}
+fn (request: POSTTemplatesRequest): POSTTemplatesResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/templates`, {}, request)
+  if(is-ok-response(response), POSTTemplatesResponse(response.body), err(HttpError(response)))
+}

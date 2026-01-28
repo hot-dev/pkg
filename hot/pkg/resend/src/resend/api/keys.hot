@@ -1,0 +1,77 @@
+::resend::api::keys ns
+
+api-request ::resend::api/request
+HttpError ::resend::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+ApiKey type {
+    id: Str?,
+    name: Str?,
+    created_at: Str?
+}
+
+CreateApiKeyRequest type {
+    name: Str,
+    permission: "full_access" | "sending_access"?,
+    domain_id: Str?
+}
+
+ListApiKeysResponse type {
+    data: Vec<ApiKey>?
+}
+
+CreateApiKeyResponse type {
+    id: Str?,
+    token: Str?
+}
+
+GETApiKeysRequest type {
+
+}
+
+GETApiKeysResponse type {
+    data: Vec<ApiKey>?
+}
+
+
+retrieve-list-api-keys
+meta {doc: "GET /api-keys - Retrieve a list of API keys"}
+fn (request: GETApiKeysRequest): GETApiKeysResponse {
+  response api-request("GET", `${::resend/BASE_URL}/api-keys`)
+  if(is-ok-response(response), GETApiKeysResponse(response.body), err(HttpError(response)))
+}
+
+POSTApiKeysRequest type {
+    name: Str,
+    permission: "full_access" | "sending_access"?,
+    domain_id: Str?
+}
+
+POSTApiKeysResponse type {
+    id: Str?,
+    token: Str?
+}
+
+
+create-new-api-key
+meta {doc: "POST /api-keys - Create a new API key"}
+fn (request: POSTApiKeysRequest): POSTApiKeysResponse {
+  response api-request("POST", `${::resend/BASE_URL}/api-keys`, {}, request)
+  if(is-ok-response(response), POSTApiKeysResponse(response.body), err(HttpError(response)))
+}
+
+DELETEApiKeysApiKeyIdRequest type {
+  api-key-id: Str
+}
+
+DELETEApiKeysApiKeyIdResponse type {
+
+}
+
+
+remove-existing-api-key
+meta {doc: "DELETE /api-keys/{api_key_id} - Remove an existing API key"}
+fn (request: DELETEApiKeysApiKeyIdRequest): DELETEApiKeysApiKeyIdResponse {
+  response api-request("DELETE", `${::resend/BASE_URL}/api-keys/${request.api-key-id}`)
+  if(is-ok-response(response), ok(response.body), err(HttpError(response)))
+}

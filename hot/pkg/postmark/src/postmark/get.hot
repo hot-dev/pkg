@@ -1,0 +1,702 @@
+::postmark::get ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+BounceSearchResponse type {
+    TotalCount: Int?,
+    Bounces: Vec<BounceInfoResponse>?
+}
+
+HeaderCollection type {
+
+}
+
+DeliveryStatsResponse type {
+    InactiveMails: Int?,
+    Bounces: Vec<BounceCountElement>?
+}
+
+MessageClickSearchResponse type {
+    TotalCount: Int?,
+    Clicks: Vec<ExtendedMessageClickEventInformation>?
+}
+
+ServerConfigurationResponse type {
+    ID: Int?,
+    Name: Str?,
+    ApiTokens: Vec<Str>?,
+    ServerLink: Str?,
+    Color: "purple" | "blue" | "turqoise" | "green" | "red" | "yellow" | "grey"?,
+    InboundAddress: Str?,
+    RawEmailEnabled: Bool?,
+    DeliveryHookUrl: Str?,
+    SmtpApiActivated: Bool?,
+    InboundHookUrl: Str?,
+    BounceHookUrl: Str?,
+    OpenHookUrl: Str?,
+    PostFirstOpenOnly: Bool?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    ClickHookUrl: Str?,
+    InboundDomain: Str?,
+    InboundHash: Str?,
+    InboundSpamThreshold: Int?
+}
+
+AttachmentCollection type {
+
+}
+
+BounceInfoResponse type {
+    ID: Str?,
+    Type: Str?,
+    TypeCode: Int?,
+    Name: Str?,
+    Tag: Str?,
+    MessageID: Str?,
+    Description: Str?,
+    Details: Str?,
+    Email: Str?,
+    BouncedAt: Str?,
+    DumpAvailable: Bool?,
+    Inactive: Bool?,
+    CanActivate: Bool?,
+    Subject: Str?,
+    Content: Str?
+}
+
+OutboundMessageDumpResponse type {
+    Body: Str?
+}
+
+ExtendedMessageClickEventInformation type {
+    ClickLocation: Str?,
+    Client: Map?,
+    OS: Map?,
+    Platform: Str?,
+    UserAgent: Str?,
+    OriginalLink: Str?,
+    Geo: Map?,
+    MessageID: Str?,
+    ReceivedAt: Str?,
+    Tag: Str?,
+    Recipient: Str?
+}
+
+TemplateDetailResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateID: Int?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    AssociatedServerId: Int?,
+    Subject: Str?,
+    Active: Bool?
+}
+
+InboundMessageFullDetailsResponse type {
+    From: Str?,
+    FromName: Str?,
+    FromFull: Map?,
+    To: Str?,
+    ToFull: Vec<EmailNameAddressPair>?,
+    Cc: Str?,
+    CcFull: Vec<EmailNameAddressPair>?,
+    ReplyTo: Str?,
+    OriginalRecipient: Str?,
+    Subject: Str?,
+    Date: Str?,
+    MailboxHash: Str?,
+    TextBody: Str?,
+    HtmlBody: Str?,
+    Tag: Str?,
+    Headers: HeaderCollection?,
+    Attachments: AttachmentCollection?,
+    MessageID: Str?,
+    BlockedReason: Str?,
+    Status: Str?
+}
+
+EmailNameAddressPair type {
+    Name: Str?,
+    Email: Str?
+}
+
+BounceCountElement type {
+    Name: Str?,
+    Count: Int?,
+    Type: Str?
+}
+
+OutboundMessageDetailsResponse type {
+    TextBody: Str?,
+    HtmlBody: Str?,
+    Body: Str?,
+    Tag: Str?,
+    MessageID: Str?,
+    To: Vec<EmailNameAddressPair>?,
+    Cc: Vec<EmailNameAddressPair>?,
+    Bcc: Vec<EmailNameAddressPair>?,
+    Recipients: Vec<Str>?,
+    ReceivedAt: Str?,
+    From: Str?,
+    Subject: Str?,
+    Attachments: AttachmentCollection?,
+    Status: Str?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    MessageEvents: Vec<MessageEventDetails>?
+}
+
+MessageOpenSearchResponse type {
+    TotalCount: Int?,
+    Opens: Vec<ExtendedMessageOpenEventInformation>?
+}
+
+SentCountsResponse type {
+    Sent: Int?,
+    Days: Vec<Map>?
+}
+
+OutboundOverviewStatsResponse type {
+    Sent: Int?,
+    Bounced: Int?,
+    SMTPAPIErrors: Int?,
+    BounceRate: Int?,
+    SpamComplaints: Int?,
+    SpamComplaintsRate: Int?,
+    Opens: Int?,
+    UniqueOpens: Int?,
+    Tracked: Int?,
+    WithOpenTracking: Int?,
+    WithLinkTracking: Int?,
+    TotalClicks: Int?,
+    UniqueLinksClicked: Int?,
+    TotalTrackedLinksSent: Int?,
+    WithClientRecorded: Int?,
+    WithPlatformRecorded: Int?
+}
+
+ExtendedMessageOpenEventInformation type {
+    FirstOpen: Bool?,
+    Client: Map?,
+    OS: Map?,
+    Platform: Str?,
+    UserAgent: Str?,
+    Geo: Map?,
+    MessageID: Str?,
+    ReceivedAt: Str?,
+    Tag: Str?,
+    Recipient: Str?
+}
+
+DynamicResponse type {
+
+}
+
+MessageEventDetails type {
+    Recipient: Str?,
+    Type: Str?,
+    ReceivedAt: Str?,
+    Details: Map?
+}
+
+GetDeliveryStatsRequest type {
+
+}
+
+GetDeliveryStatsResponse type {
+    InactiveMails: Int?,
+    Bounces: Vec<BounceCountElement>?
+}
+
+
+get-delivery-stats
+meta {doc: "GET /deliverystats - Get delivery stats"}
+fn (request: GetDeliveryStatsRequest): GetDeliveryStatsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/deliverystats`)
+  if(is-ok-response(response), GetDeliveryStatsResponse(response.body), err(HttpError(response)))
+}
+
+GetBouncesRequest type {
+  count: Str,
+  offset: Str,
+  type-param: Str,
+  inactive: Str,
+  email-filter: Str,
+  message-id: Str,
+  tag: Str,
+  todate: Str,
+  fromdate: Str
+}
+
+GetBouncesResponse type {
+    TotalCount: Int?,
+    Bounces: Vec<BounceInfoResponse>?
+}
+
+
+get-bounces
+meta {doc: "GET /bounces - Get bounces"}
+fn (request: GetBouncesRequest): GetBouncesResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/bounces?count=${request.count}&offset=${request.offset}&type=${request.type-param}&inactive=${request.inactive}&emailFilter=${request.email-filter}&messageID=${request.message-id}&tag=${request.tag}&todate=${request.todate}&fromdate=${request.fromdate}`)
+  if(is-ok-response(response), GetBouncesResponse(response.body), err(HttpError(response)))
+}
+
+GetSingleBounceRequest type {
+  bounceid: Str
+}
+
+GetSingleBounceResponse type {
+    ID: Str?,
+    Type: Str?,
+    TypeCode: Int?,
+    Name: Str?,
+    Tag: Str?,
+    MessageID: Str?,
+    Description: Str?,
+    Details: Str?,
+    Email: Str?,
+    BouncedAt: Str?,
+    DumpAvailable: Bool?,
+    Inactive: Bool?,
+    CanActivate: Bool?,
+    Subject: Str?,
+    Content: Str?
+}
+
+
+get-single-bounce
+meta {doc: "GET /bounces/{bounceid} - Get a single bounce"}
+fn (request: GetSingleBounceRequest): GetSingleBounceResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/bounces/${request.bounceid}`)
+  if(is-ok-response(response), GetSingleBounceResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundMessageDetailsRequest type {
+  messageid: Str
+}
+
+GetOutboundMessageDetailsResponse type {
+    TextBody: Str?,
+    HtmlBody: Str?,
+    Body: Str?,
+    Tag: Str?,
+    MessageID: Str?,
+    To: Vec<EmailNameAddressPair>?,
+    Cc: Vec<EmailNameAddressPair>?,
+    Bcc: Vec<EmailNameAddressPair>?,
+    Recipients: Vec<Str>?,
+    ReceivedAt: Str?,
+    From: Str?,
+    Subject: Str?,
+    Attachments: AttachmentCollection?,
+    Status: Str?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    MessageEvents: Vec<MessageEventDetails>?
+}
+
+
+outbound-message-details
+meta {doc: "GET /messages/outbound/{messageid}/details - Outbound message details"}
+fn (request: GetOutboundMessageDetailsRequest): GetOutboundMessageDetailsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/messages/outbound/${request.messageid}/details`)
+  if(is-ok-response(response), GetOutboundMessageDetailsResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundMessageDumpRequest type {
+  messageid: Str
+}
+
+GetOutboundMessageDumpResponse type {
+    Body: Str?
+}
+
+
+outbound-message-dump
+meta {doc: "GET /messages/outbound/{messageid}/dump - Outbound message dump"}
+fn (request: GetOutboundMessageDumpRequest): GetOutboundMessageDumpResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/messages/outbound/${request.messageid}/dump`)
+  if(is-ok-response(response), GetOutboundMessageDumpResponse(response.body), err(HttpError(response)))
+}
+
+GetInboundMessageDetailsRequest type {
+  messageid: Str
+}
+
+GetInboundMessageDetailsResponse type {
+    From: Str?,
+    FromName: Str?,
+    FromFull: Map?,
+    To: Str?,
+    ToFull: Vec<EmailNameAddressPair>?,
+    Cc: Str?,
+    CcFull: Vec<EmailNameAddressPair>?,
+    ReplyTo: Str?,
+    OriginalRecipient: Str?,
+    Subject: Str?,
+    Date: Str?,
+    MailboxHash: Str?,
+    TextBody: Str?,
+    HtmlBody: Str?,
+    Tag: Str?,
+    Headers: HeaderCollection?,
+    Attachments: AttachmentCollection?,
+    MessageID: Str?,
+    BlockedReason: Str?,
+    Status: Str?
+}
+
+
+inbound-message-details
+meta {doc: "GET /messages/inbound/{messageid}/details - Inbound message details"}
+fn (request: GetInboundMessageDetailsRequest): GetInboundMessageDetailsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/messages/inbound/${request.messageid}/details`)
+  if(is-ok-response(response), GetInboundMessageDetailsResponse(response.body), err(HttpError(response)))
+}
+
+GetOpensForSingleOutboundMessageRequest type {
+  messageid: Str,
+  count: Str,
+  offset: Str
+}
+
+GetOpensForSingleOutboundMessageResponse type {
+    TotalCount: Int?,
+    Opens: Vec<ExtendedMessageOpenEventInformation>?
+}
+
+
+retrieve-message-opens
+meta {doc: "GET /messages/outbound/opens/{messageid} - Retrieve Message Opens"}
+fn (request: GetOpensForSingleOutboundMessageRequest): GetOpensForSingleOutboundMessageResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/messages/outbound/opens/${request.messageid}?count=${request.count}&offset=${request.offset}`)
+  if(is-ok-response(response), GetOpensForSingleOutboundMessageResponse(response.body), err(HttpError(response)))
+}
+
+GetClicksForSingleOutboundMessageRequest type {
+  messageid: Str,
+  count: Str,
+  offset: Str
+}
+
+GetClicksForSingleOutboundMessageResponse type {
+    TotalCount: Int?,
+    Clicks: Vec<ExtendedMessageClickEventInformation>?
+}
+
+
+retrieve-message-clicks
+meta {doc: "GET /messages/outbound/clicks/{messageid} - Retrieve Message Clicks"}
+fn (request: GetClicksForSingleOutboundMessageRequest): GetClicksForSingleOutboundMessageResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/messages/outbound/clicks/${request.messageid}?count=${request.count}&offset=${request.offset}`)
+  if(is-ok-response(response), GetClicksForSingleOutboundMessageResponse(response.body), err(HttpError(response)))
+}
+
+GetSingleTemplateRequest type {
+  template-id-or-alias: Str
+}
+
+GetSingleTemplateResponse type {
+    Name: Str?,
+    Alias: Str?,
+    TemplateID: Int?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    AssociatedServerId: Int?,
+    Subject: Str?,
+    Active: Bool?
+}
+
+
+get-template
+meta {doc: "GET /templates/{templateIdOrAlias} - Get a Template"}
+fn (request: GetSingleTemplateRequest): GetSingleTemplateResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/templates/${request.template-id-or-alias}`)
+  if(is-ok-response(response), GetSingleTemplateResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundOverviewStatisticsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundOverviewStatisticsResponse type {
+    Sent: Int?,
+    Bounced: Int?,
+    SMTPAPIErrors: Int?,
+    BounceRate: Int?,
+    SpamComplaints: Int?,
+    SpamComplaintsRate: Int?,
+    Opens: Int?,
+    UniqueOpens: Int?,
+    Tracked: Int?,
+    WithOpenTracking: Int?,
+    WithLinkTracking: Int?,
+    TotalClicks: Int?,
+    UniqueLinksClicked: Int?,
+    TotalTrackedLinksSent: Int?,
+    WithClientRecorded: Int?,
+    WithPlatformRecorded: Int?
+}
+
+
+get-outbound-overview
+meta {doc: "GET /stats/outbound - Get outbound overview"}
+fn (request: GetOutboundOverviewStatisticsRequest): GetOutboundOverviewStatisticsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundOverviewStatisticsResponse(response.body), err(HttpError(response)))
+}
+
+GetSentCountsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetSentCountsResponse type {
+    Sent: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-sent-counts
+meta {doc: "GET /stats/outbound/sends - Get sent counts"}
+fn (request: GetSentCountsRequest): GetSentCountsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/sends?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetSentCountsResponse(response.body), err(HttpError(response)))
+}
+
+GetBounceCountsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetBounceCountsResponse type {
+    HardBounce: Int?,
+    SMTPApiError: Int?,
+    SoftBounce: Int?,
+    Transient: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-bounce-counts
+meta {doc: "GET /stats/outbound/bounces - Get bounce counts"}
+fn (request: GetBounceCountsRequest): GetBounceCountsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/bounces?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetBounceCountsResponse(response.body), err(HttpError(response)))
+}
+
+GetSpamComplaintsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetSpamComplaintsResponse type {
+    SpamComplaint: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-spam-complaints
+meta {doc: "GET /stats/outbound/spam - Get spam complaints"}
+fn (request: GetSpamComplaintsRequest): GetSpamComplaintsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/spam?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetSpamComplaintsResponse(response.body), err(HttpError(response)))
+}
+
+GetTrackedEmailCountsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetTrackedEmailCountsResponse type {
+    Tracked: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-tracked-email-counts
+meta {doc: "GET /stats/outbound/tracked - Get tracked email counts"}
+fn (request: GetTrackedEmailCountsRequest): GetTrackedEmailCountsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/tracked?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetTrackedEmailCountsResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundOpenCountsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundOpenCountsResponse type {
+    Opens: Int?,
+    Unique: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-email-open-counts
+meta {doc: "GET /stats/outbound/opens - Get email open counts"}
+fn (request: GetOutboundOpenCountsRequest): GetOutboundOpenCountsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/opens?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundOpenCountsResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundOpenCountsByPlatformRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundOpenCountsByPlatformResponse type {
+    Desktop: Int?,
+    WebMail: Int?,
+    Mobile: Int?,
+    Unknown: Int?,
+    Days: Vec<Map>?
+}
+
+
+get-email-platform-usage
+meta {doc: "GET /stats/outbound/opens/platforms - Get email platform usage"}
+fn (request: GetOutboundOpenCountsByPlatformRequest): GetOutboundOpenCountsByPlatformResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/opens/platforms?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundOpenCountsByPlatformResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundOpenCountsByEmailClientRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundOpenCountsByEmailClientResponse type {
+    Desktop: Int?,
+    WebMail: Int?,
+    Mobile: Int?,
+    Unknown: Int?,
+    Days: Vec<DynamicResponse>?
+}
+
+
+get-email-client-usage
+meta {doc: "GET /stats/outbound/opens/emailclients - Get email client usage"}
+fn (request: GetOutboundOpenCountsByEmailClientRequest): GetOutboundOpenCountsByEmailClientResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/opens/emailclients?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundOpenCountsByEmailClientResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundClickCountsRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundClickCountsResponse type {
+
+}
+
+
+get-click-counts
+meta {doc: "GET /stats/outbound/clicks - Get click counts"}
+fn (request: GetOutboundClickCountsRequest): GetOutboundClickCountsResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/clicks?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundClickCountsResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundClickCountsByBrowserFamilyRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundClickCountsByBrowserFamilyResponse type {
+    value: Map
+}
+
+
+get-browser-usage-by-family
+meta {doc: "GET /stats/outbound/clicks/browserfamilies - Get browser usage by family"}
+fn (request: GetOutboundClickCountsByBrowserFamilyRequest): GetOutboundClickCountsByBrowserFamilyResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/clicks/browserfamilies?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundClickCountsByBrowserFamilyResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundClickCountsByPlatformRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundClickCountsByPlatformResponse type {
+
+}
+
+
+get-browser-plaform-usage
+meta {doc: "GET /stats/outbound/clicks/platforms - Get browser plaform usage"}
+fn (request: GetOutboundClickCountsByPlatformRequest): GetOutboundClickCountsByPlatformResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/clicks/platforms?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundClickCountsByPlatformResponse(response.body), err(HttpError(response)))
+}
+
+GetOutboundClickCountsByLocationRequest type {
+  tag: Str,
+  fromdate: Str,
+  todate: Str
+}
+
+GetOutboundClickCountsByLocationResponse type {
+
+}
+
+
+get-clicks-by-body-location
+meta {doc: "GET /stats/outbound/clicks/location - Get clicks by body location"}
+fn (request: GetOutboundClickCountsByLocationRequest): GetOutboundClickCountsByLocationResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/stats/outbound/clicks/location?tag=${request.tag}&fromdate=${request.fromdate}&todate=${request.todate}`)
+  if(is-ok-response(response), GetOutboundClickCountsByLocationResponse(response.body), err(HttpError(response)))
+}
+
+GetCurrentServerConfigurationRequest type {
+
+}
+
+GetCurrentServerConfigurationResponse type {
+    ID: Int?,
+    Name: Str?,
+    ApiTokens: Vec<Str>?,
+    ServerLink: Str?,
+    Color: "purple" | "blue" | "turqoise" | "green" | "red" | "yellow" | "grey"?,
+    InboundAddress: Str?,
+    RawEmailEnabled: Bool?,
+    DeliveryHookUrl: Str?,
+    SmtpApiActivated: Bool?,
+    InboundHookUrl: Str?,
+    BounceHookUrl: Str?,
+    OpenHookUrl: Str?,
+    PostFirstOpenOnly: Bool?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    ClickHookUrl: Str?,
+    InboundDomain: Str?,
+    InboundHash: Str?,
+    InboundSpamThreshold: Int?
+}
+
+
+get-server-configuration
+meta {doc: "GET /server - Get Server Configuration"}
+fn (request: GetCurrentServerConfigurationRequest): GetCurrentServerConfigurationResponse {
+  response api-request("GET", `${::postmark/BASE_URL}/server`)
+  if(is-ok-response(response), GetCurrentServerConfigurationResponse(response.body), err(HttpError(response)))
+}

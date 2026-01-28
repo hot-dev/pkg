@@ -1,0 +1,183 @@
+::xai::search ns
+
+// ============================================================================
+// xAI Live Search
+// https://docs.x.ai/docs/guides/live-search
+//
+// Live search allows xAI models to access real-time information from the web and X.
+// It's implemented as a built-in tool in the Responses API.
+// ============================================================================
+
+api-request ::xai::api/request
+HttpError ::xai::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+CreateResponseRequest ::xai::responses/CreateResponseRequest
+CreateResponseResponse ::xai::responses/CreateResponseResponse
+create ::xai::responses/create
+extract-response-text ::xai::responses/extract-response-text
+
+// ============================================================================
+// Types
+// ============================================================================
+
+// Search tool configuration
+SearchTool type {
+    type: Str
+}
+
+// Search result from X (Twitter)
+XSearchResult type {
+    tweet_id: Str?,
+    author: Str?,
+    text: Str?,
+    created_at: Str?
+}
+
+// Web search result
+WebSearchResult type {
+    url: Str?,
+    title: Str?,
+    snippet: Str?
+}
+
+// ============================================================================
+// Tool Helpers
+// ============================================================================
+
+web-search-tool
+meta {
+    doc: "Create a web search tool configuration.
+
+Use this in the tools array of a CreateResponseRequest to enable web search.
+
+**Example**
+```hot
+response responses/create(responses/CreateResponseRequest({
+    model: \"grok-3\",
+    input: \"What is the latest news about AI?\",
+    tools: [web-search-tool()]
+}))
+```"
+}
+fn (): SearchTool {
+    SearchTool({type: "web_search"})
+}
+
+x-search-tool
+meta {
+    doc: "Create an X (Twitter) search tool configuration.
+
+Use this in the tools array of a CreateResponseRequest to enable X search.
+
+**Example**
+```hot
+response responses/create(responses/CreateResponseRequest({
+    model: \"grok-3\",
+    input: \"What are people saying about the new iPhone?\",
+    tools: [x-search-tool()]
+}))
+```"
+}
+fn (): SearchTool {
+    SearchTool({type: "x_search"})
+}
+
+// ============================================================================
+// Convenience Functions
+// ============================================================================
+
+search-web
+meta {
+    doc: "Search the web and get an AI-summarized response.
+
+This is a convenience function that enables web search and returns
+the model's response with real-time web information.
+
+**Example**
+```hot
+response search-web(\"grok-3\", \"What is the current weather in San Francisco?\")
+println(response)
+```"
+}
+fn
+(model: Str, query: Str): Str {
+    search-web(model, query, null)
+},
+(model: Str, query: Str, instructions: Str): Str {
+    request {
+        model: model,
+        input: query,
+        instructions: instructions,
+        tools: [web-search-tool()]
+    }
+
+    response create(CreateResponseRequest(request))
+
+    match response {
+        Result.Err => { err(response) }
+        Result.Ok => { extract-response-text(response) }
+    }
+}
+
+search-x
+meta {
+    doc: "Search X (Twitter) and get an AI-summarized response.
+
+This is a convenience function that enables X search and returns
+the model's response with real-time information from X.
+
+**Example**
+```hot
+response search-x(\"grok-3\", \"What are people saying about the latest tech news?\")
+println(response)
+```"
+}
+fn
+(model: Str, query: Str): Str {
+    search-x(model, query, null)
+},
+(model: Str, query: Str, instructions: Str): Str {
+    request {
+        model: model,
+        input: query,
+        instructions: instructions,
+        tools: [x-search-tool()]
+    }
+
+    response create(CreateResponseRequest(request))
+
+    match response {
+        Result.Err => { err(response) }
+        Result.Ok => { extract-response-text(response) }
+    }
+}
+
+search-all
+meta {
+    doc: "Search both web and X, returning an AI-summarized response.
+
+**Example**
+```hot
+response search-all(\"grok-3\", \"What's happening with climate change today?\")
+println(response)
+```"
+}
+fn
+(model: Str, query: Str): Str {
+    search-all(model, query, null)
+},
+(model: Str, query: Str, instructions: Str): Str {
+    request {
+        model: model,
+        input: query,
+        instructions: instructions,
+        tools: [web-search-tool(), x-search-tool()]
+    }
+
+    response create(CreateResponseRequest(request))
+
+    match response {
+        Result.Err => { err(response) }
+        Result.Ok => { extract-response-text(response) }
+    }
+}

@@ -1,0 +1,187 @@
+::resend::domains ns
+
+api-request ::resend::api/request
+HttpError ::resend::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+Domain type {
+    object: Str?,
+    id: Str?,
+    name: Str?,
+    status: Str?,
+    created_at: Str?,
+    region: Str?,
+    records: Vec<DomainRecord>?
+}
+
+UpdateDomainResponseSuccess type {
+    id: Str?,
+    object: Str?
+}
+
+CreateDomainResponse type {
+    id: Str?,
+    name: Str?,
+    created_at: Str?,
+    status: Str?,
+    records: Vec<DomainRecord>?,
+    region: Str?
+}
+
+CreateDomainRequest type {
+    name: Str,
+    region: "us-east-1" | "eu-west-1" | "sa-east-1"?
+}
+
+DomainRecord type {
+    record: Str?,
+    name: Str?,
+    type: Str?,
+    ttl: Str?,
+    status: Str?,
+    value: Str?,
+    priority: Int?
+}
+
+UpdateDomainOptions type {
+    open_tracking: Bool?,
+    click_tracking: Bool?,
+    tls: Str?
+}
+
+ListDomainsItem type {
+    id: Str?,
+    name: Str?,
+    status: Str?,
+    created_at: Str?,
+    region: Str?
+}
+
+ListDomainsResponse type {
+    data: Vec<ListDomainsItem>?
+}
+
+DeleteDomainResponse type {
+    object: Str?,
+    id: Str?,
+    deleted: Bool?
+}
+
+VerifyDomainResponse type {
+    object: Str?,
+    id: Str?
+}
+
+GETDomainsRequest type {
+
+}
+
+GETDomainsResponse type {
+    data: Vec<ListDomainsItem>?
+}
+
+
+retrieve-list-domains
+meta {doc: "GET /domains - Retrieve a list of domains"}
+fn (request: GETDomainsRequest): GETDomainsResponse {
+  response api-request("GET", `${::resend/BASE_URL}/domains`)
+  if(is-ok-response(response), GETDomainsResponse(response.body), err(HttpError(response)))
+}
+
+POSTDomainsRequest type {
+    name: Str,
+    region: "us-east-1" | "eu-west-1" | "sa-east-1"?
+}
+
+POSTDomainsResponse type {
+    id: Str?,
+    name: Str?,
+    created_at: Str?,
+    status: Str?,
+    records: Vec<DomainRecord>?,
+    region: Str?
+}
+
+
+create-new-domain
+meta {doc: "POST /domains - Create a new domain"}
+fn (request: POSTDomainsRequest): POSTDomainsResponse {
+  response api-request("POST", `${::resend/BASE_URL}/domains`, {}, request)
+  if(is-ok-response(response), POSTDomainsResponse(response.body), err(HttpError(response)))
+}
+
+GETDomainsDomainIdRequest type {
+  domain-id: Str
+}
+
+GETDomainsDomainIdResponse type {
+    object: Str?,
+    id: Str?,
+    name: Str?,
+    status: Str?,
+    created_at: Str?,
+    region: Str?,
+    records: Vec<DomainRecord>?
+}
+
+
+retrieve-single-domain
+meta {doc: "GET /domains/{domain_id} - Retrieve a single domain"}
+fn (request: GETDomainsDomainIdRequest): GETDomainsDomainIdResponse {
+  response api-request("GET", `${::resend/BASE_URL}/domains/${request.domain-id}`)
+  if(is-ok-response(response), GETDomainsDomainIdResponse(response.body), err(HttpError(response)))
+}
+
+PATCHDomainsDomainIdRequest type {
+    open_tracking: Bool?,
+    click_tracking: Bool?,
+    tls: Str?
+}
+
+PATCHDomainsDomainIdResponse type {
+    id: Str?,
+    object: Str?
+}
+
+
+update-existing-domain
+meta {doc: "PATCH /domains/{domain_id} - Update an existing domain"}
+fn (domain-id: Str, request: PATCHDomainsDomainIdRequest): PATCHDomainsDomainIdResponse {
+  response api-request("PATCH", `${::resend/BASE_URL}/domains/${domain-id}`, {}, request)
+  if(is-ok-response(response), PATCHDomainsDomainIdResponse(response.body), err(HttpError(response)))
+}
+
+DELETEDomainsDomainIdRequest type {
+  domain-id: Str
+}
+
+DELETEDomainsDomainIdResponse type {
+    object: Str?,
+    id: Str?,
+    deleted: Bool?
+}
+
+
+remove-existing-domain
+meta {doc: "DELETE /domains/{domain_id} - Remove an existing domain"}
+fn (request: DELETEDomainsDomainIdRequest): DELETEDomainsDomainIdResponse {
+  response api-request("DELETE", `${::resend/BASE_URL}/domains/${request.domain-id}`)
+  if(is-ok-response(response), DELETEDomainsDomainIdResponse(response.body), err(HttpError(response)))
+}
+
+POSTDomainsDomainIdVerifyRequest type {
+  domain-id: Str
+}
+
+POSTDomainsDomainIdVerifyResponse type {
+    object: Str?,
+    id: Str?
+}
+
+
+verify-existing-domain
+meta {doc: "POST /domains/{domain_id}/verify - Verify an existing domain"}
+fn (request: POSTDomainsDomainIdVerifyRequest): POSTDomainsDomainIdVerifyResponse {
+  response api-request("POST", `${::resend/BASE_URL}/domains/${request.domain-id}/verify`)
+  if(is-ok-response(response), POSTDomainsDomainIdVerifyResponse(response.body), err(HttpError(response)))
+}

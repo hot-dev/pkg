@@ -1,0 +1,273 @@
+::anthropic::beta::message ns
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+BetaMessageBatchIndividualRequestParams type {
+    custom_id: Str,
+    params: Any
+}
+
+BetaCreateMessageBatchParams type {
+    requests: Vec<BetaMessageBatchIndividualRequestParams>
+}
+
+BetaMessageBatch type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+BetaErrorResponse type {
+    type: "error",
+    error: Any
+}
+
+BetaListResponseMessageBatch type {
+    data: Vec<BetaMessageBatch>,
+    has_more: Bool,
+    first_id: Any,
+    last_id: Any
+}
+
+BetaMessageBatchesListRequest type {
+  before-id: Str,
+  after-id: Str,
+  limit: Str
+}
+
+BetaMessageBatchesListResponse type {
+    data: Vec<BetaMessageBatch>,
+    has_more: Bool,
+    first_id: Any,
+    last_id: Any
+}
+
+
+batches-list
+meta {doc: "GET /v1/messages/batches?beta=true - List Message Batches"}
+fn (request: BetaMessageBatchesListRequest): BetaMessageBatchesListResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches?beta=true?before_id=${request.before-id}&after_id=${request.after-id}&limit=${request.limit}`)
+  if(is-ok-response(response), BetaMessageBatchesListResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesPostRequest type {
+    requests: Vec<BetaMessageBatchIndividualRequestParams>
+}
+
+BetaMessageBatchesPostResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-post
+meta {doc: "POST /v1/messages/batches?beta=true - Create a Message Batch"}
+fn (request: BetaMessageBatchesPostRequest): BetaMessageBatchesPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/batches?beta=true`, {}, request)
+  if(is-ok-response(response), BetaMessageBatchesPostResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesRetrieveRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesRetrieveResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-retrieve
+meta {
+    doc: "GET /v1/messages/batches/{message_batch_id}?beta=true - Retrieve a Message Batch"
+}
+fn (request: BetaMessageBatchesRetrieveRequest): BetaMessageBatchesRetrieveResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}?beta=true`)
+  if(is-ok-response(response), BetaMessageBatchesRetrieveResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesCancelRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesCancelResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-cancel
+meta {
+    doc: "POST /v1/messages/batches/{message_batch_id}/cancel?beta=true - Cancel a Message Batch"
+}
+fn (request: BetaMessageBatchesCancelRequest): BetaMessageBatchesCancelResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}/cancel?beta=true`)
+  if(is-ok-response(response), BetaMessageBatchesCancelResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesResultsRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesResultsResponse type {
+    value: Str
+}
+
+
+batches-results
+meta {
+    doc: "GET /v1/messages/batches/{message_batch_id}/results?beta=true - Retrieve Message Batch results"
+}
+fn (request: BetaMessageBatchesResultsRequest): BetaMessageBatchesResultsResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}/results?beta=true`)
+  if(is-ok-response(response), BetaMessageBatchesResultsResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesListRequest type {
+  before-id: Str,
+  after-id: Str,
+  limit: Str
+}
+
+BetaMessageBatchesListResponse type {
+    data: Vec<BetaMessageBatch>,
+    has_more: Bool,
+    first_id: Any,
+    last_id: Any
+}
+
+
+batches-list
+meta {doc: "GET /v1/messages/batches - List Message Batches"}
+fn (request: BetaMessageBatchesListRequest): BetaMessageBatchesListResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches?before_id=${request.before-id}&after_id=${request.after-id}&limit=${request.limit}`)
+  if(is-ok-response(response), BetaMessageBatchesListResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesPostRequest type {
+    requests: Vec<BetaMessageBatchIndividualRequestParams>
+}
+
+BetaMessageBatchesPostResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-post
+meta {doc: "POST /v1/messages/batches - Create a Message Batch"}
+fn (request: BetaMessageBatchesPostRequest): BetaMessageBatchesPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/batches`, {}, request)
+  if(is-ok-response(response), BetaMessageBatchesPostResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesRetrieveRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesRetrieveResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-retrieve
+meta {doc: "GET /v1/messages/batches/{message_batch_id} - Retrieve a Message Batch"}
+fn (request: BetaMessageBatchesRetrieveRequest): BetaMessageBatchesRetrieveResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}`)
+  if(is-ok-response(response), BetaMessageBatchesRetrieveResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesCancelRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesCancelResponse type {
+    id: Str,
+    type: "message_batch",
+    processing_status: "in_progress" | "canceling" | "ended",
+    request_counts: Any,
+    ended_at: Any,
+    created_at: Str,
+    expires_at: Str,
+    archived_at: Any,
+    cancel_initiated_at: Any,
+    results_url: Any
+}
+
+
+batches-cancel
+meta {
+    doc: "POST /v1/messages/batches/{message_batch_id}/cancel - Cancel a Message Batch"
+}
+fn (request: BetaMessageBatchesCancelRequest): BetaMessageBatchesCancelResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}/cancel`)
+  if(is-ok-response(response), BetaMessageBatchesCancelResponse(response.body), err(HttpError(response)))
+}
+
+BetaMessageBatchesResultsRequest type {
+  message-batch-id: Str
+}
+
+BetaMessageBatchesResultsResponse type {
+    value: Str
+}
+
+
+batches-results
+meta {
+    doc: "GET /v1/messages/batches/{message_batch_id}/results - Retrieve Message Batch results"
+}
+fn (request: BetaMessageBatchesResultsRequest): BetaMessageBatchesResultsResponse {
+  response api-request("GET", `${::anthropic/BASE_URL}/v1/messages/batches/${request.message-batch-id}/results`)
+  if(is-ok-response(response), BetaMessageBatchesResultsResponse(response.body), err(HttpError(response)))
+}

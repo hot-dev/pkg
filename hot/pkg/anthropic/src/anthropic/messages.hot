@@ -1,0 +1,177 @@
+::anthropic::messages ns
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+// Literal union for message roles
+Role type "user" | "assistant"
+
+// Literal union for stop reasons
+StopReason type "end_turn" | "max_tokens" | "stop_sequence" | "tool_use"
+
+// Literal union for streaming event types
+StreamEventType type "message_start" | "content_block_start" | "content_block_delta" | "content_block_stop" | "message_delta" | "message_stop" | "ping" | "error"
+
+InputMessage type {
+    role: Role,
+    content: Any
+}
+
+CreateMessageParams type {
+    model: Model,
+    messages: Vec<InputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: ToolChoice?,
+    tools: Vec<Tool>?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+Model type {
+
+}
+
+Message type {
+    id: Str,
+    type: Str,
+    role: Role,
+    content: Vec<ContentBlock>,
+    model: Model,
+    stop_reason: StopReason?,
+    stop_sequence: Str?,
+    usage: Any
+}
+
+ErrorResponse type {
+    type: Str,
+    error: Any
+}
+
+Tool type {
+    description: Str?,
+    name: Str,
+    input_schema: Any
+}
+
+ContentBlock type {
+
+}
+
+ToolChoice type {
+
+}
+
+MessagesPostRequest type {
+    model: Model,
+    messages: Vec<InputMessage>,
+    max_tokens: Int,
+    metadata: Any?,
+    stop_sequences: Vec<Str>?,
+    stream: Bool?,
+    system: Any?,
+    temperature: Float?,
+    tool_choice: ToolChoice?,
+    tools: Vec<Tool>?,
+    top_k: Int?,
+    top_p: Float?
+}
+
+MessagesPostResponse type {
+    id: Str,
+    type: Str,
+    role: Role,
+    content: Vec<ContentBlock>,
+    model: Model,
+    stop_reason: StopReason?,
+    stop_sequence: Str?,
+    usage: Any
+}
+
+
+post
+meta {doc: "POST /v1/messages - Create a Message"}
+fn (request: MessagesPostRequest): MessagesPostResponse {
+  response api-request("POST", `${::anthropic/BASE_URL}/v1/messages`, {}, request)
+  if(is-ok-response(response), MessagesPostResponse(response.body), err(HttpError(response)))
+}
+
+// ============================================================================
+// Streaming Support
+// ============================================================================
+
+api-request-stream ::anthropic::api/request-stream
+StreamingHttpResponse ::anthropic::api/StreamingHttpResponse
+
+// SSE Event Types for streaming responses
+// See: https://docs.anthropic.com/en/api/messages-streaming
+
+MessageStreamEvent type {
+    type: StreamEventType,
+    message: Message?,
+    index: Int?,
+    content_block: ContentBlock?,
+    delta: Delta?,
+    usage: Any?
+}
+
+// Literal union for delta types
+DeltaType type "text_delta" | "input_json_delta"
+
+Delta type {
+    type: DeltaType?,
+    text: Str?,
+    partial_json: Str?,
+    stop_reason: StopReason?,
+    stop_sequence: Str?
+}
+
+StreamingMessagesResponse type {
+    status: Int,
+    headers: Map<Str, Str>,
+    body: Any  // Iterator yielding MessageStreamEvent
+}
+
+post-stream
+meta {
+    doc: "POST /v1/messages with streaming - yields SSE events as an iterator.
+
+Use this for real-time streaming of AI responses. The body is an iterator
+that yields parsed SSE events from Anthropic's streaming API.
+
+**Event Types**
+- `message_start` - Initial message metadata
+- `content_block_start` - Start of a content block
+- `content_block_delta` - Text chunk (delta.text contains the text)
+- `content_block_stop` - End of a content block
+- `message_delta` - Final message metadata (stop_reason, usage)
+- `message_stop` - End of message
+
+**Example**
+
+```hot
+request MessagesPostRequest({
+    model: \"claude-sonnet-4-20250514\",
+    max_tokens: 1024,
+    messages: [{role: \"user\", content: \"Hello!\"}]
+})
+
+response post-stream(request)
+for-each(response.body, fn (event) {
+    match event.type {
+        \"content_block_delta\" => { print(event.delta.text) }
+        \"message_stop\" => { println(\"Done!\") }
+    }
+})
+```"
+}
+fn (request: MessagesPostRequest): StreamingMessagesResponse {
+  // Force stream: true in the request
+  streaming-request merge(untype(request), {stream: true})
+  api-request-stream("POST", `${::anthropic/BASE_URL}/v1/messages`, {}, streaming-request, "sse")
+}

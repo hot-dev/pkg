@@ -1,0 +1,166 @@
+::postmark::send ns
+
+api-request ::postmark::api/request
+HttpError ::postmark::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+AttachmentCollection type {
+
+}
+
+SendEmailBatchResponse type {
+
+}
+
+SendEmailBatchRequest type {
+
+}
+
+SendEmailTemplatedBatchRequest type {
+    Messages: Vec<EmailWithTemplateRequest>?
+}
+
+HeaderCollection type {
+
+}
+
+SendEmailRequest type {
+    From: Str?,
+    To: Str?,
+    Cc: Str?,
+    Bcc: Str?,
+    Subject: Str?,
+    Tag: Str?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    ReplyTo: Str?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    Headers: HeaderCollection?,
+    Attachments: AttachmentCollection?
+}
+
+EmailWithTemplateRequest type {
+    TemplateId: Int,
+    TemplateAlias: Str,
+    TemplateModel: Map,
+    InlineCss: Bool?,
+    From: Str,
+    To: Str,
+    Cc: Str?,
+    Bcc: Str?,
+    Tag: Str?,
+    ReplyTo: Str?,
+    Headers: HeaderCollection?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    Attachments: AttachmentCollection?
+}
+
+SendEmailResponse type {
+    To: Str?,
+    SubmittedAt: Str?,
+    MessageID: Str?,
+    ErrorCode: Int?,
+    Message: Str?
+}
+
+SendEmailRequest type {
+    From: Str?,
+    To: Str?,
+    Cc: Str?,
+    Bcc: Str?,
+    Subject: Str?,
+    Tag: Str?,
+    HtmlBody: Str?,
+    TextBody: Str?,
+    ReplyTo: Str?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    Headers: HeaderCollection?,
+    Attachments: AttachmentCollection?
+}
+
+SendEmailResponse type {
+    To: Str?,
+    SubmittedAt: Str?,
+    MessageID: Str?,
+    ErrorCode: Int?,
+    Message: Str?
+}
+
+
+send-single-email
+meta {doc: "POST /email - Send a single email"}
+fn (request: SendEmailRequest): SendEmailResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/email`, {}, request)
+  if(is-ok-response(response), SendEmailResponse(response.body), err(HttpError(response)))
+}
+
+// Convenience alias
+email send-single-email
+
+SendEmailBatchRequest type {
+
+}
+
+SendEmailBatchResponse type {
+
+}
+
+
+send-batch-emails
+meta {doc: "POST /email/batch - Send a batch of emails"}
+fn (request: SendEmailBatchRequest): SendEmailBatchResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/email/batch`, {}, request)
+  if(is-ok-response(response), SendEmailBatchResponse(response.body), err(HttpError(response)))
+}
+
+SendEmailWithTemplateRequest type {
+    TemplateId: Int,
+    TemplateAlias: Str,
+    TemplateModel: Map,
+    InlineCss: Bool?,
+    From: Str,
+    To: Str,
+    Cc: Str?,
+    Bcc: Str?,
+    Tag: Str?,
+    ReplyTo: Str?,
+    Headers: HeaderCollection?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    Attachments: AttachmentCollection?
+}
+
+SendEmailWithTemplateResponse type {
+    To: Str?,
+    SubmittedAt: Str?,
+    MessageID: Str?,
+    ErrorCode: Int?,
+    Message: Str?
+}
+
+
+send-email-using-template
+meta {doc: "POST /email/withTemplate - Send an email using a Template"}
+fn (request: SendEmailWithTemplateRequest): SendEmailWithTemplateResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/email/withTemplate`, {}, request)
+  if(is-ok-response(response), SendEmailWithTemplateResponse(response.body), err(HttpError(response)))
+}
+
+SendEmailBatchWithTemplatesRequest type {
+    Messages: Vec<EmailWithTemplateRequest>?
+}
+
+SendEmailBatchWithTemplatesResponse type {
+
+}
+
+
+send-batch-email-using-templates
+meta {doc: "POST /email/batchWithTemplates - Send a batch of email using templates."}
+fn (request: SendEmailBatchWithTemplatesRequest): SendEmailBatchWithTemplatesResponse {
+  response api-request("POST", `${::postmark/BASE_URL}/email/batchWithTemplates`, {}, request)
+  if(is-ok-response(response), SendEmailBatchWithTemplatesResponse(response.body), err(HttpError(response)))
+}

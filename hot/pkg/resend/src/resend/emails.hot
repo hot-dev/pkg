@@ -1,0 +1,172 @@
+::resend::emails ns
+
+api-request ::resend::api/request
+HttpError ::resend::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+Tag type {
+    name: Str?,
+    value: Str?
+}
+
+CreateBatchEmailsResponse type {
+    data: Vec<Map>?
+}
+
+Attachment type {
+    content: Str?,
+    filename: Str?,
+    path: Str?,
+    content_type: Str?
+}
+
+SendEmailResponse type {
+    id: Str?
+}
+
+UpdateEmailOptions type {
+    scheduled_at: Str?
+}
+
+SendEmailRequest type {
+    from: Str,
+    to: Vec<Str>,
+    subject: Str,
+    bcc: Str?,
+    cc: Str?,
+    reply_to: Str?,
+    html: Str?,
+    text: Str?,
+    headers: Map?,
+    scheduled_at: Str?,
+    attachments: Vec<Attachment>?,
+    tags: Vec<Tag>?
+}
+
+Email type {
+    object: Str?,
+    id: Str?,
+    to: Vec<Str>?,
+    from: Str?,
+    created_at: Str?,
+    subject: Str?,
+    html: Str?,
+    text: Str?,
+    bcc: Vec<Str>?,
+    cc: Vec<Str>?,
+    reply_to: Vec<Str>?,
+    last_event: Str?
+}
+
+POSTEmailsRequest type {
+    from: Str,
+    to: Vec<Str>,
+    subject: Str,
+    bcc: Str?,
+    cc: Str?,
+    reply_to: Str?,
+    html: Str?,
+    text: Str?,
+    headers: Map?,
+    scheduled_at: Str?,
+    attachments: Vec<Attachment>?,
+    tags: Vec<Tag>?
+}
+
+POSTEmailsResponse type {
+    id: Str?
+}
+
+
+send-email
+meta {doc: "POST /emails - Send an email"}
+fn (request: POSTEmailsRequest): POSTEmailsResponse {
+  response api-request("POST", `${::resend/BASE_URL}/emails`, {}, request)
+  if(is-ok-response(response), POSTEmailsResponse(response.body), err(HttpError(response)))
+}
+
+GETEmailsEmailIdRequest type {
+  email-id: Str
+}
+
+GETEmailsEmailIdResponse type {
+    object: Str?,
+    id: Str?,
+    to: Vec<Str>?,
+    from: Str?,
+    created_at: Str?,
+    subject: Str?,
+    html: Str?,
+    text: Str?,
+    bcc: Vec<Str>?,
+    cc: Vec<Str>?,
+    reply_to: Vec<Str>?,
+    last_event: Str?
+}
+
+
+retrieve-single-email
+meta {doc: "GET /emails/{email_id} - Retrieve a single email"}
+fn (request: GETEmailsEmailIdRequest): GETEmailsEmailIdResponse {
+  response api-request("GET", `${::resend/BASE_URL}/emails/${request.email-id}`)
+  if(is-ok-response(response), GETEmailsEmailIdResponse(response.body), err(HttpError(response)))
+}
+
+PATCHEmailsEmailIdRequest type {
+  email-id: Str
+}
+
+PATCHEmailsEmailIdResponse type {
+    scheduled_at: Str?
+}
+
+
+update-single-email
+meta {doc: "PATCH /emails/{email_id} - Update a single email"}
+fn (request: PATCHEmailsEmailIdRequest): PATCHEmailsEmailIdResponse {
+  response api-request("PATCH", `${::resend/BASE_URL}/emails/${request.email-id}`)
+  if(is-ok-response(response), PATCHEmailsEmailIdResponse(response.body), err(HttpError(response)))
+}
+
+POSTEmailsEmailIdCancelRequest type {
+  email-id: Str
+}
+
+POSTEmailsEmailIdCancelResponse type {
+    object: Str?,
+    id: Str?,
+    to: Vec<Str>?,
+    from: Str?,
+    created_at: Str?,
+    subject: Str?,
+    html: Str?,
+    text: Str?,
+    bcc: Vec<Str>?,
+    cc: Vec<Str>?,
+    reply_to: Vec<Str>?,
+    last_event: Str?
+}
+
+
+cancel-schedule-email
+meta {doc: "POST /emails/{email_id}/cancel - Cancel the schedule of the e-mail."}
+fn (request: POSTEmailsEmailIdCancelRequest): POSTEmailsEmailIdCancelResponse {
+  response api-request("POST", `${::resend/BASE_URL}/emails/${request.email-id}/cancel`)
+  if(is-ok-response(response), POSTEmailsEmailIdCancelResponse(response.body), err(HttpError(response)))
+}
+
+POSTEmailsBatchRequest type {
+    value: Vec<SendEmailRequest>
+}
+
+POSTEmailsBatchResponse type {
+    data: Vec<Map>?
+}
+
+
+trigger-up-100-batch-emails-at-once
+meta {doc: "POST /emails/batch - Trigger up to 100 batch emails at once."}
+fn (request: POSTEmailsBatchRequest): POSTEmailsBatchResponse {
+  response api-request("POST", `${::resend/BASE_URL}/emails/batch`, {}, request)
+  if(is-ok-response(response), POSTEmailsBatchResponse(response.body), err(HttpError(response)))
+}

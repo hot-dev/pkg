@@ -1,0 +1,22 @@
+::ai ns
+meta {
+    doc: "AI types and utilities for Hot.
+
+This package provides unified types for working with AI-generated content,
+independent of specific AI providers.
+
+**Namespaces**
+- `::ai::media` - AI-generated media types (images, audio, video)
+
+**Usage**
+```hot
+import ::ai::media
+
+ai-image AIImage({
+    media: Image({file: file-meta, width: 1024, height: 1024}),
+    provider: \"openai\",
+    model: \"dall-e-3\",
+    prompt: \"A sunset over mountains\"
+})
+```"
+}

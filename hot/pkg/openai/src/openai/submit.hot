@@ -1,0 +1,111 @@
+::openai::submit ns
+
+api-request ::openai::api/request
+HttpError ::openai::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+AssistantsApiResponseFormatOption type {
+
+}
+
+RunStatus type {
+
+}
+
+ParallelToolCalls type {
+
+}
+
+SubmitToolOutputsRunRequest type {
+    tool_outputs: Vec<Map>,
+    stream: Bool?
+}
+
+RunObject type {
+    id: Str,
+    object: "thread.run",
+    created_at: Int,
+    thread_id: Str,
+    assistant_id: Str,
+    status: RunStatus,
+    required_action: Map,
+    last_error: Map,
+    expires_at: Int,
+    started_at: Int,
+    cancelled_at: Int,
+    failed_at: Int,
+    completed_at: Int,
+    incomplete_details: Map,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    metadata: Metadata,
+    usage: RunCompletionUsage,
+    temperature: Float?,
+    top_p: Float?,
+    max_prompt_tokens: Int,
+    max_completion_tokens: Int,
+    truncation_strategy: Any,
+    tool_choice: Any,
+    parallel_tool_calls: ParallelToolCalls,
+    response_format: AssistantsApiResponseFormatOption
+}
+
+AssistantTool type {
+
+}
+
+Metadata type {
+
+}
+
+RunCompletionUsage type {
+    completion_tokens: Int,
+    prompt_tokens: Int,
+    total_tokens: Int
+}
+
+SubmitToolOuputsToRunRequest type {
+    tool_outputs: Vec<Map>,
+    stream: Bool?
+}
+
+SubmitToolOuputsToRunResponse type {
+    id: Str,
+    object: "thread.run",
+    created_at: Int,
+    thread_id: Str,
+    assistant_id: Str,
+    status: RunStatus,
+    required_action: Map,
+    last_error: Map,
+    expires_at: Int,
+    started_at: Int,
+    cancelled_at: Int,
+    failed_at: Int,
+    completed_at: Int,
+    incomplete_details: Map,
+    model: Str,
+    instructions: Str,
+    tools: Vec<AssistantTool>,
+    metadata: Metadata,
+    usage: RunCompletionUsage,
+    temperature: Float?,
+    top_p: Float?,
+    max_prompt_tokens: Int,
+    max_completion_tokens: Int,
+    truncation_strategy: Any,
+    tool_choice: Any,
+    parallel_tool_calls: ParallelToolCalls,
+    response_format: AssistantsApiResponseFormatOption
+}
+
+
+submit-tool-outputs-run
+meta {
+    doc: "POST /threads/{thread_id}/runs/{run_id}/submit_tool_outputs - Submit tool outputs to run"
+}
+fn (thread-id: Str, run-id: Str, request: SubmitToolOuputsToRunRequest): SubmitToolOuputsToRunResponse {
+  response api-request("POST", `${::openai/BASE_URL}/threads/${thread-id}/runs/${run-id}/submit_tool_outputs`, {}, request)
+  if(is-ok-response(response), SubmitToolOuputsToRunResponse(response.body), err(HttpError(response)))
+}
