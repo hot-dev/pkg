@@ -2,8 +2,8 @@
 
 hot.pkg.xai {
   name: "hot.dev/xai",
-  version: "0.9.2",
-  description: "xAI API bindings for Hot.",
+  version: "1.0.0",
+  description: "xAI (Grok) API bindings for Hot. Includes Responses (Chat), Models, Collections (RAG), Images, Live Search (Web/X), and Video APIs.",
   author: "Hot Dev",
   email: "support@hot.dev",
   license: "Apache-2.0",

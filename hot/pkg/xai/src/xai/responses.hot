@@ -352,19 +352,20 @@ fn (response: CreateResponseResponse): Str {
         or(is-null(output), is-zero(length(output))) => { "" }
         => {
             // Find the first message output item
-            message-item find(output, (item) { eq(item.type, "message") })
+            message-items filter(output, (item) { eq(item.type, "message") })
             cond {
-                is-null(message-item) => { "" }
+                is-zero(length(message-items)) => { "" }
                 => {
+                    message-item first(message-items)
                     content message-item.content
                     cond {
                         or(is-null(content), is-zero(length(content))) => { "" }
                         => {
                             // Find first text content part
-                            text-part find(content, (part) { eq(part.type, "output_text") })
+                            text-parts filter(content, (part) { eq(part.type, "output_text") })
                             cond {
-                                is-null(text-part) => { "" }
-                                => { or(text-part.text, "") }
+                                is-zero(length(text-parts)) => { "" }
+                                => { or(first(text-parts).text, "") }
                             }
                         }
                     }

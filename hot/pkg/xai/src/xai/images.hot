@@ -72,7 +72,7 @@ Returns the raw API response with either URLs or base64 data.
 ```hot
 response generate({
     prompt: \"A futuristic city at sunset\",
-    model: \"aurora\"
+    model: \"grok-imagine-image\"
 })
 
 image-url response.data[0].url
@@ -82,7 +82,7 @@ image-url response.data[0].url
 ```hot
 response generate({
     prompt: \"A cat wearing a spacesuit\",
-    model: \"aurora\",
+    model: \"grok-imagine-image\",
     response_format: \"b64_json\"
 })
 
@@ -90,9 +90,9 @@ base64-data response.data[0].b64_json
 ```"
 }
 fn (request: CreateImageRequest): CreateImageResponse | HttpError {
-    // Default to aurora model if not specified
+    // Default to grok-imagine-image model if not specified
     final-request cond {
-        is-null(request.model) => { merge(untype(request), {model: "aurora"}) }
+        is-null(request.model) => { merge(untype(request), {model: "grok-imagine-image"}) }
         => { request }
     }
 
@@ -178,7 +178,7 @@ fn
                                     format: detect-format(path)
                                 }),
                                 provider: "xai",
-                                model: or(request.model, "aurora"),
+                                model: or(request.model, "grok-imagine-image"),
                                 prompt: request.prompt,
                                 revised_prompt: first-image.revised_prompt,
                                 style: request.style,
@@ -251,7 +251,7 @@ fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
                                 format: detect-format(file-path)
                             }),
                             provider: "xai",
-                            model: "aurora",
+                            model: "grok-imagine-image",
                             prompt: prompt,
                             revised_prompt: image-data.revised_prompt,
                             style: null,
@@ -358,8 +358,12 @@ fn (path: Str): Str? {
 // Available Models & Sizes
 // ============================================================================
 
-// Aurora - xAI's image generation model
-AURORA "aurora"
+// Image generation models
+GROK_IMAGINE_IMAGE "grok-imagine-image"
+GROK_2_IMAGE "grok-2-image-1212"
+
+// Default model alias
+DEFAULT_MODEL "grok-imagine-image"
 
 // Common image sizes
 SIZE_1024 "1024x1024"

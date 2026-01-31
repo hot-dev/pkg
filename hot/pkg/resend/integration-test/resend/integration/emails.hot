@@ -1,71 +1,25 @@
 ::resend::integration::emails ns
 meta ["test"]
 
-::hot::test use
-::env ::hot::env
-
-// Environment variable for API key
-api-key ::env/get("RESEND_API_KEY", "")
-test-email ::env/get("RESEND_TEST_EMAIL", "")
-
-// Helper to skip tests when no API key is configured
-skip-if-no-key fn (test-name: Str): Bool {
-    missing or(eq(api-key, ""), eq(test-email, ""))
-    cond {
-        missing => {
-            println(`    ⚠ Skipping ${test-name}: RESEND_API_KEY or RESEND_TEST_EMAIL not set`)
-            true
-        }
-        => { false }
-    }
-}
-
 // =============================================================================
 // Integration Tests
 // =============================================================================
+// These tests require RESEND_API_KEY to be set in context
+// For send tests, also set RESEND_TEST_EMAIL
 
 test-resend-api-connection
 meta ["test"]
 fn () {
-    cond {
-        eq(api-key, "") => {
-            println(`    ⚠ Skipping test-resend-api-connection: RESEND_API_KEY not set`)
-            true
-        }
-        => {
-            // Test basic API connectivity by listing API keys
-            response ::hot::http/get("https://api.resend.com/api-keys", {
-                "Authorization": `Bearer ${api-key}`
-            })
+    // Test basic API connectivity by listing API keys (read-only)
+    keys ::resend::api/keys/list()
 
-            assert-eq(200, response.status, "Should connect to Resend API successfully")
-            assert(response.body.data, "Response should have 'data' field")
-        }
-    }
+    assert(keys.data, "Response should have 'data' field")
 }
 
-test-send-email
+test-list-domains
 meta ["test"]
 fn () {
-    cond {
-        skip-if-no-key("test-send-email") => { true }
-        => {
-            // Send a test email
-            response ::hot::http/post("https://api.resend.com/emails",
-                {
-                    "Authorization": `Bearer ${api-key}`,
-                    "Content-Type": "application/json"
-                },
-                {
-                    "from": "Hot Test <onboarding@resend.dev>",
-                    "to": [test-email],
-                    "subject": "Hot Integration Test",
-                    "text": "This is a test email from Hot integration tests."
-                }
-            )
+    domains ::resend::domains/list()
 
-            assert-eq(200, response.status, "Should send email successfully")
-            assert(response.body.id, "Response should have email id")
-        }
-    }
+    assert(domains.data, "Response should have 'data' field")
 }

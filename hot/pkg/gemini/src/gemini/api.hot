@@ -37,13 +37,18 @@ fn
 
   default-headers {}
 
-  // Add Content-Type for requests with bodies
-  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-
-  // Merge in any additional headers (they can override defaults)
-  final-headers merge(headers, additional-headers)
-
-  ::hot::http/request(method, url-with-key, final-headers, to-json(untype(body)))
+  // For GET/DELETE requests with no body, don't send Content-Type or body
+  cond {
+    or(eq(body, ""), is-null(body)) => {
+      final-headers merge(default-headers, additional-headers)
+      ::hot::http/request(method, url-with-key, final-headers, "")
+    }
+    => {
+      headers merge(default-headers, {Content-Type: "application/json"})
+      final-headers merge(headers, additional-headers)
+      ::hot::http/request(method, url-with-key, final-headers, to-json(untype(body)))
+    }
+  }
 },
 (method: Str, url: Str, additional-headers: Map): HttpResponse {
   request(method, url, additional-headers, "")

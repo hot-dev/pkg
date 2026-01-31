@@ -2,8 +2,8 @@
 
 hot.pkg.anthropic {
   name: "hot.dev/anthropic",
-  version: "0.9.2",
-  description: "anthropic API bindings for Hot.",
+  version: "1.0.0",
+  description: "Anthropic Claude API bindings for Hot. Includes Messages, Models, Batches, Files, Skills, Token Counting, and Prompt Caching APIs.",
   author: "Hot Dev",
   email: "support@hot.dev",
   license: "Apache-2.0",

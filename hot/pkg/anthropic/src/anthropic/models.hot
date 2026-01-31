@@ -1,0 +1,73 @@
+::anthropic::models ns
+meta {doc: "Anthropic Models API - List and retrieve available Claude models."}
+
+api-request ::anthropic::api/request
+HttpError ::anthropic::api/HttpError
+is-ok-response ::hot::http/is-ok-response
+
+// =============================================================================
+// Types
+// =============================================================================
+
+Model type {
+    id: Str,
+    type: Str,
+    display_name: Str,
+    created_at: Str
+}
+
+ModelsListResponse type {
+    data: Vec<Model>,
+    has_more: Bool,
+    first_id: Str?,
+    last_id: Str?
+}
+
+// =============================================================================
+// API Functions
+// =============================================================================
+
+list
+meta {
+    doc: "GET /v1/models - List available Claude models.
+
+Returns a list of models available to your API key.
+
+**Example**
+
+```hot
+models ::anthropic::models/list()
+map(models.data, (m) { println(m.id) })
+```"
+}
+fn
+(): ModelsListResponse {
+    response api-request("GET", `${::anthropic/BASE_URL}/v1/models`)
+    if(is-ok-response(response), ModelsListResponse(response.body), err(HttpError(response)))
+},
+(limit: Int): ModelsListResponse {
+    response api-request("GET", `${::anthropic/BASE_URL}/v1/models?limit=${limit}`)
+    if(is-ok-response(response), ModelsListResponse(response.body), err(HttpError(response)))
+},
+(limit: Int, after_id: Str): ModelsListResponse {
+    response api-request("GET", `${::anthropic/BASE_URL}/v1/models?limit=${limit}&after_id=${after_id}`)
+    if(is-ok-response(response), ModelsListResponse(response.body), err(HttpError(response)))
+}
+
+get
+meta {
+    doc: "GET /v1/models/{model_id} - Retrieve a specific model.
+
+Returns details about a specific model.
+
+**Example**
+
+```hot
+model ::anthropic::models/get(\"claude-3-haiku-20240307\")
+println(model.display_name)
+```"
+}
+fn (model_id: Str): Model {
+    response api-request("GET", `${::anthropic/BASE_URL}/v1/models/${model_id}`)
+    if(is-ok-response(response), Model(response.body), err(HttpError(response)))
+}

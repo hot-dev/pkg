@@ -7,7 +7,7 @@ anthropic API bindings for Hot.
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/anthropic": "0.9.2"
+"hot.dev/anthropic": "1.0.0"
 ```
 
 ## API Base URL
