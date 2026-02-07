@@ -1,0 +1,17 @@
+::hot::pkg ns
+
+hot.pkg.aws-lambda {
+  name: "hot.dev/aws-lambda",
+  version: "1.0.0",
+  description: "AWS Lambda API bindings for serverless function invocation and management.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["aws"],
+  deps: {
+    "hot.dev/hot-std": {},
+    "hot.dev/aws-core": "1.0.0"
+  },
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

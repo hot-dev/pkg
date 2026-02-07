@@ -1,0 +1,26 @@
+::aws::lambda ns
+meta {
+    ctx: {"aws.access-key-id": {required: true}, "aws.secret-access-key": {required: true}, "aws.session-token": {required: false}, "aws.region": {required: false}}
+}
+
+// AWS Lambda Package
+// Provides Lambda function invocation and management
+
+// Re-export core AWS types
+Credentials ::aws::core/Credentials
+AwsError ::aws::core/AwsError
+
+// Re-export Lambda types
+InvokeResponse ::aws::lambda::invoke/InvokeResponse
+FunctionConfiguration ::aws::lambda::functions/FunctionConfiguration
+ListFunctionsResponse ::aws::lambda::functions/ListFunctionsResponse
+GetFunctionResponse ::aws::lambda::functions/GetFunctionResponse
+
+// Re-export Lambda invoke operations
+invoke ::aws::lambda::invoke/invoke
+invoke-async ::aws::lambda::invoke/invoke-async
+
+// Re-export Lambda function operations
+list-functions ::aws::lambda::functions/list-functions
+get-function ::aws::lambda::functions/get-function
+get-function-configuration ::aws::lambda::functions/get-function-configuration

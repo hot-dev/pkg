@@ -1,0 +1,16 @@
+::hot::pkg ns
+
+hot.pkg.aws-eventstream {
+  name: "hot.dev/aws-eventstream",
+  version: "1.0.0",
+  description: "AWS Event Stream binary protocol parser for streaming AWS services (Bedrock, Transcribe, etc.).",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["aws"],
+  deps: {
+    "hot.dev/hot-std": {}
+  },
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}
