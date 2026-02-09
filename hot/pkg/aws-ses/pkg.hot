@@ -2,7 +2,7 @@
 
 hot.pkg.aws-ses {
   name: "hot.dev/aws-ses",
-  version: "1.0.0",
+  version: "1.0.1",
   description: "AWS SES API bindings for sending transactional and marketing emails.",
   author: "Hot Dev",
   email: "support@hot.dev",

@@ -1,7 +1,4 @@
 ::aws::sns ns
-meta {
-    ctx: {"aws.access-key-id": {required: true}, "aws.secret-access-key": {required: true}, "aws.session-token": {required: false}, "aws.region": {required: false}}
-}
 
 // AWS SNS Package
 // Provides Simple Notification Service operations for pub/sub messaging

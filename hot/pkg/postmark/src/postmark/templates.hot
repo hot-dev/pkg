@@ -15,7 +15,7 @@ CreateTemplateRequest type {
 TemplateRecordResponse type {
     Name: Str?,
     Alias: Str?,
-    TemplateId: Float?,
+    TemplateId: Int?,
     Active: Bool?
 }
 
@@ -30,7 +30,7 @@ POSTTemplatesRequest type {
 POSTTemplatesResponse type {
     Name: Str?,
     Alias: Str?,
-    TemplateId: Float?,
+    TemplateId: Int?,
     Active: Bool?
 }
 

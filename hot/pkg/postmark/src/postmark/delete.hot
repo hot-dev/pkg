@@ -9,30 +9,13 @@ StandardPostmarkResponse type {
     Message: Str?
 }
 
-TemplateDetailResponse type {
-    Name: Str?,
-    Alias: Str?,
-    TemplateID: Int?,
-    HtmlBody: Str?,
-    TextBody: Str?,
-    AssociatedServerId: Int?,
-    Subject: Str?,
-    Active: Bool?
-}
-
 DeleteTemplateRequest type {
   template-id-or-alias: Str
 }
 
 DeleteTemplateResponse type {
-    Name: Str?,
-    Alias: Str?,
-    TemplateID: Int?,
-    HtmlBody: Str?,
-    TextBody: Str?,
-    AssociatedServerId: Int?,
-    Subject: Str?,
-    Active: Bool?
+    ErrorCode: Int?,
+    Message: Str?
 }
 
 

@@ -2,7 +2,7 @@
 
 hot.pkg.aws-secrets-manager {
   name: "hot.dev/aws-secrets-manager",
-  version: "1.0.0",
+  version: "1.0.1",
   description: "AWS Secrets Manager API bindings for secure secret storage and retrieval.",
   author: "Hot Dev",
   email: "support@hot.dev",

@@ -5,14 +5,14 @@ HttpError ::postmark::api/HttpError
 is-ok-response ::hot::http/is-ok-response
 
 TemplateListingResponse type {
-    TotalCount: Float?,
+    TotalCount: Int?,
     Templates_API: Vec<TemplateRecordResponse>?
 }
 
 TemplateRecordResponse type {
     Name: Str?,
     Alias: Str?,
-    TemplateId: Float?,
+    TemplateId: Int?,
     Active: Bool?
 }
 
@@ -22,7 +22,7 @@ ListTemplatesRequest type {
 }
 
 ListTemplatesResponse type {
-    TotalCount: Float?,
+    TotalCount: Int?,
     Templates_API: Vec<TemplateRecordResponse>?
 }
 

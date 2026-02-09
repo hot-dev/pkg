@@ -1,7 +1,4 @@
 ::aws::dynamodb ns
-meta {
-    ctx: {"aws.access-key-id": {required: true}, "aws.secret-access-key": {required: true}, "aws.session-token": {required: false}, "aws.region": {required: false}}
-}
 
 // AWS DynamoDB Package
 // Provides DynamoDB NoSQL database operations

@@ -8,61 +8,8 @@ AttachmentCollection type {
 
 }
 
-SendEmailBatchResponse type {
-
-}
-
-SendEmailBatchRequest type {
-
-}
-
-SendEmailTemplatedBatchRequest type {
-    Messages: Vec<EmailWithTemplateRequest>?
-}
-
 HeaderCollection type {
 
-}
-
-SendEmailRequest type {
-    From: Str?,
-    To: Str?,
-    Cc: Str?,
-    Bcc: Str?,
-    Subject: Str?,
-    Tag: Str?,
-    HtmlBody: Str?,
-    TextBody: Str?,
-    ReplyTo: Str?,
-    TrackOpens: Bool?,
-    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
-    Headers: HeaderCollection?,
-    Attachments: AttachmentCollection?
-}
-
-EmailWithTemplateRequest type {
-    TemplateId: Int,
-    TemplateAlias: Str,
-    TemplateModel: Map,
-    InlineCss: Bool?,
-    From: Str,
-    To: Str,
-    Cc: Str?,
-    Bcc: Str?,
-    Tag: Str?,
-    ReplyTo: Str?,
-    Headers: HeaderCollection?,
-    TrackOpens: Bool?,
-    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
-    Attachments: AttachmentCollection?
-}
-
-SendEmailResponse type {
-    To: Str?,
-    SubmittedAt: Str?,
-    MessageID: Str?,
-    ErrorCode: Int?,
-    Message: Str?
 }
 
 SendEmailRequest type {
@@ -116,6 +63,23 @@ fn (request: SendEmailBatchRequest): SendEmailBatchResponse {
   if(is-ok-response(response), SendEmailBatchResponse(response.body), err(HttpError(response)))
 }
 
+EmailWithTemplateRequest type {
+    TemplateId: Int,
+    TemplateAlias: Str,
+    TemplateModel: Map,
+    InlineCss: Bool?,
+    From: Str,
+    To: Str,
+    Cc: Str?,
+    Bcc: Str?,
+    Tag: Str?,
+    ReplyTo: Str?,
+    Headers: HeaderCollection?,
+    TrackOpens: Bool?,
+    TrackLinks: "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly"?,
+    Attachments: AttachmentCollection?
+}
+
 SendEmailWithTemplateRequest type {
     TemplateId: Int,
     TemplateAlias: Str,
@@ -147,6 +111,10 @@ meta {doc: "POST /email/withTemplate - Send an email using a Template"}
 fn (request: SendEmailWithTemplateRequest): SendEmailWithTemplateResponse {
   response api-request("POST", `${::postmark/BASE_URL}/email/withTemplate`, {}, request)
   if(is-ok-response(response), SendEmailWithTemplateResponse(response.body), err(HttpError(response)))
+}
+
+SendEmailTemplatedBatchRequest type {
+    Messages: Vec<EmailWithTemplateRequest>?
 }
 
 SendEmailBatchWithTemplatesRequest type {

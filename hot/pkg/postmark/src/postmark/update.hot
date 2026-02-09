@@ -15,7 +15,7 @@ EditTemplateRequest type {
 TemplateRecordResponse type {
     Name: Str?,
     Alias: Str?,
-    TemplateId: Float?,
+    TemplateId: Int?,
     Active: Bool?
 }
 
@@ -30,7 +30,7 @@ UpdateTemplateRequest type {
 UpdateTemplateResponse type {
     Name: Str?,
     Alias: Str?,
-    TemplateId: Float?,
+    TemplateId: Int?,
     Active: Bool?
 }
 

@@ -1,7 +1,4 @@
 ::aws::ses ns
-meta {
-    ctx: {"aws.access-key-id": {required: true}, "aws.secret-access-key": {required: true}, "aws.session-token": {required: false}, "aws.region": {required: false}}
-}
 
 // AWS SES (Simple Email Service) Package
 // Provides email sending operations via AWS SES v2 API

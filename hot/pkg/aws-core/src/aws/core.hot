@@ -1,7 +1,4 @@
 ::aws::core ns
-meta {
-    ctx: {"aws.access-key-id": {required: false}, "aws.secret-access-key": {required: false}, "aws.session-token": {required: false}, "aws.region": {required: false}}
-}
 
 // Namespace aliases
 ::ctx ::hot::ctx
@@ -64,7 +61,12 @@ HttpResponse -> AwsError fn (response: HttpResponse): AwsError {
 // Get AWS credentials from context
 get-credentials
 meta {
-    doc: "Get AWS credentials from context (aws.access-key-id, aws.secret-access-key)"
+    doc: "Get AWS credentials from context (aws.access-key-id, aws.secret-access-key)",
+    ctx: {
+        "aws.access-key-id": {},
+        "aws.secret-access-key": {},
+        "aws.session-token": {required: false}
+    }
 }
 fn (): Credentials {
     access_key_id ::ctx/get("aws.access-key-id")
@@ -81,7 +83,8 @@ fn (): Credentials {
 // Get AWS region from context
 get-region
 meta {
-    doc: "Get AWS region from context (aws.region). Defaults to us-east-1 if not set."
+    doc: "Get AWS region from context (aws.region). Defaults to us-east-1 if not set.",
+    ctx: {"aws.region": {required: false, default: "us-east-1"}}
 }
 fn (): Str {
     ctx-region ::ctx/get("aws.region")

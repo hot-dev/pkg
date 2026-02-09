@@ -2,7 +2,7 @@
 
 hot.pkg.aws-s3 {
   name: "hot.dev/aws-s3",
-  version: "1.0.0",
+  version: "1.0.1",
   description: "AWS S3 API bindings for object storage, buckets, and presigned URLs.",
   author: "Hot Dev",
   email: "support@hot.dev",

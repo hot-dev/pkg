@@ -2,7 +2,7 @@
 
 hot.pkg.aws-core {
   name: "hot.dev/aws-core",
-  version: "1.0.0",
+  version: "1.0.1",
   description: "AWS core types, authentication, and utilities shared by AWS packages.",
   author: "Hot Dev",
   email: "support@hot.dev",

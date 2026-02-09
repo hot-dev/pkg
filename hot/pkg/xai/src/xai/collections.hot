@@ -120,7 +120,8 @@ SearchResponse type {
 
 management-request
 meta {
-    doc: "Make an HTTP request with Management API Key. Required for Collections API."
+    doc: "Make an HTTP request with Management API Key. Required for Collections API.",
+    ctx: {"xai.management.api.key": {}}
 }
 fn
 (method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
@@ -301,7 +302,8 @@ for-each(results.results, (r) {
     println(`Score: ${r.score}, File: ${r.file_name}`)
     println(r.content)
 })
-```"
+```",
+    ctx: {"xai.api.key": {}}
 }
 fn (request: SearchRequest): SearchResponse | HttpError {
     // Build the request body
