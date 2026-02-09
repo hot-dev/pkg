@@ -155,18 +155,14 @@ fn (request: POSTEmailsEmailIdCancelRequest): POSTEmailsEmailIdCancelResponse {
   if(is-ok-response(response), POSTEmailsEmailIdCancelResponse(response.body), err(HttpError(response)))
 }
 
-POSTEmailsBatchRequest type {
-    value: Vec<SendEmailRequest>
-}
-
 POSTEmailsBatchResponse type {
     data: Vec<Map>?
 }
 
 
-trigger-up-100-batch-emails-at-once
-meta {doc: "POST /emails/batch - Trigger up to 100 batch emails at once."}
-fn (request: POSTEmailsBatchRequest): POSTEmailsBatchResponse {
-  response api-request("POST", `${::resend/BASE_URL}/emails/batch`, {}, request)
+send-batch-emails
+meta {doc: "POST /emails/batch - Send up to 100 batch emails at once."}
+fn (emails: Vec<SendEmailRequest>): POSTEmailsBatchResponse {
+  response api-request("POST", `${::resend/BASE_URL}/emails/batch`, {}, emails)
   if(is-ok-response(response), POSTEmailsBatchResponse(response.body), err(HttpError(response)))
 }
