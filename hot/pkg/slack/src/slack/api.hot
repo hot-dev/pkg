@@ -1,0 +1,62 @@
+::slack::api ns
+
+// Namespace alias for ctx module
+::ctx ::hot::ctx
+::regex ::hot::regex
+
+http-request ::hot::http/request
+is-ok-response ::hot::http/is-ok-response
+HttpResponse ::hot::http/HttpResponse
+
+HttpError type {
+    status: Int,
+    headers: Map,
+    body: Any
+}
+
+HttpResponse -> HttpError fn (response: HttpResponse): HttpError {
+  HttpError({
+    status: response.status,
+    headers: response.headers,
+    body: response.body
+  })
+}
+
+sanitize-url
+meta {doc: "Remove legacy token query params and normalize separators."}
+fn (url: Str): Str {
+  // Slack bearer auth is sent in Authorization header. Some endpoints still
+  // include token= in query builders; strip it to avoid invalid_auth responses.
+  removed-middle ::regex/replace-all(url, "([?&])token=[^&]*&", "$1")
+  removed-tail ::regex/replace-all(removed-middle, "[?&]token=[^&]*$", "")
+  fixed-empty-param ::regex/replace-all(removed-tail, "\\?&", "?")
+  ::regex/replace-all(fixed-empty-param, "[?&]$", "")
+}
+
+request
+meta {
+    ctx: {"slack.api.key": {required: true}},
+    doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."
+}
+fn
+(method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
+  final-url sanitize-url(url)
+  default-headers {
+    Authorization: `Bearer ${::ctx/get("slack.api.key")}`
+  }
+
+  // Add Content-Type for requests with bodies
+  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
+
+  // Merge in any additional headers (they can override defaults)
+  final-headers merge(headers, additional-headers)
+
+  encoded-body if(eq(body, ""), "", to-json(untype(body)))
+  ::hot::http/request(method, final-url, final-headers, encoded-body)
+},
+(method: Str, url: Str, additional-headers: Map): HttpResponse {
+  request(method, url, additional-headers, "")
+},
+(method: Str, url: Str): HttpResponse {
+  request(method, url, {}, "")
+}
