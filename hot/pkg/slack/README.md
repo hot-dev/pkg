@@ -82,7 +82,7 @@ response slack/files-upload-v2(slack/FilesUploadV2Request({
 ## Documentation
 
 - [Slack API Documentation](https://api.slack.com/methods)
-- [Hot Package Documentation](https://hot.dev/pkg/slack)
+- [Hot Package Documentation](https://hot.dev/pkg/hot.dev/slack)
 
 ## License
 
