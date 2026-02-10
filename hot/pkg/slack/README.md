@@ -19,9 +19,9 @@ The `slack.api.key` context variable is required. Set it to your Slack Bot User 
 ### Send a Message
 
 ```hot
-::slack ::slack::messaging
+::messaging ::slack::messaging
 
-response slack/chat-post-message(slack/ChatPostMessageRequest({
+response ::messaging/chat-post-message(::messaging/ChatPostMessageRequest({
   channel: "C01ABCDEF",
   text: "Hello from Hot!"
 }))
@@ -30,9 +30,9 @@ response slack/chat-post-message(slack/ChatPostMessageRequest({
 ### List Channels
 
 ```hot
-::slack ::slack::channels
+::channels ::slack::channels
 
-response slack/conversations-list(slack/ConversationsListRequest({}))
+response ::channels/conversations-list(::channels/ConversationsListRequest({}))
 for-each(response.channels, (ch) {
   println(ch.name)
 })
@@ -41,9 +41,9 @@ for-each(response.channels, (ch) {
 ### Get User Info
 
 ```hot
-::slack ::slack::users
+::users ::slack::users
 
-response slack/users-info(slack/UsersInfoRequest({
+response ::users/users-info(::users/UsersInfoRequest({
   user: "U01ABCDEF"
 }))
 println(response.user.real_name)
@@ -52,12 +52,13 @@ println(response.user.real_name)
 ### Upload a File
 
 ```hot
-::slack ::slack::files
+::files ::slack::files
 
-response slack/files-upload-v2(slack/FilesUploadV2Request({
-  channel_id: "C01ABCDEF",
+response ::files/files-upload(::files/FilesUploadRequest({
+  channels: "C01ABCDEF",
   filename: "report.txt",
-  content: "File contents here"
+  content: "File contents here",
+  title: "My Report"
 }))
 ```
 
