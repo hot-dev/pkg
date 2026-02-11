@@ -7,7 +7,7 @@ resend API bindings for Hot.
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/resend": "1.0.1"
+"hot.dev/resend": "1.0.3"
 ```
 
 ## API Base URL
