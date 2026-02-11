@@ -15,13 +15,17 @@
 
 verify-request
 meta {
-  ctx: {"slack.signing.secret": {required: true}},
+  ctx: {"slack.signing.secret": {required: false}},
   doc: "Verify a Slack webhook request signature. Returns true if the request is authentic. Uses the slack.signing.secret context variable by default, or accepts an explicit signing secret as a second argument for multi-app scenarios."
 }
 fn
 // 1-arity: read signing secret from ctx (default)
 (request: HttpRequest): Bool {
-  verify-request(request, or(::ctx/get("slack.signing.secret"), ""))
+  secret or(::ctx/get("slack.signing.secret"), "")
+  if(is-empty(secret),
+    fail("slack.signing.secret is not set. Add it in Context Variables to verify webhook requests.")
+  )
+  verify-request(request, secret)
 },
 // 2-arity: explicit signing secret (override for multi-app)
 (request: HttpRequest, signing-secret: Str): Bool {
