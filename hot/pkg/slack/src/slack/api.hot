@@ -6,6 +6,7 @@
 
 http-request ::hot::http/request
 is-ok-response ::hot::http/is-ok-response
+HttpRequest ::hot::http/HttpRequest
 HttpResponse ::hot::http/HttpResponse
 
 HttpError type {
@@ -39,24 +40,31 @@ meta {
     doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."
 }
 fn
-(method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
-  final-url sanitize-url(url)
-  default-headers {
-    Authorization: `Bearer ${::ctx/get("slack.api.key")}`
-  }
-
-  // Add Content-Type for requests with bodies
-  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-
-  // Merge in any additional headers (they can override defaults)
-  final-headers merge(headers, additional-headers)
-
-  encoded-body if(eq(body, ""), "", to-json(untype(body)))
-  ::hot::http/request(method, final-url, final-headers, encoded-body)
+(method: Str, url: Str): HttpResponse {
+  request(method, url, {}, "")
 },
 (method: Str, url: Str, additional-headers: Map): HttpResponse {
   request(method, url, additional-headers, "")
 },
-(method: Str, url: Str): HttpResponse {
-  request(method, url, {}, "")
+// 4-arity: use ctx api key (default) — delegates to 5-arity
+(method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
+  request(method, url, additional-headers, body, ::ctx/get("slack.api.key"))
+},
+// 5-arity: explicit api key override
+(method: Str, url: Str, additional-headers: Map, body: Any, api-key: Str): HttpResponse {
+  final-url sanitize-url(url)
+  default-headers {
+    Authorization: `Bearer ${api-key}`
+  }
+
+  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json; charset=utf-8"}))
+  final-headers merge(headers, additional-headers)
+
+  encoded-body if(eq(body, ""), "", to-json(untype(body)))
+  ::hot::http/request(HttpRequest({
+    method: method,
+    url: final-url,
+    headers: final-headers,
+    body: encoded-body
+  }))
 }

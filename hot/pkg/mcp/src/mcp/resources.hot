@@ -1,0 +1,102 @@
+::mcp::resources ns
+meta {doc: "MCP resource discovery and reading. Supports listing resources, reading content, and listing URI templates."}
+
+::client ::mcp::client
+::types ::mcp::types
+
+// ============================================================================
+// Resource Listing
+// ============================================================================
+
+// List resources (first page).
+list
+meta {doc: "List resources available on the MCP server (first page).
+
+**Example**
+
+```hot
+::resources ::mcp::resources
+resources ::resources/list(session)
+for-each(resources, fn (r) { println(`${r.name}: ${r.uri}`) })
+```"}
+fn (session: ::types/Session): Vec<::types/Resource> {
+  result ::client/session-request(session, "resources/list", {})
+  map(get(result, "resources", []), (r) { ::types/Resource(r) })
+}
+
+// List resources with explicit cursor for manual pagination.
+list-page
+meta {doc: "List resources with an explicit cursor for manual pagination. Pass null for the first page."}
+fn (session: ::types/Session, cursor: Str?): Map {
+  params if(is-some(cursor), {cursor: cursor}, {})
+  result ::client/session-request(session, "resources/list", params)
+  {
+    resources: map(get(result, "resources", []), (r) { ::types/Resource(r) }),
+    next-cursor: get(result, "nextCursor", null)
+  }
+}
+
+// List ALL resources across all pages.
+list-all
+meta {doc: "List all resources across all pages, following pagination automatically."}
+fn (session: ::types/Session): Vec<::types/Resource> {
+  collect-pages(session, null, [])
+}
+
+// Recursive pagination helper (TCO).
+collect-pages fn cond (session: ::types/Session, cursor: Str?, acc: Vec): Vec {
+  => {
+    params if(is-some(cursor), {cursor: cursor}, {})
+    result ::client/session-request(session, "resources/list", params)
+    items map(get(result, "resources", []), (r) { ::types/Resource(r) })
+    combined concat(acc, items)
+    next-cursor get(result, "nextCursor", null)
+    if(is-null(next-cursor),
+      combined,
+      collect-pages(session, next-cursor, combined))
+  }
+}
+
+// ============================================================================
+// Resource Reading
+// ============================================================================
+
+// Read a resource by URI.
+read
+meta {doc: "Read a resource from the MCP server by URI.
+
+Returns a Vec of ResourceContent (most resources return a single item).
+
+**Example**
+
+```hot
+::resources ::mcp::resources
+contents ::resources/read(session, \"file:///project/README.md\")
+println(first(contents).text)
+```"}
+fn (session: ::types/Session, uri: Str): Vec<::types/ResourceContent> {
+  result ::client/session-request(session, "resources/read", {uri: uri})
+  map(get(result, "contents", []), (c) { ::types/ResourceContent(c) })
+}
+
+// ============================================================================
+// Resource Templates
+// ============================================================================
+
+// List resource URI templates.
+list-templates
+meta {doc: "List resource URI templates from the MCP server.
+
+Templates use RFC 6570 syntax for parameterized resource URIs.
+
+**Example**
+
+```hot
+::resources ::mcp::resources
+templates ::resources/list-templates(session)
+for-each(templates, fn (t) { println(t.uri-template) })
+```"}
+fn (session: ::types/Session): Vec<::types/ResourceTemplate> {
+  result ::client/session-request(session, "resources/templates/list", {})
+  map(get(result, "resourceTemplates", []), (t) { ::types/ResourceTemplate(t) })
+}

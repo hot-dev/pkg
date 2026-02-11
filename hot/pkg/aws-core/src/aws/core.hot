@@ -4,6 +4,7 @@
 ::ctx ::hot::ctx
 
 http-request ::hot::http/request
+HttpRequest ::hot::http/HttpRequest
 HttpResponse ::hot::http/HttpResponse
 is-ok-response ::hot::http/is-ok-response
 
@@ -427,7 +428,12 @@ meta {
 fn (method: Str, url: Str, service: Str, region: Str, headers: Map, body: Str): HttpResponse {
     credentials get-credentials()
     signed-headers sign-request(method, url, region, service, credentials, headers, body)
-    http-request(method, url, signed-headers, body)
+    http-request(HttpRequest({
+        method: method,
+        url: url,
+        headers: signed-headers,
+        body: body
+    }))
 }
 
 // =============================================================================

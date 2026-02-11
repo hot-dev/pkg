@@ -2,14 +2,14 @@
 
 hot.pkg.openai {
   name: "hot.dev/openai",
-  version: "1.0.1",
+  version: "1.0.3",
   description: "OpenAI API bindings for Hot. Includes Chat Completions, Models, Embeddings, Images (DALL-E), Audio (TTS), and Moderations APIs.",
   author: "Hot Dev",
   email: "support@hot.dev",
   license: "Apache-2.0",
   tags: ["ai"],
   deps: {
-    "hot.dev/hot-ai": "0.9.1"
+    "hot.dev/hot-ai": "1.0.0"
   },
   src-paths: ["src/"],
   test-paths: ["test/"]

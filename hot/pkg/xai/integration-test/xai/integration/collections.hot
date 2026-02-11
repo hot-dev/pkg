@@ -1,6 +1,8 @@
 ::xai::integration::collections ns
 meta ["test"]
 
+HttpRequest ::hot::http/HttpRequest
+
 // =============================================================================
 // Integration Tests for xAI Collections API
 // =============================================================================
@@ -33,7 +35,11 @@ fn () {
             headers {
                 Authorization: `Bearer ${management-key}`
             }
-            response ::hot::http/request("GET", url, headers, "")
+            response ::hot::http/request(HttpRequest({
+                method: "GET",
+                url: url,
+                headers: headers
+            }))
             
             cond {
                 ::hot::http/is-ok-response(response) => {
@@ -82,7 +88,12 @@ fn () {
         }
     }
     
-    response ::hot::http/request("POST", url, headers, to-json(body))
+    response ::hot::http/request(HttpRequest({
+        method: "POST",
+        url: url,
+        headers: headers,
+        body: to-json(body)
+    }))
     
     // Empty collection_ids should return an error (400) or empty results
     cond {

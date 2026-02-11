@@ -1,0 +1,83 @@
+::mcp::prompts ns
+meta {doc: "MCP prompt discovery and retrieval. Supports listing prompt templates and rendering prompts with arguments."}
+
+::client ::mcp::client
+::types ::mcp::types
+
+// ============================================================================
+// Prompt Listing
+// ============================================================================
+
+// List prompts (first page).
+list
+meta {doc: "List prompts available on the MCP server (first page).
+
+**Example**
+
+```hot
+::prompts ::mcp::prompts
+prompts ::prompts/list(session)
+for-each(prompts, fn (p) { println(`${p.name}: ${or(p.description, \"\")}`) })
+```"}
+fn (session: ::types/Session): Vec<::types/Prompt> {
+  result ::client/session-request(session, "prompts/list", {})
+  map(get(result, "prompts", []), (p) { ::types/Prompt(p) })
+}
+
+// List prompts with explicit cursor for manual pagination.
+list-page
+meta {doc: "List prompts with an explicit cursor for manual pagination. Pass null for the first page."}
+fn (session: ::types/Session, cursor: Str?): Map {
+  params if(is-some(cursor), {cursor: cursor}, {})
+  result ::client/session-request(session, "prompts/list", params)
+  {
+    prompts: map(get(result, "prompts", []), (p) { ::types/Prompt(p) }),
+    next-cursor: get(result, "nextCursor", null)
+  }
+}
+
+// List ALL prompts across all pages.
+list-all
+meta {doc: "List all prompts across all pages, following pagination automatically."}
+fn (session: ::types/Session): Vec<::types/Prompt> {
+  collect-pages(session, null, [])
+}
+
+// Recursive pagination helper (TCO).
+collect-pages fn cond (session: ::types/Session, cursor: Str?, acc: Vec): Vec {
+  => {
+    params if(is-some(cursor), {cursor: cursor}, {})
+    result ::client/session-request(session, "prompts/list", params)
+    items map(get(result, "prompts", []), (p) { ::types/Prompt(p) })
+    combined concat(acc, items)
+    next-cursor get(result, "nextCursor", null)
+    if(is-null(next-cursor),
+      combined,
+      collect-pages(session, next-cursor, combined))
+  }
+}
+
+// ============================================================================
+// Prompt Retrieval
+// ============================================================================
+
+// Get a prompt by name, optionally with arguments.
+get-prompt
+meta {doc: "Get a prompt from the MCP server by name, optionally with arguments.
+
+Returns a Vec of PromptMessage (role + content pairs).
+
+**Example**
+
+```hot
+::prompts ::mcp::prompts
+messages ::prompts/get-prompt(session, \"code-review\", {language: \"hot\", code: \"add(1, 2)\"})
+for-each(messages, fn (m) { println(`${m.role}: ${m.content.text}`) })
+```"}
+fn (session: ::types/Session, name: Str, arguments: Map?): Vec<::types/PromptMessage> {
+  result ::client/session-request(session, "prompts/get", {
+    name: name,
+    arguments: or(arguments, {})
+  })
+  map(get(result, "messages", []), (m) { ::types/PromptMessage(m) })
+}

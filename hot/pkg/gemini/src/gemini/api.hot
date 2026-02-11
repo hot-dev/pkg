@@ -6,6 +6,7 @@
 http-request ::hot::http/request
 http-request-stream ::hot::http/request-stream
 is-ok-response ::hot::http/is-ok-response
+HttpRequest ::hot::http/HttpRequest
 HttpResponse ::hot::http/HttpResponse
 StreamingHttpResponse ::hot::http/StreamingHttpResponse
 
@@ -29,32 +30,42 @@ meta {
     ctx: {"gemini.api.key": {}}
 }
 fn
-(method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
-  api-key ::ctx/get("gemini.api.key")
-
-  // Append API key to URL as query parameter
-  url-with-key if(contains(url, "?"), `${url}&key=${api-key}`, `${url}?key=${api-key}`)
-
-  default-headers {}
-
-  // For GET/DELETE requests with no body, don't send Content-Type or body
-  cond {
-    or(eq(body, ""), is-null(body)) => {
-      final-headers merge(default-headers, additional-headers)
-      ::hot::http/request(method, url-with-key, final-headers, "")
-    }
-    => {
-      headers merge(default-headers, {Content-Type: "application/json"})
-      final-headers merge(headers, additional-headers)
-      ::hot::http/request(method, url-with-key, final-headers, to-json(untype(body)))
-    }
-  }
+(method: Str, url: Str): HttpResponse {
+  request(method, url, {}, "")
 },
 (method: Str, url: Str, additional-headers: Map): HttpResponse {
   request(method, url, additional-headers, "")
 },
-(method: Str, url: Str): HttpResponse {
-  request(method, url, {}, "")
+// 4-arity: use ctx api key (default) — delegates to 5-arity
+(method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {
+  request(method, url, additional-headers, body, ::ctx/get("gemini.api.key"))
+},
+// 5-arity: explicit api key override
+(method: Str, url: Str, additional-headers: Map, body: Any, api-key: Str): HttpResponse {
+  url-with-key if(contains(url, "?"), `${url}&key=${api-key}`, `${url}?key=${api-key}`)
+
+  default-headers {}
+
+  cond {
+    or(eq(body, ""), is-null(body)) => {
+      final-headers merge(default-headers, additional-headers)
+      ::hot::http/request(HttpRequest({
+        method: method,
+        url: url-with-key,
+        headers: final-headers
+      }))
+    }
+    => {
+      headers merge(default-headers, {Content-Type: "application/json"})
+      final-headers merge(headers, additional-headers)
+      ::hot::http/request(HttpRequest({
+        method: method,
+        url: url-with-key,
+        headers: final-headers,
+        body: to-json(untype(body))
+      }))
+    }
+  }
 }
 
 request-stream
@@ -63,23 +74,26 @@ meta {
     ctx: {"gemini.api.key": {}}
 }
 fn
+(method: Str, url: Str, additional-headers: Map, body: Any): StreamingHttpResponse {
+  request-stream(method, url, additional-headers, body, "sse")
+},
+// 5-arity: use ctx api key (default) — delegates to 6-arity
 (method: Str, url: Str, additional-headers: Map, body: Any, format: Str): StreamingHttpResponse {
-  api-key ::ctx/get("gemini.api.key")
-
-  // Append API key to URL as query parameter
+  request-stream(method, url, additional-headers, body, format, ::ctx/get("gemini.api.key"))
+},
+// 6-arity: explicit api key override
+(method: Str, url: Str, additional-headers: Map, body: Any, format: Str, api-key: Str): StreamingHttpResponse {
   url-with-key if(contains(url, "?"), `${url}&key=${api-key}`, `${url}?key=${api-key}`)
 
   default-headers {}
 
-  // Add Content-Type for requests with bodies
   headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-
-  // Merge in any additional headers (they can override defaults)
   final-headers merge(headers, additional-headers)
 
-  ::hot::http/request-stream(method, url-with-key, final-headers, to-json(untype(body)), format)
-},
-(method: Str, url: Str, additional-headers: Map, body: Any): StreamingHttpResponse {
-  // Gemini uses SSE when alt=sse is specified
-  request-stream(method, url, additional-headers, body, "sse")
+  ::hot::http/request-stream(HttpRequest({
+    method: method,
+    url: url-with-key,
+    headers: final-headers,
+    body: to-json(untype(body))
+  }), format)
 }

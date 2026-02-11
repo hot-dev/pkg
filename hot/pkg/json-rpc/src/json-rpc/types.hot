@@ -1,0 +1,50 @@
+::json-rpc::types ns
+meta {doc: "JSON-RPC 2.0 message types and standard error codes."}
+
+// ============================================================================
+// Message Types
+// ============================================================================
+
+Request
+meta {doc: "A JSON-RPC 2.0 request message. Contains a unique id for response correlation."}
+type {
+  jsonrpc: Str,
+  id: Str,
+  method: Str,
+  params: Map?
+}
+
+Notification
+meta {doc: "A JSON-RPC 2.0 notification message. Has no id and expects no response."}
+type {
+  jsonrpc: Str,
+  method: Str,
+  params: Map?
+}
+
+Error
+meta {doc: "A JSON-RPC 2.0 error object with code, message, and optional data."}
+type {
+  code: Int,
+  message: Str,
+  data: Any?
+}
+
+Response
+meta {doc: "A JSON-RPC 2.0 response message. Contains either a result or an error."}
+type {
+  jsonrpc: Str,
+  id: Str?,
+  result: Any?,
+  error: Error?
+}
+
+// ============================================================================
+// Standard Error Codes
+// ============================================================================
+
+PARSE_ERROR      -32700
+INVALID_REQUEST  -32600
+METHOD_NOT_FOUND -32601
+INVALID_PARAMS   -32602
+INTERNAL_ERROR   -32603

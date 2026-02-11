@@ -5,12 +5,12 @@ meta ["test"]
 // Integration Tests for Resend Emails API
 // =============================================================================
 // These tests require resend.api.key (full_access) to be set in context
-// Also requires RESEND_TEST_FROM_EMAIL and RESEND_TEST_TO_EMAIL
+// Also requires RESEND_TEST_FROM_EMAIL and RESEND_TEST_TO_EMAIL env vars
 
-::ctx ::hot::ctx
+::env ::hot::env
 
-from-email ::ctx/get("RESEND_TEST_FROM_EMAIL")
-to-email ::ctx/get("RESEND_TEST_TO_EMAIL")
+from-email ::env/get("RESEND_TEST_FROM_EMAIL", "")
+to-email ::env/get("RESEND_TEST_TO_EMAIL", "")
 
 // -----------------------------------------------------------------------------
 // Send & Retrieve Email

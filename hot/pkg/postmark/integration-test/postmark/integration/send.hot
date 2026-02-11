@@ -5,13 +5,13 @@ meta ["test"]
 // Integration Tests for Postmark Email Sending API
 // =============================================================================
 // These tests require postmark.server.token to be set in context
-// Also requires POSTMARK_TEST_FROM_EMAIL and POSTMARK_TEST_TO_EMAIL in context
+// Also requires POSTMARK_TEST_FROM_EMAIL and POSTMARK_TEST_TO_EMAIL env vars
 // The From address must be a verified Sender Signature in the Postmark account
 
-::ctx ::hot::ctx
+::env ::hot::env
 
-from-email ::ctx/get("POSTMARK_TEST_FROM_EMAIL")
-to-email ::ctx/get("POSTMARK_TEST_TO_EMAIL")
+from-email ::env/get("POSTMARK_TEST_FROM_EMAIL", "")
+to-email ::env/get("POSTMARK_TEST_TO_EMAIL", "")
 
 // -----------------------------------------------------------------------------
 // Single Email Tests

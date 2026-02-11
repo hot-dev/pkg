@@ -14,6 +14,7 @@
 
 ::ctx ::hot::ctx
 is-ok-response ::hot::http/is-ok-response
+HttpRequest ::hot::http/HttpRequest
 HttpResponse ::hot::http/HttpResponse
 
 // Management API has a different base URL
@@ -136,12 +137,21 @@ fn
     cond {
         or(eq(body, ""), is-null(body)) => {
             final-headers merge(default-headers, additional-headers)
-            ::hot::http/request(method, url, final-headers, "")
+            ::hot::http/request(HttpRequest({
+                method: method,
+                url: url,
+                headers: final-headers
+            }))
         }
         => {
             headers merge(default-headers, {Content-Type: "application/json"})
             final-headers merge(headers, additional-headers)
-            ::hot::http/request(method, url, final-headers, to-json(untype(body)))
+            ::hot::http/request(HttpRequest({
+                method: method,
+                url: url,
+                headers: final-headers,
+                body: to-json(untype(body))
+            }))
         }
     }
 },
@@ -332,7 +342,12 @@ fn (request: SearchRequest): SearchResponse | HttpError {
         Content-Type: "application/json"
     }
     
-    response ::hot::http/request("POST", `${::xai/BASE_URL}/documents/search`, headers, to-json(final-body))
+    response ::hot::http/request(HttpRequest({
+        method: "POST",
+        url: `${::xai/BASE_URL}/documents/search`,
+        headers: headers,
+        body: to-json(final-body)
+    }))
     if(is-ok-response(response), SearchResponse(response.body), err(HttpError(response)))
 }
 

@@ -102,6 +102,51 @@ fn (request: MessagesPostRequest): MessagesPostResponse {
 }
 
 // ============================================================================
+// Convenience Functions
+// ============================================================================
+
+chat
+meta {
+    doc: "Simple chat - send a message and get a response string.
+
+**Example**
+```hot
+response ::anthropic::messages/chat(\"claude-sonnet-4-20250514\", \"What is the capital of France?\")
+// Returns: \"The capital of France is Paris.\"
+
+// With system prompt
+response ::anthropic::messages/chat(\"claude-sonnet-4-20250514\", \"Hello!\", \"You are a helpful assistant.\")
+```"
+}
+fn
+(model: Str, message: Str): Str {
+    chat(model, message, null, null)
+},
+(model: Str, message: Str, system: Str): Str {
+    chat(model, message, system, null)
+},
+(model: Str, message: Str, system: Str, max-tokens: Int): Str {
+    messages [InputMessage({role: "user", content: message})]
+
+    request {
+        model: model,
+        messages: messages,
+        max_tokens: or(max-tokens, 1024),
+        system: system
+    }
+
+    result post(MessagesPostRequest(request))
+
+    match result {
+        Result.Err => { err(result) }
+        Result.Ok => {
+            first-block result.content[0]
+            or(first-block.text, "")
+        }
+    }
+}
+
+// ============================================================================
 // Streaming Support
 // ============================================================================
 

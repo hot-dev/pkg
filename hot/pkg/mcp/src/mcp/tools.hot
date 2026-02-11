@@ -1,0 +1,136 @@
+::mcp::tools ns
+meta {doc: "MCP tool discovery and invocation. Supports single-page listing, paginated iteration, synchronous calls, and SSE streaming calls."}
+
+::client ::mcp::client
+::types ::mcp::types
+
+// ============================================================================
+// Tool Listing
+// ============================================================================
+
+// List tools (first page).
+list
+meta {doc: "List tools available on the MCP server (first page).
+
+**Example**
+
+```hot
+::tools ::mcp::tools
+tools ::tools/list(session)
+for-each(tools, fn (tool) { println(tool.name) })
+```"}
+fn (session: ::types/Session): Vec<::types/Tool> {
+  result ::client/session-request(session, "tools/list", {})
+  map(get(result, "tools", []), (t) { ::types/Tool(t) })
+}
+
+// List tools with explicit cursor for manual pagination.
+list-page
+meta {doc: "List tools with an explicit cursor for manual pagination. Pass null for the first page."}
+fn (session: ::types/Session, cursor: Str?): Map {
+  params if(is-some(cursor), {cursor: cursor}, {})
+  result ::client/session-request(session, "tools/list", params)
+  {
+    tools: map(get(result, "tools", []), (t) { ::types/Tool(t) }),
+    next-cursor: get(result, "nextCursor", null)
+  }
+}
+
+// List ALL tools across all pages. Returns a Vec with every tool.
+// Uses collect-pages internally to follow nextCursor until exhausted.
+list-all
+meta {doc: "List all tools across all pages, following pagination automatically.
+
+**Example**
+
+```hot
+::tools ::mcp::tools
+all-tools ::tools/list-all(session)
+println(`Found ${length(all-tools)} tools`)
+```"}
+fn (session: ::types/Session): Vec<::types/Tool> {
+  collect-pages(session, "tools/list", "tools", null, [])
+}
+
+// Recursive pagination helper (TCO).
+collect-pages fn cond (session: ::types/Session, method: Str, key: Str, cursor: Str?, acc: Vec): Vec {
+  => {
+    params if(is-some(cursor), {cursor: cursor}, {})
+    result ::client/session-request(session, method, params)
+    items map(get(result, key, []), (t) { ::types/Tool(t) })
+    combined concat(acc, items)
+    next-cursor get(result, "nextCursor", null)
+    if(is-null(next-cursor),
+      combined,
+      collect-pages(session, method, key, next-cursor, combined))
+  }
+}
+
+// ============================================================================
+// Tool Calling
+// ============================================================================
+
+// Call a tool and wait for the full result.
+call
+meta {doc: "Call a tool on the MCP server and wait for the result.
+
+**Example**
+
+```hot
+::tools ::mcp::tools
+result ::tools/call(session, \"get_weather\", {location: \"Portland\"})
+println(first(result.content).text)
+```"}
+fn (session: ::types/Session, name: Str, arguments: Map?): ::types/ToolResult {
+  result ::client/session-request(session, "tools/call", {
+    name: name,
+    arguments: or(arguments, {})
+  })
+  ::types/ToolResult({
+    content: map(get(result, "content", []), (c) { ::types/ToolContent(c) }),
+    is-error: get(result, "isError", false),
+    structured-content: get(result, "structuredContent", null)
+  })
+}
+
+// Call a tool with SSE streaming. Returns an iterator of StreamEvent values.
+// The stream carries progress notifications, log messages, and the final
+// JSON-RPC response. Use for-each to process events in real time.
+call-stream
+meta {doc: "Call a tool on the MCP server with SSE streaming.
+
+Returns an iterator of StreamEvent values. Each event contains a parsed
+JSON-RPC message — progress notifications, log messages, or the final result.
+
+**Example**
+
+```hot
+::tools ::mcp::tools
+for-each(::tools/call-stream(session, \"long_analysis\", {query: \"...\"}), fn (event) {
+  cond {
+    eq(get(event.data, \"method\"), \"notifications/progress\") => {
+      println(`Progress: ${event.data.params.message}`)
+    }
+    is-some(get(event.data, \"result\")) => {
+      println(`Done: ${event.data.result}`)
+    }
+    => { null }
+  }
+})
+```"}
+fn (session: ::types/Session, name: Str, arguments: Map?): Iter {
+  response ::client/session-request-stream(session, "tools/call", {
+    name: name,
+    arguments: or(arguments, {})
+  })
+  // response.body is an SSE-parsed iterator yielding
+  // {event: "message", data: "<json-rpc-json>", id: "..."}
+  Iter(map(collect(response.body), (frame) {
+    parsed from-json(frame.data)
+    ::types/StreamEvent({
+      event: frame.event,
+      data: parsed,
+      id: frame.id
+    })
+  }))
+}
