@@ -32,7 +32,7 @@ Message type {
 ChatCompletionRequest type {
     model: Str,
     messages: Vec<Message>,
-    max_tokens: Int?,
+    max_completion_tokens: Int?,
     temperature: Float?,
     top_p: Float?,
     n: Int?,
@@ -110,7 +110,7 @@ meta {
 response complete({
     model: \"gpt-4o\",
     messages: [{role: \"user\", content: \"Hello!\"}],
-    max_tokens: 1024
+    max_completion_tokens: 1024
 })
 ```"
 }
@@ -138,7 +138,7 @@ Each event from the iterator has `{event, data}` where data contains:
 response complete-stream({
     model: \"gpt-4o\",
     messages: [{role: \"user\", content: \"Hello!\"}],
-    max_tokens: 1024
+    max_completion_tokens: 1024
 })
 
 for-each(response.body, fn (event) {
@@ -198,7 +198,7 @@ fn
     request {
         model: model,
         messages: messages,
-        max_tokens: or(max-tokens, 1024)
+        max_completion_tokens: or(max-tokens, 1024)
     }
 
     result complete(ChatCompletionRequest(request))
