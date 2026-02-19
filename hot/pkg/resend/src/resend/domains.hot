@@ -72,9 +72,8 @@ VerifyDomainResponse type {
     id: Str?
 }
 
-GETDomainsRequest type {
-
-}
+// No parameters required for this GET request
+GETDomainsRequest type Map
 
 GETDomainsResponse type {
     data: Vec<ListDomainsItem>?
@@ -82,7 +81,18 @@ GETDomainsResponse type {
 
 
 retrieve-list-domains
-meta {doc: "GET /domains - Retrieve a list of domains"}
+meta {
+    doc: """
+    Retrieve all domains configured in your Resend account.
+
+    **Example**
+
+    ```hot
+    domains ::resend::domains/retrieve-list-domains(::resend::domains/GETDomainsRequest({}))
+    domains.data // => [{id: "...", name: "example.com", status: "verified", ...}]
+    ```
+    """
+}
 fn (request: GETDomainsRequest): GETDomainsResponse {
   response api-request("GET", `${::resend/BASE_URL}/domains`)
   if(is-ok-response(response), GETDomainsResponse(response.body), err(HttpError(response)))
@@ -104,7 +114,9 @@ POSTDomainsResponse type {
 
 
 create-new-domain
-meta {doc: "POST /domains - Create a new domain"}
+meta {
+    doc: """Register a new sending domain. Returns the domain with DNS records that must be configured for verification."""
+}
 fn (request: POSTDomainsRequest): POSTDomainsResponse {
   response api-request("POST", `${::resend/BASE_URL}/domains`, {}, request)
   if(is-ok-response(response), POSTDomainsResponse(response.body), err(HttpError(response)))
@@ -126,7 +138,22 @@ GETDomainsDomainIdResponse type {
 
 
 retrieve-single-domain
-meta {doc: "GET /domains/{domain_id} - Retrieve a single domain"}
+meta {
+    doc: """
+    Retrieve a single domain by ID, including its DNS records and verification status.
+
+    **Example**
+
+    ```hot
+    domain ::resend::domains/retrieve-single-domain(::resend::domains/GETDomainsDomainIdRequest({
+        domain-id: "domain-id-string"
+    }))
+    domain.id     // => "domain-id-string"
+    domain.name   // => "example.com"
+    domain.status // => "verified"
+    ```
+    """
+}
 fn (request: GETDomainsDomainIdRequest): GETDomainsDomainIdResponse {
   response api-request("GET", `${::resend/BASE_URL}/domains/${request.domain-id}`)
   if(is-ok-response(response), GETDomainsDomainIdResponse(response.body), err(HttpError(response)))
@@ -145,7 +172,9 @@ PATCHDomainsDomainIdResponse type {
 
 
 update-existing-domain
-meta {doc: "PATCH /domains/{domain_id} - Update an existing domain"}
+meta {
+    doc: """Update tracking settings (open tracking, click tracking, TLS) for an existing domain."""
+}
 fn (domain-id: Str, request: PATCHDomainsDomainIdRequest): PATCHDomainsDomainIdResponse {
   response api-request("PATCH", `${::resend/BASE_URL}/domains/${domain-id}`, {}, request)
   if(is-ok-response(response), PATCHDomainsDomainIdResponse(response.body), err(HttpError(response)))
@@ -163,7 +192,7 @@ DELETEDomainsDomainIdResponse type {
 
 
 remove-existing-domain
-meta {doc: "DELETE /domains/{domain_id} - Remove an existing domain"}
+meta {doc: """Remove a domain from your Resend account. This cannot be undone."""}
 fn (request: DELETEDomainsDomainIdRequest): DELETEDomainsDomainIdResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/domains/${request.domain-id}`)
   if(is-ok-response(response), DELETEDomainsDomainIdResponse(response.body), err(HttpError(response)))
@@ -180,7 +209,9 @@ POSTDomainsDomainIdVerifyResponse type {
 
 
 verify-existing-domain
-meta {doc: "POST /domains/{domain_id}/verify - Verify an existing domain"}
+meta {
+    doc: """Trigger DNS verification for a domain. DNS records must be configured before calling this."""
+}
 fn (request: POSTDomainsDomainIdVerifyRequest): POSTDomainsDomainIdVerifyResponse {
   response api-request("POST", `${::resend/BASE_URL}/domains/${request.domain-id}/verify`)
   if(is-ok-response(response), POSTDomainsDomainIdVerifyResponse(response.body), err(HttpError(response)))

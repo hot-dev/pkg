@@ -92,7 +92,19 @@ extract-region-from-url fn (queue_url: Str): Str {
 // Send a message to an SQS queue
 send-message
 meta {
-    doc: "Send a message to an SQS queue. Returns SendMessageResponse on success or AwsError on failure."
+    doc: """
+    Send a message to an SQS queue.
+
+    **Example**
+
+    ```hot
+    result ::aws::sqs::messages/send-message(queue-url, "Hello from Hot!")
+    result.message_id  // => "abc123-def456..."
+
+    // With delay
+    result ::aws::sqs::messages/send-message(queue-url, "Delayed message", 30)
+    ```
+    """
 }
 fn
 (queue_url: Str, message_body: Str, delay_seconds: Int, message_attributes: Map): SendMessageResponse | AwsError {
@@ -139,7 +151,23 @@ fn
 // Receive messages from an SQS queue
 receive-messages
 meta {
-    doc: "Receive messages from an SQS queue. Returns ReceiveMessageResponse on success or AwsError on failure."
+    doc: """
+    Receive messages from an SQS queue.
+
+    **Example**
+
+    ```hot
+    // Receive up to 10 messages with 5-second long polling
+    result ::aws::sqs::messages/receive-messages(queue-url, 10, 5)
+    for-each(result.messages, (msg) {
+        msg.body            // => "Hello from Hot!"
+        msg.receipt_handle  // needed for delete-message
+    })
+
+    // Simple receive (1 message, no wait)
+    result ::aws::sqs::messages/receive-messages(queue-url)
+    ```
+    """
 }
 fn
 (queue_url: Str, max_messages: Int, wait_time_seconds: Int, visibility_timeout: Int): ReceiveMessageResponse | AwsError {
@@ -196,7 +224,22 @@ fn
 // Delete a message from an SQS queue
 delete-message
 meta {
-    doc: "Delete a message from an SQS queue after processing."
+    doc: """
+    Delete a message from an SQS queue after processing.
+
+    Use the receipt_handle from a received message to delete it.
+
+    **Example**
+
+    ```hot
+    // Receive and process messages
+    result ::aws::sqs::messages/receive-messages(queue-url, 10, 5)
+    for-each(result.messages, (msg) {
+        // Process message...
+        ::aws::sqs::messages/delete-message(queue-url, msg.receipt_handle)
+    })
+    ```
+    """
 }
 fn (queue_url: Str, receipt_handle: Str): DeleteMessageResponse | AwsError {
     region get-region()
@@ -228,7 +271,18 @@ fn (queue_url: Str, receipt_handle: Str): DeleteMessageResponse | AwsError {
 // Change message visibility timeout
 change-message-visibility
 meta {
-    doc: "Change the visibility timeout of a message."
+    doc: """
+    Change the visibility timeout of a message.
+
+    Useful for extending processing time before a message becomes visible again.
+
+    **Example**
+
+    ```hot
+    // Extend visibility timeout to 60 seconds
+    ::aws::sqs::messages/change-message-visibility(queue-url, msg.receipt_handle, 60)
+    ```
+    """
 }
 fn (queue_url: Str, receipt_handle: Str, visibility_timeout: Int): DeleteMessageResponse | AwsError {
     region get-region()
@@ -261,7 +315,17 @@ fn (queue_url: Str, receipt_handle: Str, visibility_timeout: Int): DeleteMessage
 // Purge all messages from a queue
 purge-queue
 meta {
-    doc: "Delete all messages from a queue."
+    doc: """
+    Delete all messages from a queue.
+
+    Note: This can only be called once every 60 seconds.
+
+    **Example**
+
+    ```hot
+    ::aws::sqs::messages/purge-queue(queue-url)
+    ```
+    """
 }
 fn (queue_url: Str): DeleteMessageResponse | AwsError {
     region get-region()
@@ -292,7 +356,23 @@ fn (queue_url: Str): DeleteMessageResponse | AwsError {
 // Send messages in batch
 send-message-batch
 meta {
-    doc: "Send up to 10 messages in a single batch request."
+    doc: """
+    Send up to 10 messages in a single batch request.
+
+    Each entry should have Id (unique) and MessageBody.
+
+    **Example**
+
+    ```hot
+    entries [
+        {Id: "msg1", MessageBody: "First message"},
+        {Id: "msg2", MessageBody: "Second message"},
+        {Id: "msg3", MessageBody: "Third message"}
+    ]
+    result ::aws::sqs::messages/send-message-batch(queue-url, entries)
+    length(result.successful)  // => 3
+    ```
+    """
 }
 fn (queue_url: Str, entries: Vec<Map>): SendMessageBatchResponse | AwsError {
     region get-region()
@@ -340,7 +420,21 @@ fn (queue_url: Str, entries: Vec<Map>): SendMessageBatchResponse | AwsError {
 // Delete messages in batch
 delete-message-batch
 meta {
-    doc: "Delete up to 10 messages in a single batch request."
+    doc: """
+    Delete up to 10 messages in a single batch request.
+
+    Each entry should have Id (unique) and ReceiptHandle.
+
+    **Example**
+
+    ```hot
+    result ::aws::sqs::messages/receive-messages(queue-url, 10, 5)
+    delete-entries map-indexed(result.messages, (idx, msg) {
+        {Id: Str(idx), ReceiptHandle: msg.receipt_handle}
+    })
+    ::aws::sqs::messages/delete-message-batch(queue-url, delete-entries)
+    ```
+    """
 }
 fn (queue_url: Str, entries: Vec<Map>): DeleteMessageBatchResponse | AwsError {
     region get-region()

@@ -20,7 +20,21 @@ DeleteTemplateResponse type {
 
 
 delete-template
-meta {doc: "DELETE /templates/{templateIdOrAlias} - Delete a Template"}
+meta {
+    doc: """
+    Delete a template by its numeric ID or string alias.
+
+    **Example**
+
+    ```hot
+    deleted ::postmark::delete/delete-template(::postmark::delete/DeleteTemplateRequest({
+        template-id-or-alias: "12345"
+    }))
+    deleted.ErrorCode // => 0
+    deleted.Message   // => "Template 12345 removed."
+    ```
+    """
+}
 fn (request: DeleteTemplateRequest): DeleteTemplateResponse {
   response api-request("DELETE", `${::postmark/BASE_URL}/templates/${request.template-id-or-alias}`)
   if(is-ok-response(response), DeleteTemplateResponse(response.body), err(HttpError(response)))
@@ -37,7 +51,7 @@ DeleteInboundRuleResponse type {
 
 
 delete-single-trigger
-meta {doc: "DELETE /triggers/inboundrules/{triggerid} - Delete a single trigger"}
+meta {doc: """Delete a single inbound rule trigger by its ID."""}
 fn (request: DeleteInboundRuleRequest): DeleteInboundRuleResponse {
   response api-request("DELETE", `${::postmark/BASE_URL}/triggers/inboundrules/${request.triggerid}`)
   if(is-ok-response(response), DeleteInboundRuleResponse(response.body), err(HttpError(response)))

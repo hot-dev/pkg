@@ -38,7 +38,7 @@ meta ["test"]
 fn () {
     // Test caching with a longer system prompt (caching is more beneficial for longer prompts)
     long-system "You are an expert assistant specialized in helping users with technical questions. You have deep knowledge of programming languages, software architecture, cloud computing, databases, and system design. When answering questions, you should provide clear, concise explanations with practical examples where appropriate. Always consider best practices and modern development patterns in your responses."
-    
+
     request ::anthropic::prompt::caching/PromptCachingBetaMessagesPostRequest({
         model: "claude-3-haiku-20240307",
         max_tokens: 100,

@@ -111,7 +111,7 @@ Schema type {
 
 DynamicRetrievalConfig type {
     mode: "MODE_UNSPECIFIED" | "MODE_DYNAMIC"?,
-    dynamicThreshold: Float?
+    dynamicThreshold: Dec?
 }
 
 CodeExecutionResult type {
@@ -153,7 +153,22 @@ CachedContentsListResponse type {
 
 
 list
-meta {doc: "GET /v1/cachedContents - List Cached Contents"}
+meta {
+    doc: """
+    List cached contents. Returns a paginated list of previously cached content entries.
+
+    **Example**
+
+    ```hot
+    result ::gemini::cachedcontents/list(CachedContentsListRequest({
+        page-size: "10",
+        page-token: ""
+    }))
+
+    cached or(result.cachedContents, [])
+    ```
+    """
+}
 fn (request: CachedContentsListRequest): CachedContentsListResponse {
   response api-request("GET", `${::gemini/BASE_URL}/v1/cachedContents?pageSize=${request.page-size}&pageToken=${request.page-token}`)
   if(is-ok-response(response), CachedContentsListResponse(response.body), err(HttpError(response)))
@@ -187,7 +202,27 @@ CachedContentsCreateResponse type {
 
 
 create
-meta {doc: "POST /v1/cachedContents - Create Cached Content"}
+meta {
+    doc: """
+    Create a new cached content entry. Cached content allows reusing large contexts across multiple requests, reducing latency and cost.
+
+    **Example**
+
+    ```hot
+    result ::gemini::cachedcontents/create(CachedContentsCreateRequest({
+        model: "models/gemini-2.0-flash",
+        displayName: "My cached context",
+        contents: [Content({
+            role: "user",
+            parts: [Part({text: "This is a large document to cache..."})]
+        })],
+        ttl: "3600s"
+    }))
+
+    result.name // => "cachedContents/abc123"
+    ```
+    """
+}
 fn (request: CachedContentsCreateRequest): CachedContentsCreateResponse {
   response api-request("POST", `${::gemini/BASE_URL}/v1/cachedContents`, {}, request)
   if(is-ok-response(response), CachedContentsCreateResponse(response.body), err(HttpError(response)))
@@ -214,7 +249,23 @@ CachedContentsGetResponse type {
 
 
 get
-meta {doc: "GET /v1/cachedContents/{name} - Get Cached Content"}
+meta {
+    doc: """
+    Get a specific cached content entry by name.
+
+    **Example**
+
+    ```hot
+    result ::gemini::cachedcontents/get(CachedContentsGetRequest({
+        name: "cachedContents/abc123"
+    }))
+
+    result.displayName // => "My cached context"
+    result.model       // => "models/gemini-2.0-flash"
+    result.expireTime  // => "2025-01-01T00:00:00Z"
+    ```
+    """
+}
 fn (request: CachedContentsGetRequest): CachedContentsGetResponse {
   response api-request("GET", `${::gemini/BASE_URL}/v1/cachedContents/${request.name}`)
   if(is-ok-response(response), CachedContentsGetResponse(response.body), err(HttpError(response)))
@@ -242,7 +293,21 @@ CachedContentsUpdateResponse type {
 
 
 update
-meta {doc: "PATCH /v1/cachedContents/{name} - Update Cached Content"}
+meta {
+    doc: """
+    Update a cached content entry. Currently supports updating the TTL or expire time. The `update-mask` parameter specifies which fields to update.
+
+    **Example**
+
+    ```hot
+    result ::gemini::cachedcontents/update("cachedContents/abc123", "ttl", CachedContentsUpdateRequest({
+        ttl: "7200s"
+    }))
+
+    result.expireTime // updated expiration time
+    ```
+    """
+}
 fn (name: Str, update-mask: Str, request: CachedContentsUpdateRequest): CachedContentsUpdateResponse {
   response api-request("PATCH", `${::gemini/BASE_URL}/v1/cachedContents/${name}?updateMask=${update-mask}`, {}, request)
   if(is-ok-response(response), CachedContentsUpdateResponse(response.body), err(HttpError(response)))
@@ -258,7 +323,19 @@ CachedContentsDeleteResponse type {
 
 
 delete
-meta {doc: "DELETE /v1/cachedContents/{name} - Delete Cached Content"}
+meta {
+    doc: """
+    Delete a cached content entry by name.
+
+    **Example**
+
+    ```hot
+    ::gemini::cachedcontents/delete(CachedContentsDeleteRequest({
+        name: "cachedContents/abc123"
+    }))
+    ```
+    """
+}
 fn (request: CachedContentsDeleteRequest): CachedContentsDeleteResponse {
   response api-request("DELETE", `${::gemini/BASE_URL}/v1/cachedContents/${request.name}`)
   if(is-ok-response(response), CachedContentsDeleteResponse(response.body), err(HttpError(response)))

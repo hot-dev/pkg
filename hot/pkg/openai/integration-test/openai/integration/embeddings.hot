@@ -16,7 +16,7 @@ fn () {
 
     assert(response.data, "Response should have data array")
     assert(gt(length(response.data), 0), "Should have at least one embedding")
-    
+
     embedding response.data[0].embedding
     assert(embedding, "Should have embedding vector")
     assert(gt(length(embedding), 0), "Embedding should have dimensions")

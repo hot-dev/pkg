@@ -23,7 +23,23 @@ InvokeResponse type {
 // Invoke a Lambda function synchronously
 invoke
 meta {
-    doc: "Invoke a Lambda function synchronously. Returns InvokeResponse on success or AwsError on failure."
+    doc: """
+    Invoke a Lambda function synchronously.
+
+    **Example**
+
+    ```hot
+    // Invoke with no payload
+    result ::aws::lambda::invoke/invoke("my-function")
+    result.status_code  // => 200
+    result.payload      // => "Hello from Lambda!"
+
+    // Invoke with payload
+    result ::aws::lambda::invoke/invoke("my-function", {name: "Hot", test: true})
+    result.status_code  // => 200
+    result.payload      // => {message: "Hello, Hot!"}
+    ```
+    """
 }
 fn
 (function_name: Str, payload: Any, invocation_type: Str, log_type: Str): InvokeResponse | AwsError {
@@ -69,7 +85,19 @@ fn
 // Invoke a Lambda function asynchronously (fire and forget)
 invoke-async
 meta {
-    doc: "Invoke a Lambda function asynchronously. The function is invoked and returns immediately without waiting for a response."
+    doc: """
+    Invoke a Lambda function asynchronously (fire and forget).
+
+    The function is invoked and returns immediately without waiting for the result.
+    Returns status code 202 (Accepted) on success.
+
+    **Example**
+
+    ```hot
+    result ::aws::lambda::invoke/invoke-async("my-function", {event: "process"})
+    result.status_code  // => 202
+    ```
+    """
 }
 fn
 (function_name: Str, payload: Any): InvokeResponse | AwsError {
@@ -82,7 +110,18 @@ fn
 // Invoke a Lambda function with logging
 invoke-with-logs
 meta {
-    doc: "Invoke a Lambda function and include base64-encoded logs in the response."
+    doc: """
+    Invoke a Lambda function and include base64-encoded logs in the response.
+
+    **Example**
+
+    ```hot
+    result ::aws::lambda::invoke/invoke-with-logs("my-function")
+    result.status_code  // => 200
+    result.payload      // => "Hello from Lambda!"
+    result.log_result   // => base64-encoded execution logs
+    ```
+    """
 }
 fn
 (function_name: Str, payload: Any): InvokeResponse | AwsError {
@@ -95,7 +134,18 @@ fn
 // Dry run invoke (validate without executing)
 invoke-dry-run
 meta {
-    doc: "Validate a Lambda invocation without actually executing the function."
+    doc: """
+    Validate a Lambda invocation without actually executing the function.
+
+    Returns status code 204 (No Content) if the function exists and permissions are valid.
+
+    **Example**
+
+    ```hot
+    result ::aws::lambda::invoke/invoke-dry-run("my-function")
+    result.status_code  // => 204
+    ```
+    """
 }
 fn
 (function_name: Str, payload: Any): InvokeResponse | AwsError {

@@ -1,5 +1,5 @@
 ::openai::audio ns
-meta {doc: "OpenAI Audio API - Text-to-speech and speech-to-text."}
+meta {doc: """OpenAI Audio API - Text-to-speech and speech-to-text."""}
 
 api-request ::openai::api/request
 HttpError ::openai::api/HttpError
@@ -54,21 +54,34 @@ TranslationResponse type {
 
 speech
 meta {
-    doc: "POST /audio/speech - Generate audio from text (TTS).
+    doc: """
+    POST /audio/speech - Generate audio from text (TTS).
 
-Returns the raw audio bytes. Save to file or stream.
+    Returns the raw audio bytes. Available voices: alloy, echo, fable, onyx, nova, shimmer.
 
-**Example**
+    **Example**
 
-```hot
-audio-bytes ::openai::audio/speech(SpeechRequest({
-    model: \"tts-1\",
-    input: \"Hello, world!\",
-    voice: \"alloy\"
-}))
+    ```hot
+    audio-bytes ::openai::audio/speech(SpeechRequest({
+        model: "tts-1",
+        input: "Hello, this is a test.",
+        voice: "alloy"
+    }))
 
-::hot::file/write-file-bytes(\"output.mp3\", audio-bytes)
-```"
+    length(audio-bytes) // => substantial byte count
+    ::hot::file/write-file-bytes("output.mp3", audio-bytes)
+    ```
+
+    **Example - Different voice**
+
+    ```hot
+    audio-bytes ::openai::audio/speech(SpeechRequest({
+        model: "tts-1",
+        input: "Testing with a different voice.",
+        voice: "nova"
+    }))
+    ```
+    """
 }
 fn (request: SpeechRequest): Bytes | HttpError {
     response api-request("POST", `${::openai/BASE_URL}/audio/speech`, {}, request)
@@ -84,14 +97,25 @@ fn (request: SpeechRequest): Bytes | HttpError {
 
 speak
 meta {
-    doc: "Simple TTS - generate speech from text with default settings.
+    doc: """
+    Simple TTS - generate speech from text with default settings (tts-1 model, alloy voice).
 
-**Example**
+    A convenience wrapper around `speech` that uses sensible defaults. Pass a second argument to choose a different voice.
 
-```hot
-audio-bytes ::openai::audio/speak(\"Hello, world!\")
-::hot::file/write-file-bytes(\"output.mp3\", audio-bytes)
-```"
+    **Example**
+
+    ```hot
+    audio-bytes ::openai::audio/speak("Hello world!")
+    length(audio-bytes) // => substantial byte count
+    ::hot::file/write-file-bytes("output.mp3", audio-bytes)
+    ```
+
+    **Example - Custom voice**
+
+    ```hot
+    audio-bytes ::openai::audio/speak("Hello world!", "nova")
+    ```
+    """
 }
 fn (text: Str): Bytes | HttpError {
     speak(text, "alloy")

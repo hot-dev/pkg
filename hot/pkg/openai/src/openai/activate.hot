@@ -40,7 +40,7 @@ ActivateOrganizationCertificatesResponse type {
 
 activate-certificates-organization
 meta {
-    doc: "POST /organization/certificates/activate - Activate certificates for organization"
+    doc: """POST /organization/certificates/activate - Activate certificates for organization"""
 }
 fn (request: ActivateOrganizationCertificatesRequest): ActivateOrganizationCertificatesResponse {
   response api-request("POST", `${::openai/BASE_URL}/organization/certificates/activate`, {}, request)
@@ -62,7 +62,7 @@ ActivateProjectCertificatesResponse type {
 
 activate-certificates-project
 meta {
-    doc: "POST /organization/projects/{project_id}/certificates/activate - Activate certificates for project"
+    doc: """POST /organization/projects/{project_id}/certificates/activate - Activate certificates for project"""
 }
 fn (project-id: Str, request: ActivateProjectCertificatesRequest): ActivateProjectCertificatesResponse {
   response api-request("POST", `${::openai/BASE_URL}/organization/projects/${project-id}/certificates/activate`, {}, request)

@@ -41,17 +41,20 @@ PublishBatchResponse type {
 // Publish a message to a topic or endpoint
 publish
 meta {
-    doc: "Publish a message to an SNS topic or directly to an endpoint.
-    
-Options:
-- topic_arn: Target topic ARN (use this OR target_arn)
-- target_arn: Direct endpoint ARN (for mobile push, etc.)
-- phone_number: Phone number for direct SMS
-- subject: Subject line (for email subscriptions)
-- message_structure: 'json' for protocol-specific messages
-- message_attributes: Map of message attributes for filtering
-- message_deduplication_id: Deduplication ID for FIFO topics
-- message_group_id: Group ID for FIFO topics"
+    doc: """
+    Publish a message to an SNS topic or directly to an endpoint.
+
+    **Example**
+
+    ```hot
+    // Simple publish
+    result ::aws::sns::publish/publish(topic-arn, "Hello from Hot!")
+    result.message_id  // => "abc123-def456..."
+
+    // Publish with subject (for email subscriptions)
+    result ::aws::sns::publish/publish(topic-arn, "Message body", {subject: "Alert"})
+    ```
+    """
 }
 fn
 (topic_arn: Str, message: Str, options: Map): PublishResponse | AwsError {
@@ -120,16 +123,24 @@ fn
 // Publish messages in batch
 publish-batch
 meta {
-    doc: "Publish multiple messages to a topic in a single request.
-    
-Each entry in the batch should be a Map with:
-- id: Unique identifier for this entry (required)
-- message: Message content (required)
-- subject: Subject line (optional)
-- message_structure: 'json' for protocol-specific (optional)
-- message_attributes: Attributes map (optional)
-- message_deduplication_id: For FIFO topics (optional)
-- message_group_id: For FIFO topics (optional)"
+    doc: """
+    Publish multiple messages to a topic in a single request (up to 10).
+
+    Each entry should have `id` (unique) and `message` (content).
+
+    **Example**
+
+    ```hot
+    entries [
+        {id: "msg1", message: "First message"},
+        {id: "msg2", message: "Second message"},
+        {id: "msg3", message: "Third message"}
+    ]
+    result ::aws::sns::publish/publish-batch(topic-arn, entries)
+    length(result.successful)  // => 3
+    length(result.failed)      // => 0
+    ```
+    """
 }
 fn (topic_arn: Str, entries: Vec<Map>): PublishBatchResponse | AwsError {
     region get-region()
@@ -202,10 +213,21 @@ fn (topic_arn: Str, entries: Vec<Map>): PublishBatchResponse | AwsError {
 // Helper to publish with message attributes
 publish-with-attributes
 meta {
-    doc: "Helper to publish a message with message attributes.
-    
-Attributes are used for message filtering by subscriptions.
-Each attribute should have 'DataType' (String, Number, Binary) and 'StringValue' or 'BinaryValue'."
+    doc: """
+    Publish a message with message attributes for subscription filtering.
+
+    Each attribute should have DataType ("String", "Number", or "Binary") and StringValue.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::publish/publish-with-attributes(topic-arn, "Order placed", {
+        event_type: {DataType: "String", StringValue: "order"},
+        priority: {DataType: "Number", StringValue: "1"}
+    })
+    result.message_id  // => "abc123..."
+    ```
+    """
 }
 fn (topic_arn: Str, message: Str, attributes: Map): PublishResponse | AwsError {
     publish(topic_arn, message, { message_attributes: attributes })
@@ -214,16 +236,22 @@ fn (topic_arn: Str, message: Str, attributes: Map): PublishResponse | AwsError {
 // Helper to publish JSON message with protocol-specific payloads
 publish-json
 meta {
-    doc: "Publish a message with protocol-specific payloads.
-    
-The message should be a Map with protocol keys:
-- 'default': Default message (required)
-- 'email': Email-specific message
-- 'email-json': Email JSON message
-- 'sqs': SQS-specific message
-- 'lambda': Lambda-specific message
-- 'http': HTTP endpoint message
-- 'https': HTTPS endpoint message"
+    doc: """
+    Publish a message with protocol-specific payloads.
+
+    The message map must include a "default" key. Other keys are protocol names
+    (email, sqs, lambda, http, https) with protocol-specific content.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::publish/publish-json(topic-arn, {
+        default: "Default notification",
+        sqs: to-json({type: "notification", data: {order_id: "12345"}})
+    })
+    result.message_id  // => "abc123..."
+    ```
+    """
 }
 fn (topic_arn: Str, message: Map): PublishResponse | AwsError {
     publish(topic_arn, to-json(message), { message_structure: "json" })
@@ -232,13 +260,22 @@ fn (topic_arn: Str, message: Map): PublishResponse | AwsError {
 // Helper to send SMS directly
 send-sms
 meta {
-    doc: "Send an SMS message directly to a phone number.
-    
-The phone number should be in E.164 format (e.g., +14155551234).
-    
-Options:
-- sender_id: Sender ID (alphanumeric, max 11 chars)
-- message_type: 'Promotional' or 'Transactional'"
+    doc: """
+    Send an SMS message directly to a phone number (E.164 format).
+
+    **Example**
+
+    ```hot
+    // Simple SMS
+    result ::aws::sns::publish/send-sms("+14155551234", "Your code is 123456")
+    result.message_id  // => "abc123..."
+
+    // SMS with options
+    result ::aws::sns::publish/send-sms("+14155551234", "Your code is 123456", {
+        message_type: "Transactional"
+    })
+    ```
+    """
 }
 fn
 (phone_number: Str, message: Str, options: Map): PublishResponse | AwsError {

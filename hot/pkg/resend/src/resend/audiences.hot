@@ -78,9 +78,8 @@ ListContactsResponseSuccess type {
     data: Vec<Map>?
 }
 
-GETAudiencesRequest type {
-
-}
+// No parameters required for this GET request
+GETAudiencesRequest type Map
 
 GETAudiencesResponse type {
     object: Str?,
@@ -89,7 +88,18 @@ GETAudiencesResponse type {
 
 
 retrieve-list-audiences
-meta {doc: "GET /audiences - Retrieve a list of audiences"}
+meta {
+    doc: """
+    Retrieve all audiences (contact lists) in your Resend account.
+
+    **Example**
+
+    ```hot
+    audiences ::resend::audiences/retrieve-list-audiences(::resend::audiences/GETAudiencesRequest({}))
+    audiences.data // => [{id: "...", name: "Newsletter", ...}]
+    ```
+    """
+}
 fn (request: GETAudiencesRequest): GETAudiencesResponse {
   response api-request("GET", `${::resend/BASE_URL}/audiences`)
   if(is-ok-response(response), GETAudiencesResponse(response.body), err(HttpError(response)))
@@ -107,7 +117,20 @@ POSTAudiencesResponse type {
 
 
 create-list-contacts
-meta {doc: "POST /audiences - Create a list of contacts"}
+meta {
+    doc: """
+    Create a new audience (contact list).
+
+    **Example**
+
+    ```hot
+    created ::resend::audiences/create-list-contacts(::resend::audiences/POSTAudiencesRequest({
+        name: "Newsletter Subscribers"
+    }))
+    created.id // => "audience-id-string"
+    ```
+    """
+}
 fn (request: POSTAudiencesRequest): POSTAudiencesResponse {
   response api-request("POST", `${::resend/BASE_URL}/audiences`, {}, request)
   if(is-ok-response(response), POSTAudiencesResponse(response.body), err(HttpError(response)))
@@ -126,7 +149,9 @@ GETAudiencesIdResponse type {
 
 
 retrieve-single-audience
-meta {doc: "GET /audiences/{id} - Retrieve a single audience"}
+meta {
+    doc: """Retrieve a single audience by its ID, including name and creation date."""
+}
 fn (request: GETAudiencesIdRequest): GETAudiencesIdResponse {
   response api-request("GET", `${::resend/BASE_URL}/audiences/${request.id}`)
   if(is-ok-response(response), GETAudiencesIdResponse(response.body), err(HttpError(response)))
@@ -144,7 +169,20 @@ DELETEAudiencesIdResponse type {
 
 
 remove-existing-audience
-meta {doc: "DELETE /audiences/{id} - Remove an existing audience"}
+meta {
+    doc: """
+    Remove an existing audience and all its contacts. This cannot be undone.
+
+    **Example**
+
+    ```hot
+    deleted ::resend::audiences/remove-existing-audience(::resend::audiences/DELETEAudiencesIdRequest({
+        id: "audience-id-string"
+    }))
+    deleted.deleted // => true
+    ```
+    """
+}
 fn (request: DELETEAudiencesIdRequest): DELETEAudiencesIdResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/audiences/${request.id}`)
   if(is-ok-response(response), DELETEAudiencesIdResponse(response.body), err(HttpError(response)))
@@ -161,7 +199,7 @@ GETAudiencesAudienceIdContactsResponse type {
 
 
 retrieve-list-contacts
-meta {doc: "GET /audiences/{audience_id}/contacts - Retrieve a list of contacts"}
+meta {doc: """Retrieve all contacts belonging to a specific audience."""}
 fn (request: GETAudiencesAudienceIdContactsRequest): GETAudiencesAudienceIdContactsResponse {
   response api-request("GET", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts`)
   if(is-ok-response(response), GETAudiencesAudienceIdContactsResponse(response.body), err(HttpError(response)))
@@ -182,7 +220,9 @@ POSTAudiencesAudienceIdContactsResponse type {
 
 
 create-new-contact
-meta {doc: "POST /audiences/{audience_id}/contacts - Create a new contact"}
+meta {
+    doc: """Add a new contact to an audience with email, optional name, and subscription status."""
+}
 fn (audience-id: Str, request: POSTAudiencesAudienceIdContactsRequest): POSTAudiencesAudienceIdContactsResponse {
   response api-request("POST", `${::resend/BASE_URL}/audiences/${audience-id}/contacts`, {}, request)
   if(is-ok-response(response), POSTAudiencesAudienceIdContactsResponse(response.body), err(HttpError(response)))
@@ -206,7 +246,7 @@ GETAudiencesAudienceIdContactsEmailResponse type {
 
 retrieves-single-contact-by-email
 meta {
-    doc: "GET /audiences/{audience_id}/contacts/{email} - Retrieves a single contact by email"
+    doc: """Retrieve a single contact from an audience by their email address."""
 }
 fn (request: GETAudiencesAudienceIdContactsEmailRequest): GETAudiencesAudienceIdContactsEmailResponse {
   response api-request("GET", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts/${request.email}`)
@@ -226,7 +266,7 @@ PATCHAudiencesAudienceIdContactsEmailResponse type {
 
 update-single-contact-by-email
 meta {
-    doc: "PATCH /audiences/{audience_id}/contacts/{email} - Update a single contact by email"
+    doc: """Update a contact's details by their email address within a specific audience."""
 }
 fn (request: PATCHAudiencesAudienceIdContactsEmailRequest): PATCHAudiencesAudienceIdContactsEmailResponse {
   response api-request("PATCH", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts/${request.email}`)
@@ -247,7 +287,7 @@ DELETEAudiencesAudienceIdContactsEmailResponse type {
 
 remove-existing-contact-by-email
 meta {
-    doc: "DELETE /audiences/{audience_id}/contacts/{email} - Remove an existing contact by email"
+    doc: """Remove a contact from an audience by their email address."""
 }
 fn (request: DELETEAudiencesAudienceIdContactsEmailRequest): DELETEAudiencesAudienceIdContactsEmailResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts/${request.email}`)
@@ -272,7 +312,7 @@ GETAudiencesAudienceIdContactsIdResponse type {
 
 retrieve-single-contact-by-id
 meta {
-    doc: "GET /audiences/{audience_id}/contacts/{id} - Retrieve a single contact by id"
+    doc: """Retrieve a single contact from an audience by their contact ID."""
 }
 fn (request: GETAudiencesAudienceIdContactsIdRequest): GETAudiencesAudienceIdContactsIdResponse {
   response api-request("GET", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts/${request.id}`)
@@ -294,7 +334,7 @@ PATCHAudiencesAudienceIdContactsIdResponse type {
 
 update-single-contact-by-id
 meta {
-    doc: "PATCH /audiences/{audience_id}/contacts/{id} - Update a single contact by id"
+    doc: """Update a contact's email, name, or subscription status by their contact ID."""
 }
 fn (id: Str, audience-id: Str, request: PATCHAudiencesAudienceIdContactsIdRequest): PATCHAudiencesAudienceIdContactsIdResponse {
   response api-request("PATCH", `${::resend/BASE_URL}/audiences/${audience-id}/contacts/${id}`, {}, request)
@@ -315,7 +355,7 @@ DELETEAudiencesAudienceIdContactsIdResponse type {
 
 remove-existing-contact-by-id
 meta {
-    doc: "DELETE /audiences/{audience_id}/contacts/{id} - Remove an existing contact by id"
+    doc: """Remove a contact from an audience by their contact ID."""
 }
 fn (request: DELETEAudiencesAudienceIdContactsIdRequest): DELETEAudiencesAudienceIdContactsIdResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/audiences/${request.audience-id}/contacts/${request.id}`)

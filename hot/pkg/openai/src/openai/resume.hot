@@ -61,9 +61,8 @@ FineTuneMethod type {
     reinforcement: FineTuneReinforcementMethod?
 }
 
-Metadata type {
-
-}
+// Arbitrary key-value metadata associated with an API object
+Metadata type Map
 
 FineTuneDPOMethod type {
     hyperparameters: FineTuneDPOHyperparameters?
@@ -101,7 +100,9 @@ ResumeFineTuningJobResponse type {
 
 
 resume-finetuning
-meta {doc: "POST /fine_tuning/jobs/{fine_tuning_job_id}/resume - Resume fine-tuning"}
+meta {
+    doc: """POST /fine_tuning/jobs/{fine_tuning_job_id}/resume - Resume a paused fine-tuning job."""
+}
 fn (request: ResumeFineTuningJobRequest): ResumeFineTuningJobResponse {
   response api-request("POST", `${::openai/BASE_URL}/fine_tuning/jobs/${request.fine-tuning-job-id}/resume`)
   if(is-ok-response(response), ResumeFineTuningJobResponse(response.body), err(HttpError(response)))

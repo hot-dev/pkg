@@ -32,7 +32,30 @@ ScanResponse type {
 // Query items from a DynamoDB table
 query
 meta {
-    doc: "Query items from a DynamoDB table using a key condition expression."
+    doc: """
+    Query items from a DynamoDB table using a key condition expression.
+
+    **Example**
+
+    ```hot
+    // Query all items with a partition key
+    result ::aws::dynamodb::query/query(
+        "my-table",
+        "pk = :pk",
+        {":pk": {S: "user-123"}}
+    )
+    result.count   // => 3
+    result.items   // => [{pk: {S: "user-123"}, sk: {S: "order:1"}, ...}, ...]
+
+    // Query with sort key prefix (begins_with)
+    result ::aws::dynamodb::query/query(
+        "my-table",
+        "pk = :pk AND begins_with(sk, :prefix)",
+        {":pk": {S: "user-123"}, ":prefix": {S: "order:"}},
+        null, null, null, null, true, null
+    )
+    ```
+    """
 }
 fn
 (table_name: Str, key_condition_expression: Str, expression_attribute_values: Map, expression_attribute_names: Map, filter_expression: Str, limit: Int, exclusive_start_key: Map, scan_index_forward: Bool, index_name: Str): QueryResponse | AwsError {
@@ -101,7 +124,21 @@ fn
 // Query with an index
 query-index
 meta {
-    doc: "Query items from a DynamoDB table using a secondary index."
+    doc: """
+    Query items from a DynamoDB table using a secondary index.
+
+    **Example**
+
+    ```hot
+    result ::aws::dynamodb::query/query-index(
+        "my-table",
+        "email-index",
+        "email = :email",
+        {":email": {S: "alice@example.com"}}
+    )
+    result.items  // => [{pk: {S: "user-123"}, email: {S: "alice@example.com"}, ...}]
+    ```
+    """
 }
 fn
 (table_name: Str, index_name: Str, key_condition_expression: Str, expression_attribute_values: Map): QueryResponse | AwsError {
@@ -114,7 +151,27 @@ fn
 // Scan a DynamoDB table
 scan
 meta {
-    doc: "Scan all items from a DynamoDB table."
+    doc: """
+    Scan all items from a DynamoDB table.
+
+    Scans read every item in the table and optionally apply a filter expression.
+    For large tables, prefer `query` when possible.
+
+    **Example**
+
+    ```hot
+    // Scan with a filter
+    result ::aws::dynamodb::query/scan(
+        "my-table",
+        "status = :s",
+        {":s": {S: "active"}}
+    )
+    result.items  // => [{pk: {S: "..."}, status: {S: "active"}, ...}, ...]
+
+    // Scan with limit
+    result ::aws::dynamodb::query/scan("my-table", 5)
+    ```
+    """
 }
 fn
 (table_name: Str, filter_expression: Str, expression_attribute_values: Map, expression_attribute_names: Map, limit: Int, exclusive_start_key: Map): ScanResponse | AwsError {

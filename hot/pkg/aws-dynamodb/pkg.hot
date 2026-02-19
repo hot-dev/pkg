@@ -2,7 +2,8 @@
 
 hot.pkg.aws-dynamodb {
   name: "hot.dev/aws-dynamodb",
-  version: "1.0.1",
+  version: "1.0.2",
+  hot-min-version: "1.1.0",
   description: "AWS DynamoDB API bindings for NoSQL database operations.",
   author: "Hot Dev",
   email: "support@hot.dev",

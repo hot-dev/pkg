@@ -4,13 +4,11 @@ api-request ::postmark::api/request
 HttpError ::postmark::api/HttpError
 is-ok-response ::hot::http/is-ok-response
 
-AttachmentCollection type {
+// List of email attachments. Each attachment has Name, Content (base64), and ContentType.
+AttachmentCollection type Vec<Map>
 
-}
-
-HeaderCollection type {
-
-}
+// List of custom email headers. Each header has Name and Value.
+HeaderCollection type Vec<Map>
 
 SendEmailRequest type {
     From: Str?,
@@ -38,7 +36,25 @@ SendEmailResponse type {
 
 
 send-single-email
-meta {doc: "POST /email - Send a single email"}
+meta {
+    doc: """
+    Send a single email via the Postmark API.
+
+    **Example**
+
+    ```hot
+    response ::postmark::send/send-single-email(::postmark::send/SendEmailRequest({
+        From: "sender@example.com",
+        To: "recipient@example.com",
+        Subject: "Welcome!",
+        TextBody: "Plain text body.",
+        HtmlBody: "<html><body><p>HTML body</p></body></html>"
+    }))
+    response.MessageID // => "unique-message-id"
+    response.ErrorCode // => 0
+    ```
+    """
+}
 fn (request: SendEmailRequest): SendEmailResponse {
   response api-request("POST", `${::postmark/BASE_URL}/email`, {}, request)
   if(is-ok-response(response), SendEmailResponse(response.body), err(HttpError(response)))
@@ -47,17 +63,15 @@ fn (request: SendEmailRequest): SendEmailResponse {
 // Convenience alias
 email send-single-email
 
-SendEmailBatchRequest type {
+// Batch email request: array of individual email objects
+SendEmailBatchRequest type Vec<Map>
 
-}
-
-SendEmailBatchResponse type {
-
-}
+// Batch email response: array of results for each email in the batch
+SendEmailBatchResponse type Vec<Map>
 
 
 send-batch-emails
-meta {doc: "POST /email/batch - Send a batch of emails"}
+meta {doc: """Send a batch of emails in a single API call."""}
 fn (request: SendEmailBatchRequest): SendEmailBatchResponse {
   response api-request("POST", `${::postmark/BASE_URL}/email/batch`, {}, request)
   if(is-ok-response(response), SendEmailBatchResponse(response.body), err(HttpError(response)))
@@ -107,7 +121,9 @@ SendEmailWithTemplateResponse type {
 
 
 send-email-using-template
-meta {doc: "POST /email/withTemplate - Send an email using a Template"}
+meta {
+    doc: """Send an email using a pre-defined Postmark template, identified by TemplateId or TemplateAlias."""
+}
 fn (request: SendEmailWithTemplateRequest): SendEmailWithTemplateResponse {
   response api-request("POST", `${::postmark/BASE_URL}/email/withTemplate`, {}, request)
   if(is-ok-response(response), SendEmailWithTemplateResponse(response.body), err(HttpError(response)))
@@ -121,13 +137,12 @@ SendEmailBatchWithTemplatesRequest type {
     Messages: Vec<EmailWithTemplateRequest>?
 }
 
-SendEmailBatchWithTemplatesResponse type {
-
-}
+// Batch template email response: array of results for each templated email
+SendEmailBatchWithTemplatesResponse type Vec<Map>
 
 
 send-batch-email-using-templates
-meta {doc: "POST /email/batchWithTemplates - Send a batch of email using templates."}
+meta {doc: """Send a batch of emails using templates in a single API call."""}
 fn (request: SendEmailBatchWithTemplatesRequest): SendEmailBatchWithTemplatesResponse {
   response api-request("POST", `${::postmark/BASE_URL}/email/batchWithTemplates`, {}, request)
   if(is-ok-response(response), SendEmailBatchWithTemplatesResponse(response.body), err(HttpError(response)))

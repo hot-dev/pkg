@@ -7,7 +7,7 @@ AWS Simple Notification Service (SNS) bindings for Hot, providing pub/sub messag
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/aws-sns": "1.0.1"
+"hot.dev/aws-sns": "1.0.2"
 ```
 
 ## Features

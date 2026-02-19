@@ -99,7 +99,7 @@ fn () {
 
     // Retrieve the response
     retrieved ::xai::responses/get(created.id)
-    
+
     assert-eq(created.id, retrieved.id, "Retrieved id should match")
 }
 
@@ -111,7 +111,7 @@ test-user-message-helper
 meta ["test"]
 fn () {
     msg ::xai::responses/user-message("Hello")
-    
+
     assert(msg.role, "Should have role")
     assert-eq("Hello", msg.content, "Content should match")
 }
@@ -126,7 +126,7 @@ fn () {
     }))
 
     text ::xai::responses/extract-response-text(response)
-    
+
     // Text should be extracted (may be empty if no content)
     assert(is-str(text), "Extracted text should be a string")
 }

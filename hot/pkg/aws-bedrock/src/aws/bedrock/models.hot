@@ -38,7 +38,23 @@ GetFoundationModelResponse type {
 // List all available foundation models
 list-foundation-models
 meta {
-    doc: "List all available foundation models in Bedrock."
+    doc: """
+    List all available foundation models in Bedrock.
+
+    Optionally filter by provider, customization type, output modality, or inference type.
+
+    **Example**
+
+    ```hot
+    // List all models
+    result ::aws::bedrock::models/list-foundation-models()
+    models result.models
+    // => [{model_id: "amazon.nova-micro-v1:0", provider_name: "Amazon", ...}, ...]
+
+    // List models by provider
+    result ::aws::bedrock::models/list-foundation-models("Anthropic")
+    ```
+    """
 }
 fn
 (by_provider: Str, by_customization_type: Str, by_output_modality: Str, by_inference_type: Str): ListFoundationModelsResponse | AwsError {
@@ -108,7 +124,17 @@ fn
 // Get details about a specific foundation model
 get-foundation-model
 meta {
-    doc: "Get details about a specific foundation model."
+    doc: """
+    Get details about a specific foundation model.
+
+    **Example**
+
+    ```hot
+    result ::aws::bedrock::models/get-foundation-model("amazon.nova-micro-v1:0")
+    model result.model
+    // => {model_id: "amazon.nova-micro-v1:0", model_name: "Nova Micro", ...}
+    ```
+    """
 }
 fn (model_identifier: Str): GetFoundationModelResponse | AwsError {
     region get-region()

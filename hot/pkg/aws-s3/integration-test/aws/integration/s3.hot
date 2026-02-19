@@ -54,11 +54,11 @@ fn () {
     // List objects using package function (now with proper XML parsing)
     list-result ::aws::s3::objects/list-objects(test-bucket, prefix, 10)
     assert(not(is-err(list-result)), `List should succeed: ${list-result}`)
-    
+
     // Verify we got our objects
     assert-eq(test-bucket, list-result.name, "Bucket name should match")
     assert(gte(length(list-result.contents), 2), "Should have at least 2 objects")
-    
+
     // Clean up using package functions
     ::aws::s3::objects/delete-object(test-bucket, key1)
     ::aws::s3::objects/delete-object(test-bucket, key2)
@@ -147,7 +147,7 @@ fn () {
 
     // Generate a presigned GET URL
     presigned-url ::aws::s3::presigned/generate-presigned-url(test-bucket, key, 3600)
-    
+
     // Verify URL structure
     assert(contains(presigned-url, "X-Amz-Algorithm=AWS4-HMAC-SHA256"), "URL should contain algorithm")
     assert(contains(presigned-url, "X-Amz-Credential="), "URL should contain credential")

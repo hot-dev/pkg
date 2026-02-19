@@ -1,29 +1,31 @@
 ::ai::media ns
 meta {
-    doc: "Types for AI-generated media files (images, audio, video).
+    doc: """
+    Types for AI-generated media files (images, audio, video).
 
-These types wrap pure media types from `::hot::media` with AI generation metadata
-like prompts, models, and provider information.
+    These types wrap pure media types from `::hot::media` with AI generation metadata
+    like prompts, models, and provider information.
 
-**Usage**
-```hot
-import ::hot::media
-import ::ai::media
+    **Usage**
+    ```hot
+    import ::hot::media
+    import ::ai::media
 
-// Create AI-generated image
-ai-image AIImage({
-    media: Image({file: file-meta, width: 1024, height: 1024, format: \"png\"}),
-    provider: \"openai\",
-    model: \"dall-e-3\",
-    prompt: \"A sunset over mountains\",
-    style: \"vivid\",
-    quality: \"hd\"
-})
+    // Create AI-generated image
+    ai-image AIImage({
+        media: Image({file: file-meta, width: 1024, height: 1024, format: "png"}),
+        provider: "openai",
+        model: "dall-e-3",
+        prompt: "A sunset over mountains",
+        style: "vivid",
+        quality: "hd"
+    })
 
-// Access the underlying media
-pure-image ai-image.media
-file-path ai-image.media.file.path
-```"
+    // Access the underlying media
+    pure-image ai-image.media
+    file-path ai-image.media.file.path
+    ```
+    """
 }
 
 // ============================================================================
@@ -40,16 +42,18 @@ Video ::hot::media/Video
 
 AIImage
 meta {
-    doc: "AI-generated image with generation metadata.
+    doc: """
+    AI-generated image with generation metadata.
 
-**Fields**
-- `media` - Pure image data from ::hot::media
-- `provider` - AI provider (e.g., \"openai\", \"xai\", \"stability\")
-- `model` - Model identifier (e.g., \"dall-e-3\", \"aurora\")
-- `prompt` - Original prompt used to generate
-- `revised_prompt` - AI-revised prompt (if applicable)
-- `style` - Style parameter (e.g., \"vivid\", \"natural\")
-- `quality` - Quality parameter (e.g., \"standard\", \"hd\")"
+    **Fields**
+    - `media` - Pure image data from ::hot::media
+    - `provider` - AI provider (e.g., "openai", "xai", "stability")
+    - `model` - Model identifier (e.g., "dall-e-3", "aurora")
+    - `prompt` - Original prompt used to generate
+    - `revised_prompt` - AI-revised prompt (if applicable)
+    - `style` - Style parameter (e.g., "vivid", "natural")
+    - `quality` - Quality parameter (e.g., "standard", "hd")
+    """
 }
 type {
     media: Image,
@@ -63,15 +67,17 @@ type {
 
 AIAudio
 meta {
-    doc: "AI-generated audio with generation metadata.
+    doc: """
+    AI-generated audio with generation metadata.
 
-**Fields**
-- `media` - Pure audio data from ::hot::media
-- `provider` - AI provider (e.g., \"openai\", \"elevenlabs\")
-- `model` - Model identifier (e.g., \"tts-1\", \"tts-1-hd\")
-- `prompt` - Text prompt for speech synthesis
-- `voice` - Voice identifier used (e.g., \"alloy\", \"shimmer\")
-- `language` - Language code (e.g., \"en\", \"es\")"
+    **Fields**
+    - `media` - Pure audio data from ::hot::media
+    - `provider` - AI provider (e.g., "openai", "elevenlabs")
+    - `model` - Model identifier (e.g., "tts-1", "tts-1-hd")
+    - `prompt` - Text prompt for speech synthesis
+    - `voice` - Voice identifier used (e.g., "alloy", "shimmer")
+    - `language` - Language code (e.g., "en", "es")
+    """
 }
 type {
     media: Audio,
@@ -84,14 +90,16 @@ type {
 
 AIVideo
 meta {
-    doc: "AI-generated video with generation metadata.
+    doc: """
+    AI-generated video with generation metadata.
 
-**Fields**
-- `media` - Pure video data from ::hot::media
-- `provider` - AI provider (e.g., \"openai\", \"runway\")
-- `model` - Model identifier
-- `prompt` - Original prompt used to generate
-- `revised_prompt` - AI-revised prompt (if applicable)"
+    **Fields**
+    - `media` - Pure video data from ::hot::media
+    - `provider` - AI provider (e.g., "openai", "runway")
+    - `model` - Model identifier
+    - `prompt` - Original prompt used to generate
+    - `revised_prompt` - AI-revised prompt (if applicable)
+    """
 }
 type {
     media: Video,
@@ -107,28 +115,29 @@ type {
 
 AIMedia
 meta {
-    doc: "Unified enum for AI-generated media files.
+    doc: """
+    Unified enum for AI-generated media files.
 
-Wraps pure media types with AI generation metadata.
+    Wraps pure media types with AI generation metadata.
 
-**Usage**
-```hot
-import ::ai::media
+    **Usage**
+    ```hot
+    import ::ai::media
 
-// Pattern match on AI media type
-describe-ai-media fn (ai: AIMedia): Str {
-    match ai {
-        AIMedia.Image => { `AI Image: ${ai.prompt} via ${ai.provider}` }
-        AIMedia.Audio => { `AI Audio: ${ai.voice} voice via ${ai.provider}` }
-        AIMedia.Video => { `AI Video: ${ai.prompt} via ${ai.provider}` }
+    // Pattern match on AI media type
+    describe-ai-media fn (ai: AIMedia): Str {
+        match ai {
+            AIMedia.Image => { `AI Image: ${ai.prompt} via ${ai.provider}` }
+            AIMedia.Audio => { `AI Audio: ${ai.voice} voice via ${ai.provider}` }
+            AIMedia.Video => { `AI Video: ${ai.prompt} via ${ai.provider}` }
+        }
     }
-}
 
-// Access underlying pure media
-pure-media ai.media
-```"
+    // Access underlying pure media
+    pure-media ai.media
+    ```
+    """
 }
-
 enum {
     Image(AIImage),
     Audio(AIAudio),
@@ -140,7 +149,7 @@ enum {
 // ============================================================================
 
 AIMediaError
-meta {doc: "Error that occurred during batch AI media generation."}
+meta {doc: """Error that occurred during batch AI media generation."""}
 type {
     index: Int,
     message: Str
@@ -148,13 +157,15 @@ type {
 
 AIMediaBatch
 meta {
-    doc: "Result of batch AI media generation.
+    doc: """
+    Result of batch AI media generation.
 
-**Fields**
-- `items` - Successfully generated AI media files
-- `succeeded` - Count of successful generations
-- `failed` - Count of failed generations
-- `errors` - List of errors (if any)"
+    **Fields**
+    - `items` - Successfully generated AI media files
+    - `succeeded` - Count of successful generations
+    - `failed` - Count of failed generations
+    - `errors` - List of errors (if any)
+    """
 }
 type {
     items: Vec<AIMedia>,
@@ -168,38 +179,40 @@ type {
 // ============================================================================
 
 is-image
-meta {doc: "Check if AI media is an Image variant."}
+meta {doc: """Check if AI media is an Image variant."""}
 fn (ai: AIMedia): Bool {
     match ai { AIMedia.Image => true, => false }
 }
 
 is-audio
-meta {doc: "Check if AI media is an Audio variant."}
+meta {doc: """Check if AI media is an Audio variant."""}
 fn (ai: AIMedia): Bool {
     match ai { AIMedia.Audio => true, => false }
 }
 
 is-video
-meta {doc: "Check if AI media is a Video variant."}
+meta {doc: """Check if AI media is a Video variant."""}
 fn (ai: AIMedia): Bool {
     match ai { AIMedia.Video => true, => false }
 }
 
 has-duration
-meta {doc: "Check if AI media has a duration (audio or video)."}
+meta {doc: """Check if AI media has a duration (audio or video)."""}
 fn (ai: AIMedia): Bool {
     match ai { AIMedia.Audio => true, AIMedia.Video => true, => false }
 }
 
 duration
 meta {
-    doc: "Get duration in seconds for AI audio/video. Returns null for images.
+    doc: """
+    Get duration in seconds for AI audio/video. Returns null for images.
 
-**Example**
-```hot
-seconds duration(ai-audio)  // 3.5
-seconds duration(ai-image)  // null
-```"
+    **Example**
+    ```hot
+    seconds duration(ai-audio)  // 3.5
+    seconds duration(ai-image)  // null
+    ```
+    """
 }
 fn (ai: AIMedia): Dec? {
     ai.media.duration_seconds
@@ -211,12 +224,14 @@ fn (ai: AIMedia): Dec? {
 
 image
 meta {
-    doc: "Create an AIMedia.Image from AIImage data.
+    doc: """
+    Create an AIMedia.Image from AIImage data.
 
-**Example**
-```hot
-ai image(AIImage({media: img, prompt: \"A sunset\", provider: \"xai\"}))
-```"
+    **Example**
+    ```hot
+    ai image(AIImage({media: img, prompt: "A sunset", provider: "xai"}))
+    ```
+    """
 }
 fn (data: AIImage): AIMedia {
     AIMedia.Image(data)
@@ -224,12 +239,14 @@ fn (data: AIImage): AIMedia {
 
 audio
 meta {
-    doc: "Create an AIMedia.Audio from AIAudio data.
+    doc: """
+    Create an AIMedia.Audio from AIAudio data.
 
-**Example**
-```hot
-ai audio(AIAudio({media: aud, voice: \"alloy\", provider: \"openai\"}))
-```"
+    **Example**
+    ```hot
+    ai audio(AIAudio({media: aud, voice: "alloy", provider: "openai"}))
+    ```
+    """
 }
 fn (data: AIAudio): AIMedia {
     AIMedia.Audio(data)
@@ -237,12 +254,14 @@ fn (data: AIAudio): AIMedia {
 
 video
 meta {
-    doc: "Create an AIMedia.Video from AIVideo data.
+    doc: """
+    Create an AIMedia.Video from AIVideo data.
 
-**Example**
-```hot
-ai video(AIVideo({media: vid, prompt: \"A timelapse\", provider: \"openai\"}))
-```"
+    **Example**
+    ```hot
+    ai video(AIVideo({media: vid, prompt: "A timelapse", provider: "openai"}))
+    ```
+    """
 }
 fn (data: AIVideo): AIMedia {
     AIMedia.Video(data)

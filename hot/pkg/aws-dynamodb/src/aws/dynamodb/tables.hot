@@ -42,7 +42,20 @@ DescribeTableResponse type {
 // List all DynamoDB tables
 list-tables
 meta {
-    doc: "List all DynamoDB tables in the account/region."
+    doc: """
+    List all DynamoDB tables in the account/region.
+
+    **Example**
+
+    ```hot
+    result ::aws::dynamodb::tables/list-tables()
+    result.table_names
+    // => ["users", "orders", "products"]
+
+    // With limit
+    result ::aws::dynamodb::tables/list-tables(10)
+    ```
+    """
 }
 fn
 (limit: Int, exclusive_start_table_name: Str): ListTablesResponse | AwsError {
@@ -87,7 +100,18 @@ fn
 // Describe a DynamoDB table
 describe-table
 meta {
-    doc: "Get detailed information about a DynamoDB table."
+    doc: """
+    Get detailed information about a DynamoDB table.
+
+    **Example**
+
+    ```hot
+    result ::aws::dynamodb::tables/describe-table("my-table")
+    result.table.table_name    // => "my-table"
+    result.table.table_status  // => "ACTIVE"
+    result.table.item_count    // => 1500
+    ```
+    """
 }
 fn (table_name: Str): DescribeTableResponse | AwsError {
     region get-region()

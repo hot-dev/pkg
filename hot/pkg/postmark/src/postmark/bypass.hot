@@ -21,7 +21,7 @@ BypassRulesForInboundMessageResponse type {
 
 bypass-rules-blocked-inbound-message
 meta {
-    doc: "PUT /messages/inbound/{messageid}/bypass - Bypass rules for a blocked inbound message"
+    doc: """Bypass inbound rules for a blocked message, allowing it to be processed by the inbound webhook."""
 }
 fn (request: BypassRulesForInboundMessageRequest): BypassRulesForInboundMessageResponse {
   response api-request("PUT", `${::postmark/BASE_URL}/messages/inbound/${request.messageid}/bypass`)

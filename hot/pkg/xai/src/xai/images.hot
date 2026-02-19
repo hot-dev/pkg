@@ -64,30 +64,34 @@ CreateImageResponse type {
 
 generate
 meta {
-    doc: "Generate images from a text prompt.
+    doc: """
+    Generate images from a text prompt.
 
-Returns the raw API response with either URLs or base64 data.
+    Returns the raw API response with either URLs or base64 data.
 
-**Example - URL response (default)**
-```hot
-response generate({
-    prompt: \"A futuristic city at sunset\",
-    model: \"grok-imagine-image\"
-})
+    **Example - URL response (default)**
 
-image-url response.data[0].url
-```
+    ```hot
+    response generate(CreateImageRequest({
+        prompt: "A futuristic city at sunset",
+        model: "grok-imagine-image"
+    }))
 
-**Example - Base64 response**
-```hot
-response generate({
-    prompt: \"A cat wearing a spacesuit\",
-    model: \"grok-imagine-image\",
-    response_format: \"b64_json\"
-})
+    image-url response.data[0].url
+    ```
 
-base64-data response.data[0].b64_json
-```"
+    **Example - Base64 response**
+
+    ```hot
+    response generate(CreateImageRequest({
+        prompt: "A cat wearing a spacesuit",
+        model: "grok-imagine-image",
+        response_format: "b64_json"
+    }))
+
+    base64-data response.data[0].b64_json
+    ```
+    """
 }
 fn (request: CreateImageRequest): CreateImageResponse | HttpError {
     // Default to grok-imagine-image model if not specified
@@ -106,34 +110,39 @@ fn (request: CreateImageRequest): CreateImageResponse | HttpError {
 
 generate-to-file
 meta {
-    doc: "Generate an image and save it to a file.
+    doc: """
+    Generate an image and save it to a file.
 
-Returns an AIMedia.Image with file metadata and AI generation details.
+    Returns an AIMedia.Image with file metadata and AI generation details.
+    The image is requested in base64 format and decoded to bytes for file writing.
 
-**Example**
-```hot
-result generate-to-file(\"uploads/city.png\", \"A futuristic city at sunset\")
+    **Example**
 
-match result {
-    AIMedia.Image => {
-        println(result.media.file.path)  // \"uploads/city.png\"
-        println(result.media.file.size)  // 123456
-        println(result.prompt)           // \"A futuristic city at sunset\"
-        println(result.revised_prompt)   // \"A detailed futuristic city...\"
+    ```hot
+    result generate-to-file("uploads/city.png", "A futuristic city at sunset")
+
+    match result {
+        AIMedia.Image => {
+            result.media.file.path // => "uploads/city.png"
+            result.media.file.size // => 123456
+            result.prompt // => "A futuristic city at sunset"
+            result.revised_prompt // => "A detailed futuristic city..."
+        }
+
+        HttpError => { fail("Image generation failed") }
     }
+    ```
 
-    HttpError => { println(\"Error!\") }
-}
-```
+    **With options**
 
-**With options**
-```hot
-result generate-to-file(\"output/cat.png\", {
-    prompt: \"A cat wearing a spacesuit\",
-    quality: \"hd\",
-    style: \"vivid\"
-})
-```"
+    ```hot
+    result generate-to-file("output/cat.png", CreateImageRequest({
+        prompt: "A cat wearing a spacesuit",
+        quality: "hd",
+        style: "vivid"
+    }))
+    ```
+    """
 }
 fn
 (path: Str, prompt: Str): AIMedia | HttpError {
@@ -194,22 +203,25 @@ fn
 
 generate-batch-to-files
 meta {
-    doc: "Generate multiple images and save them to files.
+    doc: """
+    Generate multiple images and save them to files.
 
-Returns an AIMediaBatch with all generated AIMedia.Image items.
+    Returns an AIMediaBatch with all generated AIMedia.Image items.
+    The path should include a `{n}` placeholder that will be replaced with the image index (0-based).
 
-The path should include a `{n}` placeholder that will be replaced with the image index.
+    **Example**
 
-**Example**
-```hot
-batch generate-batch-to-files(\"uploads/image-{n}.png\", \"A beautiful landscape\", 3)
-// Generates: uploads/image-0.png, uploads/image-1.png, uploads/image-2.png
+    ```hot
+    batch generate-batch-to-files("uploads/image-{n}.png", "A beautiful landscape", 3)
+    // Generates: uploads/image-0.png, uploads/image-1.png, uploads/image-2.png
 
-println(batch.succeeded)  // 3
-for-each(batch.items, (ai-media) {
-    println(ai-media.media.file.path)
-})
-```"
+    batch.succeeded // => 3
+    batch.failed // => 0
+
+    paths map(batch.items, (item) { item.media.file.path })
+    // => ["uploads/image-0.png", "uploads/image-1.png", "uploads/image-2.png"]
+    ```
+    """
 }
 fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
     // Generate all images in one request
@@ -286,13 +298,21 @@ fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
 
 create-image
 meta {
-    doc: "Simple image generation - returns the URL of the generated image.
+    doc: """
+    Simple image generation - returns the URL of the generated image.
 
-**Example**
-```hot
-url create-image(\"A sunset over mountains\")
-// \"https://...\"
-```"
+    Optionally pass a size string (e.g. "1024x1024") as a second argument.
+
+    **Example**
+
+    ```hot
+    url create-image("A sunset over mountains")
+    // => "https://..."
+
+    // With custom size
+    url create-image("A sunset over mountains", "512x512")
+    ```
+    """
 }
 fn (prompt: Str): Str | HttpError {
     create-image(prompt, null)
@@ -327,7 +347,9 @@ fn (prompt: Str): Str | HttpError {
 // ============================================================================
 
 parse-size
-meta {doc: "Parse size string like '1024x1024' into width/height."}
+meta {
+    doc: """Parse size string like "1024x1024" into a Map with width and height keys."""
+}
 fn (size: Str?): Map {
     cond {
         is-null(size) => { {width: null, height: null} }
@@ -347,7 +369,9 @@ fn (size: Str?): Map {
 }
 
 detect-format
-meta {doc: "Detect image format from file path extension."}
+meta {
+    doc: """Detect image format from file path extension. Returns the MIME minor type (e.g. "png") or null."""
+}
 fn (path: Str): Str? {
     // Use ::hot::mime to get the minor type (e.g., "png" from "image/png")
     mime ::hot::mime/from-path(path)

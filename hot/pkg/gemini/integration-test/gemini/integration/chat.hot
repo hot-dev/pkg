@@ -23,7 +23,7 @@ fn () {
 
     assert(response.candidates, "Response should have candidates")
     assert(gt(length(response.candidates), 0), "Should have at least one candidate")
-    
+
     first-candidate first(response.candidates)
     assert(first-candidate.content, "Candidate should have content")
     assert(first-candidate.content.parts, "Content should have parts")
@@ -127,7 +127,7 @@ test-user-content-helper
 meta ["test"]
 fn () {
     content ::gemini::chat/user-content("Hello world")
-    
+
     // Role is a literal union type, check the content structure
     assert(content.role, "Should have role")
     assert(content.parts, "Should have parts")
@@ -139,7 +139,7 @@ test-model-content-helper
 meta ["test"]
 fn () {
     content ::gemini::chat/model-content("Hello back")
-    
+
     assert(content.role, "Should have role")
     assert(content.parts, "Should have parts")
 }

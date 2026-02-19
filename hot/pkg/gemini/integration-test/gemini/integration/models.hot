@@ -16,7 +16,7 @@ fn () {
 
     assert(is-vec(models.models), "Response should have models array")
     assert(gt(length(models.models), 0), "Should have at least one model")
-    
+
     // Check first model has expected fields
     first-model first(models.models)
     assert(first-model.name, "Model should have name")

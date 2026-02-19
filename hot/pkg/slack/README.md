@@ -7,7 +7,7 @@ Slack API bindings for Hot.
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/slack": "1.0.4"
+"hot.dev/slack": "1.0.5"
 ```
 
 ## Configuration

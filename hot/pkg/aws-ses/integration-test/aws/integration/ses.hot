@@ -27,7 +27,7 @@ fn () {
     subject `Hot Integration Test ${timestamp}`
     body-text `This is a test email sent from Hot integration tests at ${timestamp}.`
     body-html `<h1>Hot Integration Test</h1><p>Sent at ${timestamp}.</p>`
-    
+
     result ::aws::ses::email/send-simple-email(
         test-from-email,
         [test-to-email],
@@ -35,7 +35,7 @@ fn () {
         body-text,
         body-html
     )
-    
+
     // Success (200) or email not verified (400) are both acceptable
     // A signature error would be 403 SignatureDoesNotMatch
     if(is-err(result), {
@@ -53,30 +53,30 @@ test-send-email-full-request
 meta ["test"]
 fn () {
     timestamp ::hot::time/epoch-millis(::hot::time/now())
-    
+
     // Build request using types
     destination ::aws::ses::email/Destination({
         to_addresses: [test-to-email],
         cc_addresses: null,
         bcc_addresses: null
     })
-    
+
     body ::aws::ses::email/Body({
         text: `Full request test at ${timestamp}`,
         html: `<p>Full request test at ${timestamp}</p>`
     })
-    
+
     message ::aws::ses::email/Message({
         subject: `Hot Full Request Test ${timestamp}`,
         body: body
     })
-    
+
     content ::aws::ses::email/EmailContent({
         simple: message,
         raw: null,
         template: null
     })
-    
+
     request ::aws::ses::email/SendEmailRequest({
         from_email_address: test-from-email,
         destination: destination,
@@ -84,9 +84,9 @@ fn () {
         reply_to_addresses: null,
         configuration_set_name: null
     })
-    
+
     result ::aws::ses::email/send-email(request)
-    
+
     // Success or validation error (email not verified) are acceptable
     if(is-err(result), {
         assert(true, "Expected error due to email verification")

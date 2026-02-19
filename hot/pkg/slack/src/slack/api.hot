@@ -24,7 +24,9 @@ HttpResponse -> HttpError fn (response: HttpResponse): HttpError {
 }
 
 sanitize-url
-meta {doc: "Remove legacy token query params and normalize separators."}
+meta {
+    doc: """Remove legacy token query params and normalize URL separators. Strips any `token=` query parameters to ensure authentication is only sent via the Authorization header."""
+}
 fn (url: Str): Str {
   // Slack bearer auth is sent in Authorization header. Some endpoints still
   // include token= in query builders; strip it to avoid invalid_auth responses.
@@ -37,7 +39,24 @@ fn (url: Str): Str {
 request
 meta {
     ctx: {"slack.api.key": {required: true}},
-    doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."
+    doc: """
+    Make an authenticated HTTP request to the Slack API. Automatically adds the Bearer token from the `slack.api.key` context variable and sets Content-Type for JSON bodies. Additional headers can be provided to merge/override defaults.
+
+    **Example**
+
+    ```hot
+    ::api ::slack::api
+
+    // Simple GET request
+    response ::api/request("GET", "https://slack.com/api/auth.test")
+
+    // POST with JSON body
+    response ::api/request("POST", "https://slack.com/api/chat.postMessage", {}, {channel: "C1234", text: "Hello"})
+
+    // With explicit API key override
+    response ::api/request("POST", url, {}, body, "xoxb-custom-token")
+    ```
+    """
 }
 fn
 (method: Str, url: Str): HttpResponse {

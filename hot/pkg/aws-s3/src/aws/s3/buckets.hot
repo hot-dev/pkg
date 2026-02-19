@@ -40,7 +40,17 @@ HeadBucketResponse type {
 // List all buckets
 list-buckets
 meta {
-    doc: "LIST all S3 buckets in the account."
+    doc: """
+    List all S3 buckets in the account.
+
+    **Example**
+
+    ```hot
+    result ::aws::s3::buckets/list-buckets()
+    result.buckets
+    // => [{name: "my-bucket", creation_date: "2024-01-01T00:00:00Z"}, ...]
+    ```
+    """
 }
 fn (): ListBucketsResponse | AwsError {
     region get-region()
@@ -64,7 +74,19 @@ fn (): ListBucketsResponse | AwsError {
 // Create a bucket
 create-bucket
 meta {
-    doc: "CREATE a new S3 bucket."
+    doc: """
+    Create a new S3 bucket.
+
+    **Example**
+
+    ```hot
+    result ::aws::s3::buckets/create-bucket("my-new-bucket", "us-east-1")
+    result.location  // => "http://my-new-bucket.s3.amazonaws.com/"
+
+    // Use default region from context
+    result ::aws::s3::buckets/create-bucket("my-new-bucket")
+    ```
+    """
 }
 fn
 (bucket: Str, region: Str): CreateBucketResponse | AwsError {
@@ -101,7 +123,16 @@ fn
 // Delete a bucket
 delete-bucket
 meta {
-    doc: "DELETE an S3 bucket. Bucket must be empty."
+    doc: """
+    Delete an S3 bucket. The bucket must be empty before it can be deleted.
+
+    **Example**
+
+    ```hot
+    ::aws::s3::buckets/delete-bucket("my-bucket")
+    // => true
+    ```
+    """
 }
 fn (bucket: Str): Bool | AwsError {
     region get-region()
@@ -125,7 +156,16 @@ fn (bucket: Str): Bool | AwsError {
 // Head a bucket (check if exists)
 head-bucket
 meta {
-    doc: "HEAD a bucket to check if it exists and get its region."
+    doc: """
+    HEAD a bucket to check if it exists and get its region.
+
+    **Example**
+
+    ```hot
+    result ::aws::s3::buckets/head-bucket("my-bucket")
+    result.exists  // => true
+    ```
+    """
 }
 fn (bucket: Str): HeadBucketResponse | AwsError {
     region get-region()

@@ -2,7 +2,8 @@
 
 hot.pkg.hot-ai {
   name: "hot.dev/hot-ai",
-  version: "1.0.0",
+  version: "1.0.1",
+  hot-min-version: "1.1.0",
   description: "AI types and utilities for Hot. Provides unified types for AI-generated content, chat, embeddings, and more.",
   author: "Hot Dev",
   email: "hi@hot.dev",

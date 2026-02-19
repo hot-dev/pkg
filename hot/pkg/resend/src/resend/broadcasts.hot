@@ -53,9 +53,8 @@ CreateBroadcastOptions type {
     text: Str?
 }
 
-GETBroadcastsRequest type {
-
-}
+// No parameters required for this GET request
+GETBroadcastsRequest type Map
 
 GETBroadcastsResponse type {
     object: Str?,
@@ -64,7 +63,9 @@ GETBroadcastsResponse type {
 
 
 retrieve-list-broadcasts
-meta {doc: "GET /broadcasts - Retrieve a list of broadcasts"}
+meta {
+    doc: """Retrieve all broadcasts in your Resend account, including draft, scheduled, and sent."""
+}
 fn (request: GETBroadcastsRequest): GETBroadcastsResponse {
   response api-request("GET", `${::resend/BASE_URL}/broadcasts`)
   if(is-ok-response(response), GETBroadcastsResponse(response.body), err(HttpError(response)))
@@ -88,7 +89,9 @@ POSTBroadcastsResponse type {
 
 
 create-broadcast
-meta {doc: "POST /broadcasts - Create a broadcast"}
+meta {
+    doc: """Create a new broadcast draft targeting a specific audience. Must be sent separately via send-or-schedule-broadcast."""
+}
 fn (request: POSTBroadcastsRequest): POSTBroadcastsResponse {
   response api-request("POST", `${::resend/BASE_URL}/broadcasts`, {}, request)
   if(is-ok-response(response), POSTBroadcastsResponse(response.body), err(HttpError(response)))
@@ -114,7 +117,9 @@ GETBroadcastsIdResponse type {
 
 
 retrieve-single-broadcast
-meta {doc: "GET /broadcasts/{id} - Retrieve a single broadcast"}
+meta {
+    doc: """Retrieve a single broadcast by its ID, including status, schedule, and content details."""
+}
 fn (request: GETBroadcastsIdRequest): GETBroadcastsIdResponse {
   response api-request("GET", `${::resend/BASE_URL}/broadcasts/${request.id}`)
   if(is-ok-response(response), GETBroadcastsIdResponse(response.body), err(HttpError(response)))
@@ -133,7 +138,7 @@ DELETEBroadcastsIdResponse type {
 
 remove-existing-broadcast-that-is-draft-status
 meta {
-    doc: "DELETE /broadcasts/{id} - Remove an existing broadcast that is in the draft status"
+    doc: """Remove an existing broadcast. Only broadcasts in draft status can be deleted."""
 }
 fn (request: DELETEBroadcastsIdRequest): DELETEBroadcastsIdResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/broadcasts/${request.id}`)
@@ -150,7 +155,9 @@ POSTBroadcastsIdSendResponse type {
 
 
 send-or-schedule-broadcast
-meta {doc: "POST /broadcasts/{id}/send - Send or schedule a broadcast"}
+meta {
+    doc: """Send a broadcast immediately or schedule it for later delivery via scheduled_at."""
+}
 fn (id: Str, request: POSTBroadcastsIdSendRequest): POSTBroadcastsIdSendResponse {
   response api-request("POST", `${::resend/BASE_URL}/broadcasts/${id}/send`, {}, request)
   if(is-ok-response(response), POSTBroadcastsIdSendResponse(response.body), err(HttpError(response)))

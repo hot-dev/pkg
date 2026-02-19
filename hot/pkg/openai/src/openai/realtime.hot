@@ -14,11 +14,11 @@ RealtimeSessionCreateRequest type {
     input_audio_transcription: Map?,
     turn_detection: Map?,
     input_audio_noise_reduction: Map?,
-    speed: Float?,
+    speed: Dec?,
     tracing: Any?,
     tools: Vec<Map>?,
     tool_choice: Str?,
-    temperature: Float?,
+    temperature: Dec?,
     max_response_output_tokens: Any?,
     client_secret: Map?
 }
@@ -31,12 +31,12 @@ RealtimeSessionCreateResponse type {
     input_audio_format: Str?,
     output_audio_format: Str?,
     input_audio_transcription: Map?,
-    speed: Float?,
+    speed: Dec?,
     tracing: Any?,
     turn_detection: Map?,
     tools: Vec<Map>?,
     tool_choice: Str?,
-    temperature: Float?,
+    temperature: Dec?,
     max_response_output_tokens: Any?
 }
 
@@ -50,9 +50,8 @@ RealtimeTranscriptionSessionCreateRequest type {
     client_secret: Map?
 }
 
-VoiceIdsShared type {
-
-}
+// Voice ID for realtime audio (e.g. "alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse")
+VoiceIdsShared type Str
 
 RealtimeTranscriptionSessionCreateResponse type {
     client_secret: Map,
@@ -72,11 +71,11 @@ CreateRealtimeSessionRequest type {
     input_audio_transcription: Map?,
     turn_detection: Map?,
     input_audio_noise_reduction: Map?,
-    speed: Float?,
+    speed: Dec?,
     tracing: Any?,
     tools: Vec<Map>?,
     tool_choice: Str?,
-    temperature: Float?,
+    temperature: Dec?,
     max_response_output_tokens: Any?,
     client_secret: Map?
 }
@@ -89,18 +88,20 @@ CreateRealtimeSessionResponse type {
     input_audio_format: Str?,
     output_audio_format: Str?,
     input_audio_transcription: Map?,
-    speed: Float?,
+    speed: Dec?,
     tracing: Any?,
     turn_detection: Map?,
     tools: Vec<Map>?,
     tool_choice: Str?,
-    temperature: Float?,
+    temperature: Dec?,
     max_response_output_tokens: Any?
 }
 
 
 create-session
-meta {doc: "POST /realtime/sessions - Create session"}
+meta {
+    doc: """POST /realtime/sessions - Create a realtime session for audio/text conversations with GPT-4o models."""
+}
 fn (request: CreateRealtimeSessionRequest): CreateRealtimeSessionResponse {
   response api-request("POST", `${::openai/BASE_URL}/realtime/sessions`, {}, request)
   if(is-ok-response(response), CreateRealtimeSessionResponse(response.body), err(HttpError(response)))
@@ -126,7 +127,9 @@ CreateRealtimeTranscriptionSessionResponse type {
 
 
 create-transcription-session
-meta {doc: "POST /realtime/transcription_sessions - Create transcription session"}
+meta {
+    doc: """POST /realtime/transcription_sessions - Create a realtime transcription session for live audio-to-text."""
+}
 fn (request: CreateRealtimeTranscriptionSessionRequest): CreateRealtimeTranscriptionSessionResponse {
   response api-request("POST", `${::openai/BASE_URL}/realtime/transcription_sessions`, {}, request)
   if(is-ok-response(response), CreateRealtimeTranscriptionSessionResponse(response.body), err(HttpError(response)))

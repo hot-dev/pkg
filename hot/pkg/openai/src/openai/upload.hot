@@ -34,7 +34,9 @@ UploadCertificateResponse type {
 
 
 upload-certificate
-meta {doc: "POST /organization/certificates - Upload certificate"}
+meta {
+    doc: """POST /organization/certificates - Upload a TLS certificate for the organization."""
+}
 fn (request: UploadCertificateRequest): UploadCertificateResponse {
   response api-request("POST", `${::openai/BASE_URL}/organization/certificates`, {}, request)
   if(is-ok-response(response), UploadCertificateResponse(response.body), err(HttpError(response)))

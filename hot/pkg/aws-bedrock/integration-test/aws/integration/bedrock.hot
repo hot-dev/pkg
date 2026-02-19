@@ -48,10 +48,10 @@ test-converse
 meta ["test"]
 fn () {
     result ::aws::bedrock::converse/converse(test-model, "What is 2+2? Reply with just the number.")
-    
+
     assert(not(is-err(result)), `converse failed: ${result}`)
     assert(not(is-null(result.output)), "Response should have output")
-    
+
     // Verify we got a response with text
     message-content result.output.message.content
     first-content if(is-vec(message-content), first(message-content), message-content)
@@ -64,7 +64,7 @@ test-usage-metrics
 meta ["test"]
 fn () {
     result ::aws::bedrock::converse/converse(test-model, "Say hello.")
-    
+
     assert(not(is-err(result)), `converse failed: ${result}`)
     assert(not(is-null(result.usage)), "Response should have usage")
     assert(gt(result.usage.inputTokens, 0), "Should have input tokens")
@@ -78,11 +78,11 @@ fn () {
     // Test text-content helper
     text-block ::aws::bedrock::converse/text-content("Hello")
     assert-eq("Hello", text-block.text, "text-content should create text block")
-    
+
     // Test inference-config helper
     config ::aws::bedrock::converse/inference-config(100)
     assert-eq(100, config.maxTokens, "inference-config should set maxTokens")
-    
+
     // Test inference-config with temperature
     config2 ::aws::bedrock::converse/inference-config(200, 0.5)
     assert-eq(200, config2.maxTokens, "maxTokens should be 200")
@@ -94,20 +94,20 @@ fn () {
 // =============================================================================
 // Uncomment these tests after requesting Anthropic model access in the Bedrock console:
 // 1. Go to Amazon Bedrock Console → Model access
-// 2. Click "Manage model access" 
+// 2. Click "Manage model access"
 // 3. Check Anthropic models and submit
 // 4. Wait for "Access granted" status
 
 // anthropic-model "us.anthropic.claude-3-haiku-20240307-v1:0"
-// 
+//
 // test-anthropic-converse
 // meta ["test"]
 // fn () {
 //     result ::aws::bedrock::converse/converse(anthropic-model, "What is 2+2? Reply with just the number.")
-//     
+//
 //     assert(not(is-err(result)), `Anthropic converse failed: ${result}`)
 //     assert(not(is-null(result.output)), "Response should have output")
-//     
+//
 //     message-content result.output.message.content
 //     first-content if(is-vec(message-content), first(message-content), message-content)
 //     response-text if(is-null(first-content), "", if(is-null(first-content.text), "", first-content.text))

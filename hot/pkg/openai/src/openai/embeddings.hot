@@ -1,5 +1,5 @@
 ::openai::embeddings ns
-meta {doc: "OpenAI Embeddings API - Generate vector embeddings from text."}
+meta {doc: """OpenAI Embeddings API - Generate vector embeddings from text."""}
 
 api-request ::openai::api/request
 HttpError ::openai::api/HttpError
@@ -41,37 +41,46 @@ EmbeddingResponse type {
 
 create
 meta {
-    doc: "POST /embeddings - Create embeddings for text.
+    doc: """
+    POST /embeddings - Create embeddings for text.
 
-**Example - Single text**
+    Returns an EmbeddingResponse with `data` containing embedding vectors and `usage` with token counts.
 
-```hot
-response ::openai::embeddings/create({
-    input: \"The quick brown fox jumps over the lazy dog\",
-    model: \"text-embedding-3-small\"
-})
+    **Example - Single text**
 
-embedding response.data[0].embedding  // Vec<Dec> of 1536 dimensions
-```
+    ```hot
+    response ::openai::embeddings/create(EmbeddingRequest({
+        input: "The quick brown fox jumps over the lazy dog",
+        model: "text-embedding-3-small"
+    }))
 
-**Example - Multiple texts**
+    embedding response.data[0].embedding  // Vec<Dec> of 1536 dimensions
+    response.usage                        // => {prompt_tokens: 10, total_tokens: 10}
+    ```
 
-```hot
-response ::openai::embeddings/create({
-    input: [\"Hello world\", \"Goodbye world\"],
-    model: \"text-embedding-3-small\"
-})
-```
+    **Example - Multiple texts**
 
-**Example - With dimensions**
+    ```hot
+    response ::openai::embeddings/create(EmbeddingRequest({
+        input: ["Hello world", "Goodbye world"],
+        model: "text-embedding-3-small"
+    }))
 
-```hot
-response ::openai::embeddings/create({
-    input: \"Hello world\",
-    model: \"text-embedding-3-small\",
-    dimensions: 256
-})
-```"
+    length(response.data) // => 2
+    ```
+
+    **Example - With custom dimensions**
+
+    ```hot
+    response ::openai::embeddings/create(EmbeddingRequest({
+        input: "Test text",
+        model: "text-embedding-3-small",
+        dimensions: 256
+    }))
+
+    length(response.data[0].embedding) // => 256
+    ```
+    """
 }
 fn (request: EmbeddingRequest): EmbeddingResponse {
     response api-request("POST", `${::openai/BASE_URL}/embeddings`, {}, request)
@@ -84,14 +93,16 @@ fn (request: EmbeddingRequest): EmbeddingResponse {
 
 embed
 meta {
-    doc: "Simple embedding - returns the embedding vector for a single text.
+    doc: """
+    Simple embedding - returns the embedding vector for a single text.
 
-**Example**
+    **Example**
 
-```hot
-vector ::openai::embeddings/embed(\"Hello world\")
-// Returns: Vec<Dec> with 1536 dimensions
-```"
+    ```hot
+    vector ::openai::embeddings/embed("Hello world")
+    // Returns: Vec<Dec> with 1536 dimensions
+    ```
+    """
 }
 fn (text: Str): Vec<Dec> {
     embed(text, "text-embedding-3-small")

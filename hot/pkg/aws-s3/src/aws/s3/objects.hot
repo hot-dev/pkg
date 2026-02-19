@@ -138,7 +138,20 @@ HeadObjectResponse type {
 // Put an object to S3
 put-object
 meta {
-    doc: "PUT an object to S3. Returns PutObjectResponse on success or AwsError on failure."
+    doc: """
+    PUT an object to S3.
+
+    **Example**
+
+    ```hot
+    // Upload text content
+    ::aws::s3::objects/put-object("my-bucket", "path/to/file.txt", "Hello!", "text/plain")
+
+    // Upload JSON
+    data to-json({name: "Alice", active: true})
+    ::aws::s3::objects/put-object("my-bucket", "data.json", data, "application/json")
+    ```
+    """
 }
 fn
 (bucket: Str, key: Str, body: Any, content_type: Str): PutObjectResponse | AwsError {
@@ -173,7 +186,16 @@ fn
 // Get an object from S3
 get-object
 meta {
-    doc: "GET an object from S3. Returns GetObjectResponse on success or AwsError on failure."
+    doc: """
+    GET an object from S3.
+
+    **Example**
+
+    ```hot
+    result ::aws::s3::objects/get-object("my-bucket", "path/to/file.txt")
+    result.body  // => "Hello!"
+    ```
+    """
 }
 fn (bucket: Str, key: Str): GetObjectResponse | AwsError {
     region get-region()
@@ -204,7 +226,15 @@ fn (bucket: Str, key: Str): GetObjectResponse | AwsError {
 // Delete an object from S3
 delete-object
 meta {
-    doc: "DELETE an object from S3. Returns DeleteObjectResponse on success or AwsError on failure."
+    doc: """
+    DELETE an object from S3.
+
+    **Example**
+
+    ```hot
+    ::aws::s3::objects/delete-object("my-bucket", "path/to/file.txt")
+    ```
+    """
 }
 fn (bucket: Str, key: Str): DeleteObjectResponse | AwsError {
     region get-region()
@@ -232,16 +262,31 @@ fn (bucket: Str, key: Str): DeleteObjectResponse | AwsError {
 // List objects in an S3 bucket (uses ListObjectsV2 API)
 list-objects
 meta {
-    doc: "LIST objects in an S3 bucket using ListObjectsV2 API. Returns ListObjectsResponse on success or AwsError on failure.
-    
-Supports pagination via continuation_token. When is_truncated is true, use next_continuation_token for the next request."
+    doc: """
+    List objects in an S3 bucket using the ListObjectsV2 API.
+
+    Supports pagination via continuation_token. When is_truncated is true,
+    use next_continuation_token for the next request.
+
+    **Example**
+
+    ```hot
+    // List objects with a prefix
+    result ::aws::s3::objects/list-objects("my-bucket", "uploads/", 10)
+    result.name      // => "my-bucket"
+    result.contents  // => [{key: "uploads/file1.txt", size: 1024, ...}, ...]
+
+    // List all objects in a bucket
+    result ::aws::s3::objects/list-objects("my-bucket")
+    ```
+    """
 }
 fn
 (bucket: Str, prefix: Str, max_keys: Int, continuation_token: Str?): ListObjectsResponse | AwsError {
     region get-region()
     credentials get-credentials()
     endpoint s3-endpoint(bucket, region)
-    
+
     // Build URL with optional continuation token
     base-url `${endpoint}?list-type=2&prefix=${prefix}&max-keys=${max_keys}`
     url if(ne(continuation_token, null),
@@ -281,10 +326,19 @@ CopyObjectResponse type {
 // Copy an object within S3
 copy-object
 meta {
-    doc: "COPY an object within S3. Can copy between buckets or within the same bucket.
-    
-source_bucket and source_key specify the source object.
-dest_bucket and dest_key specify the destination."
+    doc: """
+    Copy an object within S3. Can copy between buckets or within the same bucket.
+
+    **Example**
+
+    ```hot
+    // Copy within the same bucket
+    ::aws::s3::objects/copy-object("my-bucket", "original.txt", "my-bucket", "backup.txt")
+
+    // Copy to a different bucket
+    ::aws::s3::objects/copy-object("source-bucket", "file.txt", "dest-bucket", "file.txt")
+    ```
+    """
 }
 fn (source_bucket: Str, source_key: Str, dest_bucket: Str, dest_key: Str): CopyObjectResponse | AwsError {
     region get-region()
@@ -334,7 +388,17 @@ fn (source_bucket: Str, source_key: Str, dest_bucket: Str, dest_key: Str): CopyO
 // Head an object (get metadata without body)
 head-object
 meta {
-    doc: "HEAD an object to get metadata without downloading the body."
+    doc: """
+    HEAD an object to get metadata without downloading the body.
+
+    **Example**
+
+    ```hot
+    result ::aws::s3::objects/head-object("my-bucket", "data.json")
+    result.content_type  // => "application/json"
+    result.etag          // => "\"d41d8cd98f00b204e9800998ecf8427e\""
+    ```
+    """
 }
 fn (bucket: Str, key: Str): HeadObjectResponse | AwsError {
     region get-region()

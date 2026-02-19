@@ -84,7 +84,9 @@ EditCurrentServerConfigurationResponse type {
 
 
 edit-server-configuration
-meta {doc: "PUT /server - Edit Server Configuration"}
+meta {
+    doc: """Update the current server configuration including name, color, webhook URLs, and tracking settings."""
+}
 fn (request: EditCurrentServerConfigurationRequest): EditCurrentServerConfigurationResponse {
   response api-request("PUT", `${::postmark/BASE_URL}/server`, {}, request)
   if(is-ok-response(response), EditCurrentServerConfigurationResponse(response.body), err(HttpError(response)))

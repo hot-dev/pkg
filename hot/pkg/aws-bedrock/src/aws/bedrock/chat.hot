@@ -35,19 +35,21 @@ ContentBlock ::aws::bedrock::converse/ContentBlock
 
 chat
 meta {
-    doc: "Simple chat with a Bedrock model - send a message and get a response string.
+    doc: """
+    Simple chat with a Bedrock model - send a message and get a response string.
 
-**Supported Models**
-- `anthropic.claude-3-5-sonnet-20241022-v2:0` - Claude 3.5 Sonnet
-- `anthropic.claude-3-haiku-20240307-v1:0` - Claude 3 Haiku (faster, cheaper)
-- `amazon.titan-text-express-v1` - Amazon Titan
-- `meta.llama3-8b-instruct-v1:0` - Meta Llama 3
+    **Supported Models**
+    - `anthropic.claude-3-5-sonnet-20241022-v2:0` - Claude 3.5 Sonnet
+    - `anthropic.claude-3-haiku-20240307-v1:0` - Claude 3 Haiku (faster, cheaper)
+    - `amazon.titan-text-express-v1` - Amazon Titan
+    - `meta.llama3-8b-instruct-v1:0` - Meta Llama 3
 
-**Example**
-```hot
-response chat(\"anthropic.claude-3-5-sonnet-20241022-v2:0\", \"What is the capital of France?\")
-// Returns: \"The capital of France is Paris.\"
-```"
+    **Example**
+    ```hot
+    response chat("anthropic.claude-3-5-sonnet-20241022-v2:0", "What is the capital of France?")
+    // Returns: "The capital of France is Paris."
+    ```
+    """
 }
 fn
 (model-id: Str, message: Str): Str | AwsError {
@@ -102,20 +104,22 @@ fn
 // Multi-turn conversation helper
 converse-multi
 meta {
-    doc: "Have a multi-turn conversation with a Bedrock model.
+    doc: """
+    Have a multi-turn conversation with a Bedrock model.
 
-**Example**
-```hot
-history []
+    **Example**
+    ```hot
+    history []
 
-// First turn
-result1 converse-multi(\"anthropic.claude-3-5-sonnet-20241022-v2:0\", history, \"Hi, my name is Alice\", \"You are a helpful assistant.\")
-new-history result1.history
+    // First turn
+    result1 converse-multi("anthropic.claude-3-5-sonnet-20241022-v2:0", history, "Hi, my name is Alice", "You are a helpful assistant.")
+    new-history result1.history
 
-// Second turn (remembers context)
-result2 converse-multi(\"anthropic.claude-3-5-sonnet-20241022-v2:0\", new-history, \"What's my name?\", \"You are a helpful assistant.\")
-// result2.response will mention \"Alice\"
-```"
+    // Second turn (remembers context)
+    result2 converse-multi("anthropic.claude-3-5-sonnet-20241022-v2:0", new-history, "What's my name?", "You are a helpful assistant.")
+    // result2.response will mention "Alice"
+    ```
+    """
 }
 fn (model-id: Str, history: Vec, message: Str, system: Str): Map {
     // Build messages: history + new user message
@@ -179,14 +183,16 @@ fn (model-id: Str, history: Vec, message: Str, system: Str): Map {
 // Chat with image
 chat-with-image
 meta {
-    doc: "Chat with an image attachment.
+    doc: """
+    Chat with an image attachment.
 
-**Example**
-```hot
-// Read and encode image
-image-data ::hot::base64/encode(::hot::file/read-bytes(\"photo.png\"))
-response chat-with-image(\"anthropic.claude-3-5-sonnet-20241022-v2:0\", \"What's in this image?\", \"png\", image-data)
-```"
+    **Example**
+    ```hot
+    // Read and encode image
+    image-data ::hot::base64/encode(::hot::file/read-bytes("photo.png"))
+    response chat-with-image("anthropic.claude-3-5-sonnet-20241022-v2:0", "What's in this image?", "png", image-data)
+    ```
+    """
 }
 fn (model-id: Str, message: Str, image-format: Str, image-base64: Str): Str | AwsError {
     chat-with-image(model-id, message, image-format, image-base64, null)

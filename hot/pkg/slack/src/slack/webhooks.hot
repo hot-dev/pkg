@@ -15,8 +15,22 @@
 
 verify-request
 meta {
-  ctx: {"slack.signing.secret": {required: false}},
-  doc: "Verify a Slack webhook request signature. Returns true if the request is authentic. Uses the slack.signing.secret context variable by default, or accepts an explicit signing secret as a second argument for multi-app scenarios."
+    ctx: {"slack.signing.secret": {required: false}},
+    doc: """
+  Verify a Slack webhook request signature using HMAC-SHA256. Returns true if the request is authentic. Uses the `slack.signing.secret` context variable by default, or accepts an explicit signing secret as a second argument for multi-app scenarios.
+
+  The function checks the `x-slack-request-timestamp` and `x-slack-signature` headers against the computed HMAC using constant-time comparison to prevent timing attacks.
+
+  **Example**
+
+  ```hot
+  // Using context variable (1-arity, most common)
+  is-valid ::slack::webhooks/verify-request(request)
+
+  // With explicit signing secret (2-arity, for multi-app)
+  is-valid ::slack::webhooks/verify-request(request, "your-signing-secret")
+  ```
+  """
 }
 fn
 // 1-arity: read signing secret from ctx (default)

@@ -1,5 +1,7 @@
 ::anthropic::files ns
-meta {doc: "Anthropic Files API (Beta) - Upload and manage files for use across API calls."}
+meta {
+    doc: """Anthropic Files API (Beta) - Upload and manage files for use across API calls."""
+}
 
 api-request ::anthropic::api/request
 HttpError ::anthropic::api/HttpError
@@ -35,16 +37,26 @@ FilesListResponse type {
 
 list
 meta {
-    doc: "GET /v1/files - List uploaded files.
+    doc: """
+    GET /v1/files - List uploaded files.
 
-Returns a list of files uploaded to your account.
+    Returns a paginated list of files uploaded to your account. Optionally pass
+    a `limit` to control page size. Each file includes metadata such as
+    `filename`, `mime_type`, `size_bytes`, and `created_at`.
 
-**Example**
+    **Example**
 
-```hot
-files ::anthropic::files/list()
-map(files.data, (f) { println(`${f.filename}: ${f.size_bytes} bytes`) })
-```"
+    ```hot
+    // List all files
+    files ::anthropic::files/list()
+    assert(is-vec(files.data))
+    map(files.data, (f) { f.filename })
+
+    // List with a limit
+    files ::anthropic::files/list(5)
+    assert(lte(length(files.data), 5))
+    ```
+    """
 }
 fn
 (): FilesListResponse {
@@ -58,16 +70,19 @@ fn
 
 get
 meta {
-    doc: "GET /v1/files/{file_id} - Get file metadata.
+    doc: """
+    GET /v1/files/{file_id} - Get file metadata.
 
-Returns metadata about a specific file.
+    Returns metadata about a specific file.
 
-**Example**
+    **Example**
 
-```hot
-file ::anthropic::files/get(\"file_abc123\")
-println(`File: ${file.filename}, Size: ${file.size_bytes}`)
-```"
+    ```hot
+    file ::anthropic::files/get("file_abc123")
+    file.filename   // => "document.pdf"
+    file.size_bytes // => 102400
+    ```
+    """
 }
 fn (file_id: Str): FileMetadata {
     response api-request("GET", `${::anthropic/BASE_URL}/v1/files/${file_id}`, {anthropic-beta: BETA_HEADER})
@@ -76,15 +91,17 @@ fn (file_id: Str): FileMetadata {
 
 delete
 meta {
-    doc: "DELETE /v1/files/{file_id} - Delete a file.
+    doc: """
+    DELETE /v1/files/{file_id} - Delete a file.
 
-Permanently deletes a file.
+    Permanently deletes a file.
 
-**Example**
+    **Example**
 
-```hot
-::anthropic::files/delete(\"file_abc123\")
-```"
+    ```hot
+    ::anthropic::files/delete("file_abc123")
+    ```
+    """
 }
 fn (file_id: Str): Map {
     response api-request("DELETE", `${::anthropic/BASE_URL}/v1/files/${file_id}`, {anthropic-beta: BETA_HEADER})
@@ -93,15 +110,17 @@ fn (file_id: Str): Map {
 
 download
 meta {
-    doc: "GET /v1/files/{file_id}/content - Download file content.
+    doc: """
+    GET /v1/files/{file_id}/content - Download file content.
 
-Downloads the content of a file. Only available for downloadable files.
+    Downloads the content of a file. Only available for downloadable files.
 
-**Example**
+    **Example**
 
-```hot
-content ::anthropic::files/download(\"file_abc123\")
-```"
+    ```hot
+    content ::anthropic::files/download("file_abc123")
+    ```
+    """
 }
 fn (file_id: Str): Any {
     response api-request("GET", `${::anthropic/BASE_URL}/v1/files/${file_id}/content`, {anthropic-beta: BETA_HEADER})
@@ -110,7 +129,7 @@ fn (file_id: Str): Any {
 
 // Note: upload requires multipart/form-data which needs special handling
 // upload
-// meta {doc: "POST /v1/files - Upload a file."}
+// meta {doc: """POST /v1/files - Upload a file."""}
 // fn (filename: Str, content: Bytes, mime_type: Str): FileMetadata {
 //     // Requires multipart/form-data support
 // }

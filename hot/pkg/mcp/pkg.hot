@@ -2,7 +2,8 @@
 
 hot.pkg.mcp {
   name: "hot.dev/mcp",
-  version: "1.0.1",
+  version: "1.0.2",
+  hot-min-version: "1.1.0",
   description: "MCP client for connecting to Model Context Protocol servers. Supports tools, resources, prompts, and SSE streaming.",
   author: "Hot Dev",
   email: "support@hot.dev",

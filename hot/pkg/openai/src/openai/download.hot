@@ -14,7 +14,9 @@ DownloadFileResponse type {
 
 
 retrieve-file-content
-meta {doc: "GET /files/{file_id}/content - Retrieve file content"}
+meta {
+    doc: """GET /files/{file_id}/content - Download the contents of an uploaded file."""
+}
 fn (request: DownloadFileRequest): DownloadFileResponse {
   response api-request("GET", `${::openai/BASE_URL}/files/${request.file-id}/content`)
   if(is-ok-response(response), DownloadFileResponse(response.body), err(HttpError(response)))

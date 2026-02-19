@@ -63,7 +63,23 @@ FilesGetResponse type {
 
 
 get
-meta {doc: "GET /v1/{name} - Get File"}
+meta {
+    doc: """
+    Get metadata for a specific uploaded file by its resource name.
+
+    **Example**
+
+    ```hot
+    file ::gemini::files/get(FilesGetRequest({
+        name: "files/abc123"
+    }))
+
+    file.displayName // => "my-document.pdf"
+    file.mimeType    // => "application/pdf"
+    file.state       // => "ACTIVE"
+    ```
+    """
+}
 fn (request: FilesGetRequest): FilesGetResponse {
   response api-request("GET", `${::gemini/BASE_URL}/v1/${request.name}`)
   if(is-ok-response(response), FilesGetResponse(response.body), err(HttpError(response)))
@@ -79,7 +95,19 @@ FilesDeleteResponse type {
 
 
 delete
-meta {doc: "DELETE /v1/{name} - Delete File"}
+meta {
+    doc: """
+    Delete an uploaded file by its resource name.
+
+    **Example**
+
+    ```hot
+    ::gemini::files/delete(FilesDeleteRequest({
+        name: "files/abc123"
+    }))
+    ```
+    """
+}
 fn (request: FilesDeleteRequest): FilesDeleteResponse {
   response api-request("DELETE", `${::gemini/BASE_URL}/v1/${request.name}`)
   if(is-ok-response(response), FilesDeleteResponse(response.body), err(HttpError(response)))
@@ -97,7 +125,23 @@ FilesListResponse type {
 
 
 list
-meta {doc: "GET /v1/files - List Files"}
+meta {
+    doc: """
+    List uploaded files. Returns a paginated list of file metadata.
+
+    **Example**
+
+    ```hot
+    result ::gemini::files/list(FilesListRequest({
+        page-size: "10",
+        page-token: ""
+    }))
+
+    // result.files is a Vec<File> or null if no files exist
+    files or(result.files, [])
+    ```
+    """
+}
 fn (request: FilesListRequest): FilesListResponse {
   response api-request("GET", `${::gemini/BASE_URL}/v1/files?pageSize=${request.page-size}&pageToken=${request.page-token}`)
   if(is-ok-response(response), FilesListResponse(response.body), err(HttpError(response)))
@@ -114,7 +158,23 @@ FilesUploadResponse type {
 
 
 upload
-meta {doc: "POST /upload/v1/files - Upload File"}
+meta {
+    doc: """
+    Upload a file to be used with Gemini models. Uploaded files can be referenced in content generation requests.
+
+    **Example**
+
+    ```hot
+    result ::gemini::files/upload(FilesUploadRequest({
+        file: "path/to/document.pdf",
+        metadata: {displayName: "My Document"}
+    }))
+
+    result.file.name  // => "files/abc123"
+    result.file.state // => "PROCESSING"
+    ```
+    """
+}
 fn (request: FilesUploadRequest): FilesUploadResponse {
   response api-request("POST", `${::gemini/BASE_URL}/upload/v1/files`, {}, request)
   if(is-ok-response(response), FilesUploadResponse(response.body), err(HttpError(response)))

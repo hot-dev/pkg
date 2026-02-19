@@ -26,7 +26,25 @@ HttpResponse -> HttpError fn (response: HttpResponse): HttpError {
 
 request
 meta {
-    doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults.",
+    doc: """
+    Make an authenticated HTTP request to the Gemini API. Automatically appends the API key from context. Additional headers can be provided to merge/override defaults.
+
+    Supports 2 to 5 arguments: method and URL (minimum), plus optional headers, body, and explicit API key override.
+
+    **Example**
+
+    ```hot
+    response ::gemini::api/request("GET", `${::gemini/BASE_URL}/v1/models`)
+    response.status // => 200
+    response.body   // => {models: [...]}
+    ```
+
+    **With body**
+
+    ```hot
+    response ::gemini::api/request("POST", url, {}, {contents: [...]})
+    ```
+    """,
     ctx: {"gemini.api.key": {}}
 }
 fn
@@ -70,7 +88,20 @@ fn
 
 request-stream
 meta {
-    doc: "Make a streaming HTTP request with pre-filled service headers. Returns a response with an iterator body for SSE streams.",
+    doc: """
+    Make a streaming HTTP request to the Gemini API. Returns a response with an iterator body for consuming SSE or NDJSON streams.
+
+    Supports 4 to 6 arguments: method, URL, headers, body (minimum), plus optional format and explicit API key override.
+
+    **Example**
+
+    ```hot
+    response ::gemini::api/request-stream("POST", url, {}, body, "sse")
+    for-each(response.body, (event) {
+        // process each streaming event
+    })
+    ```
+    """,
     ctx: {"gemini.api.key": {}}
 }
 fn

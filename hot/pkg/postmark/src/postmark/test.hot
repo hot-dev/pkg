@@ -50,7 +50,25 @@ TestTemplateContentResponse type {
 
 
 test-template-content
-meta {doc: "POST /templates/validate - Test Template Content"}
+meta {
+    doc: """
+    Validate template content and render it with a test model. Returns validation results
+    indicating whether the Subject, HtmlBody, and TextBody are valid, plus a suggested template model.
+
+    **Example**
+
+    ```hot
+    response ::postmark::test/test-template-content(::postmark::test/TestTemplateContentRequest({
+        Subject: "Hello {{name}}!",
+        HtmlBody: "<html><body><p>Welcome, {{name}}!</p></body></html>",
+        TextBody: "Welcome, {{name}}!",
+        TestRenderModel: {"name": "Alice"}
+    }))
+    response.AllContentIsValid // => true
+    response.SuggestedTemplateModel // => suggested model map
+    ```
+    """
+}
 fn (request: TestTemplateContentRequest): TestTemplateContentResponse {
   response api-request("POST", `${::postmark/BASE_URL}/templates/validate`, {}, request)
   if(is-ok-response(response), TestTemplateContentResponse(response.body), err(HttpError(response)))

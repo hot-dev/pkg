@@ -49,7 +49,20 @@ GetFunctionResponse type {
 // List Lambda functions
 list-functions
 meta {
-    doc: "List all Lambda functions in the account/region."
+    doc: """
+    List all Lambda functions in the account/region.
+
+    **Example**
+
+    ```hot
+    result ::aws::lambda::functions/list-functions()
+    result.functions
+    // => [{function_name: "my-function", runtime: "nodejs20.x", ...}, ...]
+
+    // With limit
+    result ::aws::lambda::functions/list-functions(10)
+    ```
+    """
 }
 fn
 (max_items: Int, marker: Str): ListFunctionsResponse | AwsError {
@@ -110,7 +123,18 @@ fn
 // Get Lambda function details
 get-function
 meta {
-    doc: "Get details about a Lambda function, including code location."
+    doc: """
+    Get details about a Lambda function, including code location.
+
+    **Example**
+
+    ```hot
+    result ::aws::lambda::functions/get-function("my-function")
+    result.configuration.function_name  // => "my-function"
+    result.configuration.runtime        // => "nodejs20.x"
+    result.configuration.handler        // => "index.handler"
+    ```
+    """
 }
 fn (function_name: Str): GetFunctionResponse | AwsError {
     region get-region()
@@ -158,7 +182,19 @@ fn (function_name: Str): GetFunctionResponse | AwsError {
 // Get function configuration only
 get-function-configuration
 meta {
-    doc: "Get the configuration of a Lambda function."
+    doc: """
+    Get the configuration of a Lambda function (without code location).
+
+    **Example**
+
+    ```hot
+    config ::aws::lambda::functions/get-function-configuration("my-function")
+    config.function_name  // => "my-function"
+    config.runtime        // => "nodejs20.x"
+    config.memory_size    // => 128
+    config.timeout        // => 3
+    ```
+    """
 }
 fn (function_name: Str): FunctionConfiguration | AwsError {
     region get-region()

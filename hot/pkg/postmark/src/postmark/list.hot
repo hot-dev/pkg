@@ -28,7 +28,21 @@ ListTemplatesResponse type {
 
 
 get-templates-associated-with-this-server
-meta {doc: "GET /templates - Get the Templates associated with this Server"}
+meta {
+    doc: """
+    Retrieve a paginated list of templates associated with the current server.
+
+    **Example**
+
+    ```hot
+    response ::postmark::list/get-templates-associated-with-this-server(::postmark::list/ListTemplatesRequest({
+        count: "10",
+        offset: "0"
+    }))
+    response.TotalCount // => 5
+    ```
+    """
+}
 fn (request: ListTemplatesRequest): ListTemplatesResponse {
   response api-request("GET", `${::postmark/BASE_URL}/templates?Count=${request.count}&Offset=${request.offset}`)
   if(is-ok-response(response), ListTemplatesResponse(response.body), err(HttpError(response)))
@@ -46,7 +60,21 @@ ListInboundRulesResponse type {
 
 
 list-inbound-rule-triggers
-meta {doc: "GET /triggers/inboundrules - List inbound rule triggers"}
+meta {
+    doc: """
+    Retrieve a paginated list of inbound rule triggers configured on the server.
+
+    **Example**
+
+    ```hot
+    response ::postmark::list/list-inbound-rule-triggers(::postmark::list/ListInboundRulesRequest({
+        count: "10",
+        offset: "0"
+    }))
+    response.TotalCount // => 0
+    ```
+    """
+}
 fn (request: ListInboundRulesRequest): ListInboundRulesResponse {
   response api-request("GET", `${::postmark/BASE_URL}/triggers/inboundrules?count=${request.count}&offset=${request.offset}`)
   if(is-ok-response(response), ListInboundRulesResponse(response.body), err(HttpError(response)))

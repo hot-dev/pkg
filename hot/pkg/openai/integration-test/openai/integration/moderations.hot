@@ -16,7 +16,7 @@ fn () {
     assert(response.id, "Response should have an id")
     assert(response.results, "Response should have results")
     assert(gt(length(response.results), 0), "Should have at least one result")
-    
+
     result response.results[0]
     assert-eq(false, result.flagged, "Safe content should not be flagged")
     assert(result.categories, "Result should have categories")

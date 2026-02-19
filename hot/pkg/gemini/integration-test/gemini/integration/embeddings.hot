@@ -47,9 +47,9 @@ fn () {
             {model: "models/text-embedding-004", content: {role: "user", parts: [{text: "Goodbye world"}]}}
         ]
     }
-    
+
     response ::gemini::api/request("POST", url, {}, body)
-    
+
     cond {
         ::hot::http/is-ok-response(response) => {
             // Response should have embeddings array

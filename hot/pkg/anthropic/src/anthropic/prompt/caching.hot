@@ -4,8 +4,15 @@ api-request ::anthropic::api/request
 HttpError ::anthropic::api/HttpError
 is-ok-response ::hot::http/is-ok-response
 
+// Tool choice configuration for controlling tool use behavior.
+// Auto: {type: "auto"} - Model decides whether to use tools
+// Any: {type: "any"} - Model must use at least one tool
+// Specific: {type: "tool", name: "tool_name"} - Model must use the named tool
+// None: {type: "none"} - Model must not use tools
 ToolChoice type {
-
+    type: Str,
+    name: Str?,
+    disable_parallel_tool_use: Bool?
 }
 
 PromptCachingBetaCreateMessageParams type {
@@ -16,11 +23,11 @@ PromptCachingBetaCreateMessageParams type {
     stop_sequences: Vec<Str>?,
     stream: Bool?,
     system: Any?,
-    temperature: Float?,
+    temperature: Dec?,
     tool_choice: ToolChoice?,
     tools: Vec<PromptCachingBetaTool>?,
     top_k: Int?,
-    top_p: Float?
+    top_p: Dec?
 }
 
 PromptCachingBetaTool type {
@@ -30,13 +37,17 @@ PromptCachingBetaTool type {
     cache_control: Any?
 }
 
+// Content block in a message response. Polymorphic -- may be text, tool_use, image, etc.
 ContentBlock type {
-
+    type: Str,
+    text: Str?,
+    id: Str?,
+    name: Str?,
+    input: Any?
 }
 
-Model type {
-
-}
+// Model ID string (e.g. "claude-sonnet-4-20250514")
+Model type Str
 
 ErrorResponse type {
     type: "error",
@@ -67,11 +78,11 @@ PromptCachingBetaMessagesPostRequest type {
     stop_sequences: Vec<Str>?,
     stream: Bool?,
     system: Any?,
-    temperature: Float?,
+    temperature: Dec?,
     tool_choice: ToolChoice?,
     tools: Vec<PromptCachingBetaTool>?,
     top_k: Int?,
-    top_p: Float?
+    top_p: Dec?
 }
 
 PromptCachingBetaMessagesPostResponse type {
@@ -87,7 +98,53 @@ PromptCachingBetaMessagesPostResponse type {
 
 
 beta-messages-post
-meta {doc: "POST /v1/messages?beta=prompt_caching - Create a Message"}
+meta {
+    doc: """
+    POST /v1/messages (prompt caching beta) - Create a message with prompt caching.
+
+    Cache portions of your prompt for reuse across requests. Particularly beneficial
+    for long system prompts, reducing latency and costs on repeated calls. Use
+    `cache_control: {type: "ephemeral"}` on content blocks you want to cache.
+
+    **Example**
+
+    ```hot
+    // Basic prompt caching with a system prompt
+    request PromptCachingBetaMessagesPostRequest({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1024,
+        system: [
+            {
+                type: "text",
+                text: "You are a helpful assistant that responds concisely.",
+                cache_control: {type: "ephemeral"}
+            }
+        ],
+        messages: [{role: "user", content: "Say hello!"}]
+    })
+    response ::anthropic::prompt::caching/beta-messages-post(request)
+    response.content[0].text
+
+    // Multi-turn conversation with cached system prompt
+    request PromptCachingBetaMessagesPostRequest({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1024,
+        system: [
+            {
+                type: "text",
+                text: "You are a math tutor. Be concise.",
+                cache_control: {type: "ephemeral"}
+            }
+        ],
+        messages: [
+            {role: "user", content: "What is 2+2?"},
+            {role: "assistant", content: "4"},
+            {role: "user", content: "And 3+3?"}
+        ]
+    })
+    ```
+    """
+}
 fn (request: PromptCachingBetaMessagesPostRequest): PromptCachingBetaMessagesPostResponse {
   response api-request("POST", `${::anthropic/BASE_URL}/v1/messages?beta=prompt_caching`, {}, request)
   if(is-ok-response(response), PromptCachingBetaMessagesPostResponse(response.body), err(HttpError(response)))

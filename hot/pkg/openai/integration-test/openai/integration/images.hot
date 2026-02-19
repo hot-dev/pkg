@@ -19,7 +19,7 @@ fn () {
 
     assert(response.data, "Response should have data array")
     assert(gt(length(response.data), 0), "Should have at least one image")
-    
+
     image response.data[0]
     assert(image.url, "Image should have URL")
 }
@@ -37,7 +37,7 @@ fn () {
 
     assert(response.data, "Should have data")
     assert(gt(length(response.data), 0), "Should have at least one image")
-    
+
     image response.data[0]
     assert(image.url, "Image should have URL")
 }

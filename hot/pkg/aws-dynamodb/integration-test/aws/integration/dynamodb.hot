@@ -55,7 +55,7 @@ meta ["test"]
 fn () {
     pk test-key-prefix()
     sk "item-test"
-    
+
     // Create item using DynamoDB attribute value format
     item {
         pk: ddb-string(pk),
@@ -63,11 +63,11 @@ fn () {
         data: ddb-string("Hello from Hot!"),
         count: ddb-number(42)
     }
-    
+
     // Put the item
     put-result ::aws::dynamodb::items/put-item(test-table, item)
     assert(not(is-err(put-result)), `put-item failed: ${put-result}`)
-    
+
     // Get the item back
     key { pk: ddb-string(pk), sk: ddb-string(sk) }
     get-result ::aws::dynamodb::items/get-item(test-table, key)
@@ -76,7 +76,7 @@ fn () {
     assert-eq(pk, get-result.item.pk.S, "pk should match")
     assert-eq("Hello from Hot!", get-result.item.data.S, "data should match")
     assert-eq("42", get-result.item.count.N, "count should match")
-    
+
     // Clean up
     ::aws::dynamodb::items/delete-item(test-table, key)
 }
@@ -87,17 +87,17 @@ meta ["test"]
 fn () {
     pk test-key-prefix()
     sk "update-test"
-    
+
     // Create initial item
     item {
         pk: ddb-string(pk),
         sk: ddb-string(sk),
         hit_count: ddb-number(0)
     }
-    
+
     put-result ::aws::dynamodb::items/put-item(test-table, item)
     assert(not(is-err(put-result)), `put-item failed: ${put-result}`)
-    
+
     // Update the item
     key { pk: ddb-string(pk), sk: ddb-string(sk) }
     update-result ::aws::dynamodb::items/update-item(
@@ -112,7 +112,7 @@ fn () {
     assert(not(is-err(update-result)), `update-item failed: ${update-result}`)
     assert-eq("1", update-result.attributes.hit_count.N, "hit_count should be incremented")
     assert-eq("2026-02-07", update-result.attributes.updated_at.S, "updated_at should be set")
-    
+
     // Clean up
     ::aws::dynamodb::items/delete-item(test-table, key)
 }
@@ -123,17 +123,17 @@ meta ["test"]
 fn () {
     pk test-key-prefix()
     sk "delete-test"
-    
+
     // Create item
     item { pk: ddb-string(pk), sk: ddb-string(sk), temp: ddb-string("to delete") }
     key { pk: ddb-string(pk), sk: ddb-string(sk) }
-    
+
     ::aws::dynamodb::items/put-item(test-table, item)
-    
+
     // Delete the item
     delete-result ::aws::dynamodb::items/delete-item(test-table, key)
     assert(not(is-err(delete-result)), `delete-item failed: ${delete-result}`)
-    
+
     // Verify deletion
     get-result ::aws::dynamodb::items/get-item(test-table, key)
     assert(not(is-err(get-result)), `get-item after delete failed: ${get-result}`)
@@ -152,7 +152,7 @@ fn () {
     sk1 "query-1"
     sk2 "query-2"
     sk3 "query-3"
-    
+
     // Create test items
     ::aws::dynamodb::items/put-item(test-table, {
         pk: ddb-string(pk), sk: ddb-string(sk1), value: ddb-number(1)
@@ -163,7 +163,7 @@ fn () {
     ::aws::dynamodb::items/put-item(test-table, {
         pk: ddb-string(pk), sk: ddb-string(sk3), value: ddb-number(3)
     })
-    
+
     // Query all items with this pk
     query-result ::aws::dynamodb::query/query(
         test-table,
@@ -173,7 +173,7 @@ fn () {
     assert(not(is-err(query-result)), `query failed: ${query-result}`)
     assert-eq(3, query-result.count, "should find 3 items")
     assert(is-vec(query-result.items), "items should be a Vec")
-    
+
     // Clean up
     key1 { pk: ddb-string(pk), sk: ddb-string(sk1) }
     key2 { pk: ddb-string(pk), sk: ddb-string(sk2) }
@@ -188,7 +188,7 @@ test-query-with-sk
 meta ["test"]
 fn () {
     pk test-key-prefix()
-    
+
     // Create items with different sk prefixes
     ::aws::dynamodb::items/put-item(test-table, {
         pk: ddb-string(pk), sk: ddb-string("user:1"), name: ddb-string("Alice")
@@ -199,7 +199,7 @@ fn () {
     ::aws::dynamodb::items/put-item(test-table, {
         pk: ddb-string(pk), sk: ddb-string("order:1"), total: ddb-number(100)
     })
-    
+
     // Query only user items using begins_with
     query-result ::aws::dynamodb::query/query(
         test-table,
@@ -209,7 +209,7 @@ fn () {
     )
     assert(not(is-err(query-result)), `query with sk failed: ${query-result}`)
     assert-eq(2, query-result.count, "should find 2 user items")
-    
+
     // Clean up
     ::aws::dynamodb::items/delete-item(test-table, { pk: ddb-string(pk), sk: ddb-string("user:1") })
     ::aws::dynamodb::items/delete-item(test-table, { pk: ddb-string(pk), sk: ddb-string("user:2") })
@@ -223,7 +223,7 @@ fn () {
     pk test-key-prefix()
     sk1 "scan-1"
     sk2 "scan-2"
-    
+
     // Create items with a unique marker
     marker `scan-marker-${pk}`
     ::aws::dynamodb::items/put-item(test-table, {
@@ -232,7 +232,7 @@ fn () {
     ::aws::dynamodb::items/put-item(test-table, {
         pk: ddb-string(pk), sk: ddb-string(sk2), marker: ddb-string(marker)
     })
-    
+
     // Scan with filter
     scan-result ::aws::dynamodb::query/scan(
         test-table,
@@ -242,7 +242,7 @@ fn () {
     assert(not(is-err(scan-result)), `scan failed: ${scan-result}`)
     assert(gte(scan-result.count, 2), "should find at least 2 items")
     assert(is-vec(scan-result.items), "items should be a Vec")
-    
+
     // Clean up
     ::aws::dynamodb::items/delete-item(test-table, { pk: ddb-string(pk), sk: ddb-string(sk1) })
     ::aws::dynamodb::items/delete-item(test-table, { pk: ddb-string(pk), sk: ddb-string(sk2) })

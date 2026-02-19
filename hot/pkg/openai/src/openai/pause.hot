@@ -14,9 +14,8 @@ FineTuneReinforcementHyperparameters type {
     eval_samples: Any?
 }
 
-Metadata type {
-
-}
+// Arbitrary key-value metadata associated with an API object
+Metadata type Map
 
 FineTuningJob type {
     id: Str,
@@ -101,7 +100,9 @@ PauseFineTuningJobResponse type {
 
 
 pause-finetuning
-meta {doc: "POST /fine_tuning/jobs/{fine_tuning_job_id}/pause - Pause fine-tuning"}
+meta {
+    doc: """POST /fine_tuning/jobs/{fine_tuning_job_id}/pause - Pause a running fine-tuning job."""
+}
 fn (request: PauseFineTuningJobRequest): PauseFineTuningJobResponse {
   response api-request("POST", `${::openai/BASE_URL}/fine_tuning/jobs/${request.fine-tuning-job-id}/pause`)
   if(is-ok-response(response), PauseFineTuningJobResponse(response.body), err(HttpError(response)))

@@ -7,7 +7,7 @@ AI types and utilities for Hot. Provides unified types for AI-generated content,
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/hot-ai": "1.0.0"
+"hot.dev/hot-ai": "1.0.1"
 ```
 
 ## Namespaces

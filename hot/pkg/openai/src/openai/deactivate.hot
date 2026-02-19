@@ -40,7 +40,7 @@ DeactivateOrganizationCertificatesResponse type {
 
 deactivate-certificates-organization
 meta {
-    doc: "POST /organization/certificates/deactivate - Deactivate certificates for organization"
+    doc: """POST /organization/certificates/deactivate - Deactivate certificates for organization"""
 }
 fn (request: DeactivateOrganizationCertificatesRequest): DeactivateOrganizationCertificatesResponse {
   response api-request("POST", `${::openai/BASE_URL}/organization/certificates/deactivate`, {}, request)
@@ -62,7 +62,7 @@ DeactivateProjectCertificatesResponse type {
 
 deactivate-certificates-project
 meta {
-    doc: "POST /organization/projects/{project_id}/certificates/deactivate - Deactivate certificates for project"
+    doc: """POST /organization/projects/{project_id}/certificates/deactivate - Deactivate certificates for project"""
 }
 fn (project-id: Str, request: DeactivateProjectCertificatesRequest): DeactivateProjectCertificatesResponse {
   response api-request("POST", `${::openai/BASE_URL}/organization/projects/${project-id}/certificates/deactivate`, {}, request)

@@ -1,30 +1,32 @@
 ::aws::eventstream ns
 meta {
-    doc: "AWS Event Stream binary protocol parser.
+    doc: """
+    AWS Event Stream binary protocol parser.
 
-AWS Event Stream is the binary framing protocol used by AWS streaming services
-like Bedrock, Transcribe, and S3 Select. This module provides functions to parse
-event stream messages from binary data.
+    AWS Event Stream is the binary framing protocol used by AWS streaming services
+    like Bedrock, Transcribe, and S3 Select. This module provides functions to parse
+    event stream messages from binary data.
 
-## Message Format
+    ## Message Format
 
-```
-[total_length:4][headers_length:4][prelude_crc:4][headers:*][payload:*][message_crc:4]
-```
+    ```
+    [total_length:4][headers_length:4][prelude_crc:4][headers:*][payload:*][message_crc:4]
+    ```
 
-## Example
+    ## Example
 
-```hot
-::aws::eventstream use
+    ```hot
+    ::aws::eventstream use
 
-// Parse messages from a binary stream
-messages parse-stream(response-bytes)
+    // Parse messages from a binary stream
+    messages parse-stream(response-bytes)
 
-each(messages, (msg) {
-    event-type get-header(msg, \":event-type\")
-    log(event-type, Str(msg.payload))
-})
-```"
+    each(messages, (msg) {
+        event-type get-header(msg, ":event-type")
+        log(event-type, Str(msg.payload))
+    })
+    ```
+    """
 }
 
 // Imports
@@ -44,14 +46,14 @@ crc32 ::hot::bytes/crc32
 // ============================================================================
 
 Message
-meta { doc: "A parsed event stream message." }
+meta { doc: """A parsed event stream message.""" }
 type {
     headers: Map<Str, Any>,
     payload: Bytes
 }
 
 ParseResult
-meta { doc: "Result of parsing an event stream message." }
+meta { doc: """Result of parsing an event stream message.""" }
 type {
     ok: Bool,
     message: Message?,
@@ -77,22 +79,24 @@ HEADER_TYPE_UUID 9
 
 parse-message
 meta {
-    doc: "Parse a single event stream message from bytes.
+    doc: """
+    Parse a single event stream message from bytes.
 
-Returns a ParseResult with the parsed message or an error.
+    Returns a ParseResult with the parsed message or an error.
 
-**Example**
+    **Example**
 
-```hot
-result parse-message(message-bytes)
-cond {
-    result.ok => {
-        log(result.message.headers)
-        log(Str(result.message.payload))
+    ```hot
+    result parse-message(message-bytes)
+    cond {
+        result.ok => {
+            log(result.message.headers)
+            log(Str(result.message.payload))
+        }
+        => { log("Error:", result.error) }
     }
-    => { log(\"Error:\", result.error) }
-}
-```"
+    ```
+    """
 }
 fn cond (data: Bytes): ParseResult {
     // Minimum message size is 16 bytes (prelude + CRCs, no headers/payload)
@@ -110,19 +114,21 @@ fn cond (data: Bytes): ParseResult {
 
 parse-stream
 meta {
-    doc: "Parse all event stream messages from a byte stream.
+    doc: """
+    Parse all event stream messages from a byte stream.
 
-Returns a vector of parsed Messages. Stops parsing on first error.
+    Returns a vector of parsed Messages. Stops parsing on first error.
 
-**Example**
+    **Example**
 
-```hot
-messages parse-stream(stream-bytes)
-each(messages, (msg) {
-    event-type get-header(msg, \":event-type\")
-    log(event-type)
-})
-```"
+    ```hot
+    messages parse-stream(stream-bytes)
+    each(messages, (msg) {
+        event-type get-header(msg, ":event-type")
+        log(event-type)
+    })
+    ```
+    """
 }
 fn (data: Bytes): Vec<Message> {
     parse-stream-recursive(data, 0, [])
@@ -131,17 +137,19 @@ fn (data: Bytes): Vec<Message> {
 
 get-header
 meta {
-    doc: "Get a header value from a message by name.
+    doc: """
+    Get a header value from a message by name.
 
-Returns the header value or null if not found.
+    Returns the header value or null if not found.
 
-**Example**
+    **Example**
 
-```hot
-message-type get-header(msg, \":message-type\")
-event-type get-header(msg, \":event-type\")
-content-type get-header(msg, \":content-type\")
-```"
+    ```hot
+    message-type get-header(msg, ":message-type")
+    event-type get-header(msg, ":event-type")
+    content-type get-header(msg, ":content-type")
+    ```
+    """
 }
 fn (message: Message, name: Str): Any {
     get(message.headers, name)
@@ -150,7 +158,7 @@ fn (message: Message, name: Str): Any {
 
 is-event
 meta {
-    doc: "Check if a message is an event (`:message-type` is \"event\")."
+    doc: """Check if a message is an event (`:message-type` is "event")."""
 }
 fn (message: Message): Bool {
     eq(get-header(message, ":message-type"), "event")
@@ -159,7 +167,7 @@ fn (message: Message): Bool {
 
 is-exception
 meta {
-    doc: "Check if a message is an exception (`:message-type` is \"exception\")."
+    doc: """Check if a message is an exception (`:message-type` is "exception")."""
 }
 fn (message: Message): Bool {
     eq(get-header(message, ":message-type"), "exception")
@@ -168,7 +176,7 @@ fn (message: Message): Bool {
 
 is-error
 meta {
-    doc: "Check if a message is an error (`:message-type` is \"error\")."
+    doc: """Check if a message is an error (`:message-type` is "error")."""
 }
 fn (message: Message): Bool {
     eq(get-header(message, ":message-type"), "error")
@@ -180,7 +188,7 @@ fn (message: Message): Bool {
 // ============================================================================
 
 parse-message-internal
-meta { doc: "Internal: Parse a message assuming we have at least 16 bytes." }
+meta { doc: """Internal: Parse a message assuming we have at least 16 bytes.""" }
 fn (data: Bytes): ParseResult {
     // Parse prelude (8 bytes)
     prelude-bytes slice(data, 0, 8)
@@ -258,7 +266,7 @@ fn (data: Bytes): ParseResult {
 
 
 parse-stream-recursive
-meta { doc: "Internal: Recursively parse messages from a stream." }
+meta { doc: """Internal: Recursively parse messages from a stream.""" }
 fn cond (data: Bytes, offset: Int, messages: Vec<Message>): Vec<Message> {
     // Not enough bytes for another message - return accumulated messages
     lt(sub(length(data), offset), 16) => { messages }
@@ -282,14 +290,14 @@ fn cond (data: Bytes, offset: Int, messages: Vec<Message>): Vec<Message> {
 
 
 parse-headers
-meta { doc: "Internal: Parse headers from header bytes." }
+meta { doc: """Internal: Parse headers from header bytes.""" }
 fn (data: Bytes): Map<Str, Any> {
     parse-headers-recursive(data, 0, {})
 }
 
 
 parse-headers-recursive
-meta { doc: "Internal: Recursively parse headers." }
+meta { doc: """Internal: Recursively parse headers.""" }
 fn cond (data: Bytes, offset: Int, headers: Map<Str, Any>): Map<Str, Any> {
     // Done parsing when offset reaches or exceeds data length
     gte(offset, length(data)) => { headers }
@@ -318,7 +326,7 @@ fn cond (data: Bytes, offset: Int, headers: Map<Str, Any>): Map<Str, Any> {
 
 
 HeaderValueResult
-meta { doc: "Internal type for header value parsing result." }
+meta { doc: """Internal type for header value parsing result.""" }
 type {
     value: Any,
     next_offset: Int
@@ -326,7 +334,7 @@ type {
 
 
 parse-header-value
-meta { doc: "Internal: Parse a header value based on its type." }
+meta { doc: """Internal: Parse a header value based on its type.""" }
 fn (data: Bytes, offset: Int, header-type: Int): HeaderValueResult {
     cond {
         eq(header-type, HEADER_TYPE_BOOL_TRUE) => {

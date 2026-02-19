@@ -46,18 +46,22 @@ WebSearchResult type {
 
 web-search-tool
 meta {
-    doc: "Create a web search tool configuration.
+    doc: """
+    Create a web search tool configuration for the Responses API.
 
-Use this in the tools array of a CreateResponseRequest to enable web search.
+    Use this in the tools array of a CreateResponseRequest to enable real-time web search.
+    The model will automatically decide when to search based on the query.
 
-**Example**
-```hot
-response responses/create(responses/CreateResponseRequest({
-    model: \"grok-3\",
-    input: \"What is the latest news about AI?\",
-    tools: [web-search-tool()]
-}))
-```"
+    **Example**
+
+    ```hot
+    response ::xai::responses/create(::xai::responses/CreateResponseRequest({
+        model: "grok-3",
+        input: "What is the latest news about AI?",
+        tools: [web-search-tool()]
+    }))
+    ```
+    """
 }
 fn (): SearchTool {
     SearchTool({type: "web_search"})
@@ -65,18 +69,22 @@ fn (): SearchTool {
 
 x-search-tool
 meta {
-    doc: "Create an X (Twitter) search tool configuration.
+    doc: """
+    Create an X (Twitter) search tool configuration for the Responses API.
 
-Use this in the tools array of a CreateResponseRequest to enable X search.
+    Use this in the tools array of a CreateResponseRequest to enable real-time X search.
+    The model will automatically decide when to search based on the query.
 
-**Example**
-```hot
-response responses/create(responses/CreateResponseRequest({
-    model: \"grok-3\",
-    input: \"What are people saying about the new iPhone?\",
-    tools: [x-search-tool()]
-}))
-```"
+    **Example**
+
+    ```hot
+    response ::xai::responses/create(::xai::responses/CreateResponseRequest({
+        model: "grok-3",
+        input: "What are people saying about the new iPhone?",
+        tools: [x-search-tool()]
+    }))
+    ```
+    """
 }
 fn (): SearchTool {
     SearchTool({type: "x_search"})
@@ -88,16 +96,23 @@ fn (): SearchTool {
 
 search-web
 meta {
-    doc: "Search the web and get an AI-summarized response.
+    doc: """
+    Search the web and get an AI-summarized response.
 
-This is a convenience function that enables web search and returns
-the model's response with real-time web information.
+    This is a convenience function that enables web search and returns
+    the model's response text with real-time web information.
+    Optionally pass system instructions as a third argument.
 
-**Example**
-```hot
-response search-web(\"grok-3\", \"What is the current weather in San Francisco?\")
-println(response)
-```"
+    **Example**
+
+    ```hot
+    answer search-web("grok-3", "What is the current weather in San Francisco?")
+    // => "Currently in San Francisco, it's 62°F..."
+
+    // With instructions
+    answer search-web("grok-3", "Latest AI news", "Summarize in bullet points.")
+    ```
+    """
 }
 fn
 (model: Str, query: Str): Str {
@@ -121,16 +136,23 @@ fn
 
 search-x
 meta {
-    doc: "Search X (Twitter) and get an AI-summarized response.
+    doc: """
+    Search X (Twitter) and get an AI-summarized response.
 
-This is a convenience function that enables X search and returns
-the model's response with real-time information from X.
+    This is a convenience function that enables X search and returns
+    the model's response text with real-time information from X posts.
+    Optionally pass system instructions as a third argument.
 
-**Example**
-```hot
-response search-x(\"grok-3\", \"What are people saying about the latest tech news?\")
-println(response)
-```"
+    **Example**
+
+    ```hot
+    answer search-x("grok-3", "What are people saying about the latest tech news?")
+    // => "Here's what people are discussing on X..."
+
+    // With instructions
+    answer search-x("grok-3", "Reactions to the new iPhone", "Focus on sentiment analysis.")
+    ```
+    """
 }
 fn
 (model: Str, query: Str): Str {
@@ -154,13 +176,19 @@ fn
 
 search-all
 meta {
-    doc: "Search both web and X, returning an AI-summarized response.
+    doc: """
+    Search both web and X simultaneously, returning an AI-summarized response.
 
-**Example**
-```hot
-response search-all(\"grok-3\", \"What's happening with climate change today?\")
-println(response)
-```"
+    Combines web-search-tool() and x-search-tool() for comprehensive coverage.
+    Optionally pass system instructions as a third argument.
+
+    **Example**
+
+    ```hot
+    answer search-all("grok-3", "What's happening with climate change today?")
+    // => "Based on web and X sources..."
+    ```
+    """
 }
 fn
 (model: Str, query: Str): Str {

@@ -25,9 +25,8 @@ CreateApiKeyResponse type {
     token: Str?
 }
 
-GETApiKeysRequest type {
-
-}
+// No parameters required for this GET request
+GETApiKeysRequest type Map
 
 GETApiKeysResponse type {
     data: Vec<ApiKey>?
@@ -35,7 +34,18 @@ GETApiKeysResponse type {
 
 
 retrieve-list-api-keys
-meta {doc: "GET /api-keys - Retrieve a list of API keys"}
+meta {
+    doc: """
+    Retrieve all API keys in your Resend account.
+
+    **Example**
+
+    ```hot
+    keys ::resend::api::keys/retrieve-list-api-keys(::resend::api::keys/GETApiKeysRequest({}))
+    keys.data // => [{id: "...", name: "Production Key", created_at: "..."}]
+    ```
+    """
+}
 fn (request: GETApiKeysRequest): GETApiKeysResponse {
   response api-request("GET", `${::resend/BASE_URL}/api-keys`)
   if(is-ok-response(response), GETApiKeysResponse(response.body), err(HttpError(response)))
@@ -54,7 +64,9 @@ POSTApiKeysResponse type {
 
 
 create-new-api-key
-meta {doc: "POST /api-keys - Create a new API key"}
+meta {
+    doc: """Create a new API key with specified name, permission level, and optional domain restriction."""
+}
 fn (request: POSTApiKeysRequest): POSTApiKeysResponse {
   response api-request("POST", `${::resend/BASE_URL}/api-keys`, {}, request)
   if(is-ok-response(response), POSTApiKeysResponse(response.body), err(HttpError(response)))
@@ -64,13 +76,12 @@ DELETEApiKeysApiKeyIdRequest type {
   api-key-id: Str
 }
 
-DELETEApiKeysApiKeyIdResponse type {
-
-}
+// Empty response from successful API key deletion
+DELETEApiKeysApiKeyIdResponse type Map
 
 
 remove-existing-api-key
-meta {doc: "DELETE /api-keys/{api_key_id} - Remove an existing API key"}
+meta {doc: """Permanently delete an API key. This cannot be undone."""}
 fn (request: DELETEApiKeysApiKeyIdRequest): DELETEApiKeysApiKeyIdResponse {
   response api-request("DELETE", `${::resend/BASE_URL}/api-keys/${request.api-key-id}`)
   if(is-ok-response(response), ok(response.body), err(HttpError(response)))

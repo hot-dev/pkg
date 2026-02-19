@@ -31,15 +31,21 @@ ModelsListResponse type {
 
 list
 meta {
-    doc: "List available models.
+    doc: """
+    List available models from the xAI API.
 
-**Example**
-```hot
-models list()
-for-each(models.data, fn (model) {
-    println(model.id)
-})
-```"
+    Returns a ModelsListResponse containing a Vec of Model objects.
+
+    **Example**
+
+    ```hot
+    models list()
+    models.data // => [{id: "grok-3", object: "model", ...}, ...]
+
+    first-model first(models.data)
+    first-model.id // => "grok-3"
+    ```
+    """
 }
 fn (): ModelsListResponse | HttpError {
     response api-request("GET", `${::xai/BASE_URL}/models`)
@@ -48,13 +54,19 @@ fn (): ModelsListResponse | HttpError {
 
 get
 meta {
-    doc: "Retrieve details about a specific model.
+    doc: """
+    Retrieve details about a specific model by its ID.
 
-**Example**
-```hot
-model get(\"grok-3\")
-println(model.id)
-```"
+    Returns a Model with id, object, created, and owned_by fields.
+
+    **Example**
+
+    ```hot
+    model get("grok-3-mini")
+    model.id // => "grok-3-mini"
+    model.object // => "model"
+    ```
+    """
 }
 fn (model-id: Str): Model | HttpError {
     response api-request("GET", `${::xai/BASE_URL}/models/${model-id}`)

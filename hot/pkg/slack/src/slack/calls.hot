@@ -27,7 +27,9 @@ CallsAddResponse type {
 
 
 calls-add
-meta {doc: "POST /calls.add - Register a new call"}
+meta {
+    doc: """POST /calls.add - Register a new call. Requires an `external_unique_id` and `join_url`. Optionally include a title, participants, and start time."""
+}
 fn (request: CallsAddRequest): CallsAddResponse {
   response api-request("POST", `${::slack::core/BASE_URL}/calls.add`, {}, request)
   if(is-ok-response(response), CallsAddResponse(response.body), err(HttpError(response)))
@@ -45,7 +47,9 @@ CallsEndResponse type {
 
 
 calls-end
-meta {doc: "POST /calls.end - End a call"}
+meta {
+    doc: """POST /calls.end - End a call. Pass the call `id` and optionally a `duration` in seconds."""
+}
 fn (request: CallsEndRequest): CallsEndResponse {
   response api-request("POST", `${::slack::core/BASE_URL}/calls.end`, {}, request)
   if(is-ok-response(response), CallsEndResponse(response.body), err(HttpError(response)))
@@ -63,7 +67,9 @@ CallsInfoResponse type {
 
 
 calls-info
-meta {doc: "GET /calls.info - Get information about a call"}
+meta {
+    doc: """GET /calls.info - Get information about a call. Returns the call object with title, participants, and status."""
+}
 fn (request: CallsInfoRequest): CallsInfoResponse {
   response api-request("GET", `${::slack::core/BASE_URL}/calls.info?id=${request.id}`)
   if(is-ok-response(response), CallsInfoResponse(response.body), err(HttpError(response)))
@@ -84,7 +90,9 @@ CallsUpdateResponse type {
 
 
 calls-update
-meta {doc: "POST /calls.update - Update information about a call"}
+meta {
+    doc: """POST /calls.update - Update information about a call. Can change the title and join URLs."""
+}
 fn (request: CallsUpdateRequest): CallsUpdateResponse {
   response api-request("POST", `${::slack::core/BASE_URL}/calls.update`, {}, request)
   if(is-ok-response(response), CallsUpdateResponse(response.body), err(HttpError(response)))
@@ -106,7 +114,9 @@ CallsParticipantsAddResponse type {
 
 
 calls-participants-add
-meta {doc: "POST /calls.participants.add - Add new participants to a call"}
+meta {
+    doc: """POST /calls.participants.add - Add new participants to a call. Each user in the `users` Vec should be a Map with a `slack_id` or `external_id` and `display_name`."""
+}
 fn (request: CallsParticipantsAddRequest): CallsParticipantsAddResponse {
   response api-request("POST", `${::slack::core/BASE_URL}/calls.participants.add`, {}, request)
   if(is-ok-response(response), CallsParticipantsAddResponse(response.body), err(HttpError(response)))
@@ -124,7 +134,9 @@ CallsParticipantsRemoveResponse type {
 
 
 calls-participants-remove
-meta {doc: "POST /calls.participants.remove - Remove participants from a call"}
+meta {
+    doc: """POST /calls.participants.remove - Remove participants from a call. Each user in the `users` Vec should be a Map with a `slack_id` or `external_id`."""
+}
 fn (request: CallsParticipantsRemoveRequest): CallsParticipantsRemoveResponse {
   response api-request("POST", `${::slack::core/BASE_URL}/calls.participants.remove`, {}, request)
   if(is-ok-response(response), CallsParticipantsRemoveResponse(response.body), err(HttpError(response)))
@@ -149,7 +161,20 @@ RtmConnectResponse type {
 
 
 rtm-connect
-meta {doc: "GET /rtm.connect - Start a Real Time Messaging session"}
+meta {
+    doc: """
+GET /rtm.connect - Start a Real Time Messaging session. Returns a WebSocket URL for receiving events in real time. Note: RTM may not be available for all token types (bot tokens may receive a `not_allowed_token_type` error).
+
+**Example**
+
+```hot
+response ::slack::calls/rtm-connect(::slack::calls/RtmConnectRequest({}))
+response.url   // => "wss://wss-primary.slack.com/websocket/..."
+response.team  // => {id: "T1234", name: "My Team"}
+response.self  // => {id: "U1234", name: "my-bot"}
+```
+"""
+}
 fn (request: RtmConnectRequest): RtmConnectResponse {
   response api-request("GET", `${::slack::core/BASE_URL}/rtm.connect?batch_presence_aware=${or(request.batch_presence_aware, "")}&presence_sub=${or(request.presence_sub, "")}`)
   if(is-ok-response(response), RtmConnectResponse(response.body), err(HttpError(response)))

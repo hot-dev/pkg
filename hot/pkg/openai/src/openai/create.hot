@@ -4,9 +4,8 @@ api-request ::openai::api/request
 HttpError ::openai::api/HttpError
 is-ok-response ::hot::http/is-ok-response
 
-StopConfiguration type {
-
-}
+// Stop sequence(s): a single string or array of strings
+StopConfiguration type Any
 
 CreateEvalRequest type {
     name: Str?,
@@ -30,9 +29,8 @@ ImagesResponse type {
     usage: ImageGenUsage?
 }
 
-CreateResponse type {
-
-}
+// Response creation result
+CreateResponse type Map
 
 VectorStoreFileBatchObject type {
     id: Str,
@@ -83,9 +81,8 @@ ImageGenInputUsageDetails type {
     image_tokens: Int
 }
 
-ImageInputFidelity type {
-
-}
+// Image input fidelity level ("low" or "high")
+ImageInputFidelity type Str
 
 CreateUploadRequest type {
     filename: Str,
@@ -125,13 +122,11 @@ CreateEmbeddingRequest type {
     user: Str?
 }
 
-MessageContent type {
+// Message content -- can be text or an array of content parts
+MessageContent type Any
 
-}
-
-ParallelToolCalls type {
-
-}
+// Whether to allow parallel function calls during tool use
+ParallelToolCalls type Bool
 
 CreateThreadRequest type {
     messages: Vec<CreateMessageRequest>?,
@@ -152,7 +147,7 @@ CreateTranscriptionRequest type {
     language: Str?,
     prompt: Str?,
     response_format: AudioResponseFormat?,
-    temperature: Float?,
+    temperature: Dec?,
     stream: Bool?,
     chunking_strategy: TranscriptionChunkingStrategy?,
     timestamp_granularities: Vec<"word" | "segment">?,
@@ -178,9 +173,8 @@ CreateMessageRequest type {
     metadata: Metadata?
 }
 
-Response type {
-
-}
+// Generic API response object
+Response type Map
 
 FineTuneSupervisedMethod type {
     hyperparameters: FineTuneSupervisedHyperparameters?
@@ -224,8 +218,8 @@ RunObject type {
     tools: Vec<AssistantTool>,
     metadata: Metadata,
     usage: RunCompletionUsage,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     max_prompt_tokens: Int,
     max_completion_tokens: Int,
     truncation_strategy: Any,
@@ -251,9 +245,8 @@ CreateChatCompletionResponse type {
     usage: CompletionUsage?
 }
 
-FilePurpose type {
-
-}
+// File purpose (e.g. "assistants", "batch", "fine-tune", "vision")
+FilePurpose type Str
 
 CompletionUsage type {
     completion_tokens: Int,
@@ -263,9 +256,8 @@ CompletionUsage type {
     prompt_tokens_details: Map?
 }
 
-ReasoningEffort type {
-
-}
+// Reasoning effort level (e.g. "low", "medium", "high")
+ReasoningEffort type Str
 
 FineTuningCheckpointPermission type {
     id: Str,
@@ -309,9 +301,8 @@ VectorStoreFileObject type {
     attributes: VectorStoreFileAttributes?
 }
 
-RunStatus type {
-
-}
+// Run status identifier (e.g. "queued", "in_progress", "completed", "failed", "cancelled", "expired")
+RunStatus type Str
 
 FineTuneReinforcementHyperparameters type {
     batch_size: Any?,
@@ -323,9 +314,8 @@ FineTuneReinforcementHyperparameters type {
     eval_samples: Any?
 }
 
-TranscriptionChunkingStrategy type {
-
-}
+// Chunking strategy for audio transcription
+TranscriptionChunkingStrategy type Map
 
 CreateModerationRequest type {
     input: Any,
@@ -364,9 +354,8 @@ Error type {
     type: Str
 }
 
-AudioResponseFormat type {
-
-}
+// Audio response format (e.g. "mp3", "opus", "aac", "flac", "wav", "pcm")
+AudioResponseFormat type Str
 
 FineTuneSupervisedHyperparameters type {
     batch_size: Any?,
@@ -403,9 +392,8 @@ VectorStoreObject type {
     metadata: Metadata
 }
 
-VectorStoreFileAttributes type {
-
-}
+// Custom key-value attributes for a vector store file (used for filtering)
+VectorStoreFileAttributes type Map
 
 Eval type {
     object: "eval",
@@ -417,17 +405,14 @@ Eval type {
     metadata: Metadata
 }
 
-ChunkingStrategyResponse type {
+// Chunking strategy used for a vector store file
+ChunkingStrategyResponse type Map
 
-}
+// What to include in transcription (e.g. "logprobs")
+TranscriptionInclude type Str
 
-TranscriptionInclude type {
-
-}
-
-ServiceTier type {
-
-}
+// Service tier for the request (e.g. "auto", "default", "scale", "flex")
+ServiceTier type Str
 
 ThreadObject type {
     id: Str,
@@ -437,13 +422,12 @@ ThreadObject type {
     metadata: Metadata
 }
 
-ChunkingStrategyRequestParam type {
-
-}
+// Chunking strategy configuration for vector store file creation
+ChunkingStrategyRequestParam type Map
 
 Embedding type {
     index: Int,
-    embedding: Vec<Float>,
+    embedding: Vec<Dec>,
     object: "embedding"
 }
 
@@ -452,19 +436,19 @@ CreateCompletionRequest type {
     prompt: Any,
     best_of: Int?,
     echo: Bool?,
-    frequency_penalty: Float?,
+    frequency_penalty: Dec?,
     logit_bias: Map?,
     logprobs: Int?,
     max_tokens: Int?,
     n: Int?,
-    presence_penalty: Float?,
+    presence_penalty: Dec?,
     seed: Int?,
     stop: StopConfiguration?,
     stream: Bool?,
     stream_options: ChatCompletionStreamOptions?,
     suffix: Str?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     user: Str?
 }
 
@@ -475,9 +459,8 @@ CreateEmbeddingResponse type {
     usage: Map
 }
 
-AssistantTool type {
-
-}
+// Tool definition for an assistant (code_interpreter, file_search, or function)
+AssistantTool type Map
 
 FineTuneDPOHyperparameters type {
     beta: Any?,
@@ -499,8 +482,8 @@ CreateThreadAndRunRequest type {
     tools: Vec<AssistantTool>?,
     tool_resources: Map?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     stream: Bool?,
     max_prompt_tokens: Int?,
     max_completion_tokens: Int?,
@@ -528,9 +511,8 @@ CreateVectorStoreFileBatchRequest type {
     attributes: VectorStoreFileAttributes?
 }
 
-VoiceIdsShared type {
-
-}
+// Voice ID for audio (e.g. "alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse")
+VoiceIdsShared type Str
 
 CreateVectorStoreRequest type {
     file_ids: Vec<Str>?,
@@ -540,9 +522,8 @@ CreateVectorStoreRequest type {
     metadata: Metadata?
 }
 
-CreateChatCompletionRequest type {
-
-}
+// Chat completion request body -- see OpenAI API docs for full schema
+CreateChatCompletionRequest type Map
 
 CreateRunRequest type {
     assistant_id: Str,
@@ -553,8 +534,8 @@ CreateRunRequest type {
     additional_messages: Vec<CreateMessageRequest>?,
     tools: Vec<AssistantTool>?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     stream: Bool?,
     max_prompt_tokens: Int?,
     max_completion_tokens: Int?,
@@ -607,8 +588,8 @@ CreateAssistantRequest type {
     tools: Vec<AssistantTool>?,
     tool_resources: Map?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     response_format: AssistantsApiResponseFormatOption?
 }
 
@@ -618,7 +599,7 @@ CreateSpeechRequest type {
     instructions: Str?,
     voice: VoiceIdsShared,
     response_format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"?,
-    speed: Float?,
+    speed: Dec?,
     stream_format: "sse" | "audio"?
 }
 
@@ -626,9 +607,8 @@ FineTuneDPOMethod type {
     hyperparameters: FineTuneDPOHyperparameters?
 }
 
-AssistantsApiResponseFormatOption type {
-
-}
+// Response format: "auto", or {type: "json_object"}, or {type: "json_schema", json_schema: {...}}
+AssistantsApiResponseFormatOption type Any
 
 CreateCompletionResponse type {
     id: Str,
@@ -644,9 +624,8 @@ CreateFineTuningCheckpointPermissionRequest type {
     project_ids: Vec<Str>
 }
 
-PartialImages type {
-
-}
+// Partial images configuration for streaming
+PartialImages type Map
 
 ChatCompletionStreamOptions type {
     include_usage: Bool?,
@@ -670,14 +649,13 @@ AssistantObject type {
     tools: Vec<AssistantTool>,
     tool_resources: Map?,
     metadata: Metadata,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     response_format: AssistantsApiResponseFormatOption?
 }
 
-Metadata type {
-
-}
+// Arbitrary key-value metadata associated with an API object
+Metadata type Map
 
 VectorStoreExpirationAfter type {
     anchor: "last_active_at",
@@ -695,7 +673,7 @@ CreateTranslationRequest type {
     model: Any,
     prompt: Str?,
     response_format: "json" | "text" | "srt" | "verbose_json" | "vtt"?,
-    temperature: Float?
+    temperature: Dec?
 }
 
 CreateAssistantRequest type {
@@ -707,8 +685,8 @@ CreateAssistantRequest type {
     tools: Vec<AssistantTool>?,
     tool_resources: Map?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     response_format: AssistantsApiResponseFormatOption?
 }
 
@@ -723,14 +701,31 @@ CreateAssistantResponse type {
     tools: Vec<AssistantTool>,
     tool_resources: Map?,
     metadata: Metadata,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     response_format: AssistantsApiResponseFormatOption?
 }
 
 
 create-assistant
-meta {doc: "POST /assistants - Create assistant"}
+meta {
+    doc: """
+    POST /assistants - Create an assistant with instructions and tools.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-assistant(CreateAssistantRequest({
+        model: "gpt-4o-mini",
+        name: "Math Tutor",
+        instructions: "You are a helpful math tutor."
+    }))
+
+    response.id   // => "asst_abc123"
+    response.name // => "Math Tutor"
+    ```
+    """
+}
 fn (request: CreateAssistantRequest): CreateAssistantResponse {
   response api-request("POST", `${::openai/BASE_URL}/assistants`, {}, request)
   if(is-ok-response(response), CreateAssistantResponse(response.body), err(HttpError(response)))
@@ -742,7 +737,7 @@ CreateSpeechRequest type {
     instructions: Str?,
     voice: VoiceIdsShared,
     response_format: "mp3" | "opus" | "aac" | "flac" | "wav" | "pcm"?,
-    speed: Float?,
+    speed: Dec?,
     stream_format: "sse" | "audio"?
 }
 
@@ -752,7 +747,23 @@ CreateSpeechResponse type {
 
 
 create-speech
-meta {doc: "POST /audio/speech - Create speech"}
+meta {
+    doc: """
+    POST /audio/speech - Generate audio from text (TTS).
+
+    For a more ergonomic API, see `::openai::audio/speech` which provides typed request/response wrappers.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-speech(CreateSpeechRequest({
+        model: "tts-1",
+        input: "Hello, world!",
+        voice: "alloy"
+    }))
+    ```
+    """
+}
 fn (request: CreateSpeechRequest): CreateSpeechResponse {
   response api-request("POST", `${::openai/BASE_URL}/audio/speech`, {}, request)
   if(is-ok-response(response), CreateSpeechResponse(response.body), err(HttpError(response)))
@@ -764,7 +775,7 @@ CreateTranscriptionRequest type {
     language: Str?,
     prompt: Str?,
     response_format: AudioResponseFormat?,
-    temperature: Float?,
+    temperature: Dec?,
     stream: Bool?,
     chunking_strategy: TranscriptionChunkingStrategy?,
     timestamp_granularities: Vec<"word" | "segment">?,
@@ -777,7 +788,20 @@ CreateTranscriptionResponse type {
 
 
 create-transcription
-meta {doc: "POST /audio/transcriptions - Create transcription"}
+meta {
+    doc: """
+    POST /audio/transcriptions - Transcribe audio to text using Whisper.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-transcription(CreateTranscriptionRequest({
+        file: "audio.mp3",
+        model: "whisper-1"
+    }))
+    ```
+    """
+}
 fn (request: CreateTranscriptionRequest): CreateTranscriptionResponse {
   response api-request("POST", `${::openai/BASE_URL}/audio/transcriptions`, {}, request)
   if(is-ok-response(response), CreateTranscriptionResponse(response.body), err(HttpError(response)))
@@ -788,7 +812,7 @@ CreateTranslationRequest type {
     model: Any,
     prompt: Str?,
     response_format: "json" | "text" | "srt" | "verbose_json" | "vtt"?,
-    temperature: Float?
+    temperature: Dec?
 }
 
 CreateTranslationResponse type {
@@ -797,7 +821,20 @@ CreateTranslationResponse type {
 
 
 create-translation
-meta {doc: "POST /audio/translations - Create translation"}
+meta {
+    doc: """
+    POST /audio/translations - Translate audio to English text using Whisper.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-translation(CreateTranslationRequest({
+        file: "french-audio.mp3",
+        model: "whisper-1"
+    }))
+    ```
+    """
+}
 fn (request: CreateTranslationRequest): CreateTranslationResponse {
   response api-request("POST", `${::openai/BASE_URL}/audio/translations`, {}, request)
   if(is-ok-response(response), CreateTranslationResponse(response.body), err(HttpError(response)))
@@ -835,15 +872,33 @@ CreateBatchResponse type {
 
 
 create-batch
-meta {doc: "POST /batches - Create batch"}
+meta {
+    doc: """
+    POST /batches - Create a batch of API requests for asynchronous processing.
+
+    Batches support chat completions, embeddings, and completions endpoints with a 24-hour completion window.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-batch(CreateBatchRequest({
+        input_file_id: "file-abc123",
+        endpoint: "/v1/chat/completions",
+        completion_window: "24h"
+    }))
+
+    response.id     // => "batch_abc123"
+    response.status // => "validating"
+    ```
+    """
+}
 fn (request: CreateBatchRequest): CreateBatchResponse {
   response api-request("POST", `${::openai/BASE_URL}/batches`, {}, request)
   if(is-ok-response(response), CreateBatchResponse(response.body), err(HttpError(response)))
 }
 
-CreateChatCompletionRequest type {
-
-}
+// Chat completion request body -- see OpenAI API docs for full schema
+CreateChatCompletionRequest type Map
 
 CreateChatCompletionResponse type {
     id: Str,
@@ -858,7 +913,25 @@ CreateChatCompletionResponse type {
 
 
 create-chat-completion
-meta {doc: "POST /chat/completions - Create chat completion"}
+meta {
+    doc: """
+    POST /chat/completions - Create a chat completion.
+
+    For a more ergonomic API, see `::openai::chat/complete` which provides typed request/response wrappers.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-chat-completion(CreateChatCompletionRequest({
+        model: "gpt-4o-mini",
+        messages: [{role: "user", content: "What is 1+1?"}],
+        max_completion_tokens: 50
+    }))
+
+    response.choices[0].message.content // => "2"
+    ```
+    """
+}
 fn (request: CreateChatCompletionRequest): CreateChatCompletionResponse {
   response api-request("POST", `${::openai/BASE_URL}/chat/completions`, {}, request)
   if(is-ok-response(response), CreateChatCompletionResponse(response.body), err(HttpError(response)))
@@ -869,19 +942,19 @@ CreateCompletionRequest type {
     prompt: Any,
     best_of: Int?,
     echo: Bool?,
-    frequency_penalty: Float?,
+    frequency_penalty: Dec?,
     logit_bias: Map?,
     logprobs: Int?,
     max_tokens: Int?,
     n: Int?,
-    presence_penalty: Float?,
+    presence_penalty: Dec?,
     seed: Int?,
     stop: StopConfiguration?,
     stream: Bool?,
     stream_options: ChatCompletionStreamOptions?,
     suffix: Str?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     user: Str?
 }
 
@@ -897,7 +970,13 @@ CreateCompletionResponse type {
 
 
 create-completion
-meta {doc: "POST /completions - Create completion"}
+meta {
+    doc: """
+    POST /completions - Create a text completion (legacy endpoint).
+
+    For chat-based completions, prefer `create-chat-completion` or `::openai::chat/complete`.
+    """
+}
 fn (request: CreateCompletionRequest): CreateCompletionResponse {
   response api-request("POST", `${::openai/BASE_URL}/completions`, {}, request)
   if(is-ok-response(response), CreateCompletionResponse(response.body), err(HttpError(response)))
@@ -920,7 +999,24 @@ CreateEmbeddingResponse type {
 
 
 create-embeddings
-meta {doc: "POST /embeddings - Create embeddings"}
+meta {
+    doc: """
+    POST /embeddings - Create vector embeddings for text input.
+
+    For a more ergonomic API, see `::openai::embeddings/create` which provides typed request/response wrappers.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-embeddings(CreateEmbeddingRequest({
+        input: "The quick brown fox",
+        model: "text-embedding-3-small"
+    }))
+
+    response.data[0].embedding // => Vec<Dec> of embedding dimensions
+    ```
+    """
+}
 fn (request: CreateEmbeddingRequest): CreateEmbeddingResponse {
   response api-request("POST", `${::openai/BASE_URL}/embeddings`, {}, request)
   if(is-ok-response(response), CreateEmbeddingResponse(response.body), err(HttpError(response)))
@@ -945,7 +1041,9 @@ CreateEvalResponse type {
 
 
 create-eval
-meta {doc: "POST /evals - Create eval"}
+meta {
+    doc: """POST /evals - Create an evaluation to test model outputs against criteria."""
+}
 fn (request: CreateEvalRequest): CreateEvalResponse {
   response api-request("POST", `${::openai/BASE_URL}/evals`, {}, request)
   if(is-ok-response(response), CreateEvalResponse(response.body), err(HttpError(response)))
@@ -976,7 +1074,7 @@ CreateEvalRunResponse type {
 
 
 create-eval-run
-meta {doc: "POST /evals/{eval_id}/runs - Create eval run"}
+meta {doc: """POST /evals/{eval_id}/runs - Run an evaluation against a data source."""}
 fn (eval-id: Str, request: CreateEvalRunRequest): CreateEvalRunResponse {
   response api-request("POST", `${::openai/BASE_URL}/evals/${eval-id}/runs`, {}, request)
   if(is-ok-response(response), CreateEvalRunResponse(response.body), err(HttpError(response)))
@@ -1001,7 +1099,24 @@ CreateFileResponse type {
 
 
 upload-file
-meta {doc: "POST /files - Upload file"}
+meta {
+    doc: """
+    POST /files - Upload a file for use with assistants, fine-tuning, or batch API.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/upload-file(CreateFileRequest({
+        file: "training-data.jsonl",
+        purpose: "fine-tune"
+    }))
+
+    response.id       // => "file-abc123"
+    response.filename  // => "training-data.jsonl"
+    response.status    // => "uploaded"
+    ```
+    """
+}
 fn (request: CreateFileRequest): CreateFileResponse {
   response api-request("POST", `${::openai/BASE_URL}/files`, {}, request)
   if(is-ok-response(response), CreateFileResponse(response.body), err(HttpError(response)))
@@ -1022,7 +1137,7 @@ CreateFineTuningCheckpointPermissionResponse type {
 
 create-checkpoint-permissions
 meta {
-    doc: "POST /fine_tuning/checkpoints/{fine_tuned_model_checkpoint}/permissions - Create checkpoint permissions"
+    doc: """POST /fine_tuning/checkpoints/{fine_tuned_model_checkpoint}/permissions - Create checkpoint permissions"""
 }
 fn (fine-tuned-model-checkpoint: Str, request: CreateFineTuningCheckpointPermissionRequest): CreateFineTuningCheckpointPermissionResponse {
   response api-request("POST", `${::openai/BASE_URL}/fine_tuning/checkpoints/${fine-tuned-model-checkpoint}/permissions`, {}, request)
@@ -1065,7 +1180,23 @@ CreateFineTuningJobResponse type {
 
 
 create-finetuning-job
-meta {doc: "POST /fine_tuning/jobs - Create fine-tuning job"}
+meta {
+    doc: """
+    POST /fine_tuning/jobs - Create a fine-tuning job to customize a model with your training data.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-finetuning-job(CreateFineTuningJobRequest({
+        model: "gpt-4o-mini-2024-07-18",
+        training_file: "file-abc123"
+    }))
+
+    response.id     // => "ftjob-abc123"
+    response.status // => "validating_files"
+    ```
+    """
+}
 fn (request: CreateFineTuningJobRequest): CreateFineTuningJobResponse {
   response api-request("POST", `${::openai/BASE_URL}/fine_tuning/jobs`, {}, request)
   if(is-ok-response(response), CreateFineTuningJobResponse(response.body), err(HttpError(response)))
@@ -1101,7 +1232,13 @@ CreateImageEditResponse type {
 
 
 create-image-edit
-meta {doc: "POST /images/edits - Create image edit"}
+meta {
+    doc: """
+    POST /images/edits - Edit an image with a text prompt (inpainting).
+
+    For a more ergonomic API, see `::openai::images/edit`.
+    """
+}
 fn (request: CreateImageEditRequest): CreateImageEditResponse {
   response api-request("POST", `${::openai/BASE_URL}/images/edits`, {}, request)
   if(is-ok-response(response), CreateImageEditResponse(response.body), err(HttpError(response)))
@@ -1136,7 +1273,26 @@ CreateImageResponse type {
 
 
 create-image
-meta {doc: "POST /images/generations - Create image"}
+meta {
+    doc: """
+    POST /images/generations - Generate an image from a text prompt.
+
+    For a more ergonomic API, see `::openai::images/generate` which provides typed request/response wrappers and auto-defaults to DALL-E 3.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-image(CreateImageRequest({
+        prompt: "A simple red circle on a white background",
+        model: "dall-e-2",
+        size: "256x256",
+        n: 1
+    }))
+
+    response.data[0].url // => "https://oaidalleapi..."
+    ```
+    """
+}
 fn (request: CreateImageRequest): CreateImageResponse {
   response api-request("POST", `${::openai/BASE_URL}/images/generations`, {}, request)
   if(is-ok-response(response), CreateImageResponse(response.body), err(HttpError(response)))
@@ -1163,7 +1319,13 @@ CreateImageVariationResponse type {
 
 
 create-image-variation
-meta {doc: "POST /images/variations - Create image variation"}
+meta {
+    doc: """
+    POST /images/variations - Create variations of an existing image.
+
+    For a more ergonomic API, see `::openai::images/variation`.
+    """
+}
 fn (request: CreateImageVariationRequest): CreateImageVariationResponse {
   response api-request("POST", `${::openai/BASE_URL}/images/variations`, {}, request)
   if(is-ok-response(response), CreateImageVariationResponse(response.body), err(HttpError(response)))
@@ -1182,23 +1344,37 @@ CreateModerationResponse type {
 
 
 create-moderation
-meta {doc: "POST /moderations - Create moderation"}
+meta {
+    doc: """
+    POST /moderations - Check content for potentially harmful material.
+
+    For a more ergonomic API, see `::openai::moderations/create` which provides typed request/response wrappers.
+
+    **Example**
+
+    ```hot
+    response ::openai::create/create-moderation(CreateModerationRequest({
+        input: "I love programming!"
+    }))
+
+    response.results[0].flagged // => false
+    ```
+    """
+}
 fn (request: CreateModerationRequest): CreateModerationResponse {
   response api-request("POST", `${::openai/BASE_URL}/moderations`, {}, request)
   if(is-ok-response(response), CreateModerationResponse(response.body), err(HttpError(response)))
 }
 
-CreateResponseRequest type {
+// Response creation request body
+CreateResponseRequest type Map
 
-}
-
-CreateResponseResponse type {
-
-}
+// Response creation response
+CreateResponseResponse type Map
 
 
 create-model-response
-meta {doc: "POST /responses - Create a model response"}
+meta {doc: """POST /responses - Create a model response using the Responses API."""}
 fn (request: CreateResponseRequest): CreateResponseResponse {
   response api-request("POST", `${::openai/BASE_URL}/responses`, {}, request)
   if(is-ok-response(response), CreateResponseResponse(response.body), err(HttpError(response)))
@@ -1220,7 +1396,7 @@ CreateThreadResponse type {
 
 
 create-thread
-meta {doc: "POST /threads - Create thread"}
+meta {doc: """POST /threads - Create a new thread for the Assistants API."""}
 fn (request: CreateThreadRequest): CreateThreadResponse {
   response api-request("POST", `${::openai/BASE_URL}/threads`, {}, request)
   if(is-ok-response(response), CreateThreadResponse(response.body), err(HttpError(response)))
@@ -1234,8 +1410,8 @@ CreateThreadAndRunRequest type {
     tools: Vec<AssistantTool>?,
     tool_resources: Map?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     stream: Bool?,
     max_prompt_tokens: Int?,
     max_completion_tokens: Int?,
@@ -1265,8 +1441,8 @@ CreateThreadAndRunResponse type {
     tools: Vec<AssistantTool>,
     metadata: Metadata,
     usage: RunCompletionUsage,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     max_prompt_tokens: Int,
     max_completion_tokens: Int,
     truncation_strategy: Any,
@@ -1277,7 +1453,9 @@ CreateThreadAndRunResponse type {
 
 
 create-thread-and-run
-meta {doc: "POST /threads/runs - Create thread and run"}
+meta {
+    doc: """POST /threads/runs - Create a thread and immediately run an assistant on it."""
+}
 fn (request: CreateThreadAndRunRequest): CreateThreadAndRunResponse {
   response api-request("POST", `${::openai/BASE_URL}/threads/runs`, {}, request)
   if(is-ok-response(response), CreateThreadAndRunResponse(response.body), err(HttpError(response)))
@@ -1309,7 +1487,7 @@ CreateMessageResponse type {
 
 
 create-message
-meta {doc: "POST /threads/{thread_id}/messages - Create message"}
+meta {doc: """POST /threads/{thread_id}/messages - Create a message in a thread."""}
 fn (thread-id: Str, request: CreateMessageRequest): CreateMessageResponse {
   response api-request("POST", `${::openai/BASE_URL}/threads/${thread-id}/messages`, {}, request)
   if(is-ok-response(response), CreateMessageResponse(response.body), err(HttpError(response)))
@@ -1324,8 +1502,8 @@ CreateRunRequest type {
     additional_messages: Vec<CreateMessageRequest>?,
     tools: Vec<AssistantTool>?,
     metadata: Metadata?,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     stream: Bool?,
     max_prompt_tokens: Int?,
     max_completion_tokens: Int?,
@@ -1355,8 +1533,8 @@ CreateRunResponse type {
     tools: Vec<AssistantTool>,
     metadata: Metadata,
     usage: RunCompletionUsage,
-    temperature: Float?,
-    top_p: Float?,
+    temperature: Dec?,
+    top_p: Dec?,
     max_prompt_tokens: Int,
     max_completion_tokens: Int,
     truncation_strategy: Any,
@@ -1367,7 +1545,9 @@ CreateRunResponse type {
 
 
 create-run
-meta {doc: "POST /threads/{thread_id}/runs - Create run"}
+meta {
+    doc: """POST /threads/{thread_id}/runs - Create a run to execute an assistant on a thread."""
+}
 fn (thread-id: Str, include: Str, request: CreateRunRequest): CreateRunResponse {
   response api-request("POST", `${::openai/BASE_URL}/threads/${thread-id}/runs?include[]=${include}`, {}, request)
   if(is-ok-response(response), CreateRunResponse(response.body), err(HttpError(response)))
@@ -1394,7 +1574,7 @@ CreateUploadResponse type {
 
 
 create-upload
-meta {doc: "POST /uploads - Create upload"}
+meta {doc: """POST /uploads - Create a multi-part upload for large files."""}
 fn (request: CreateUploadRequest): CreateUploadResponse {
   response api-request("POST", `${::openai/BASE_URL}/uploads`, {}, request)
   if(is-ok-response(response), CreateUploadResponse(response.body), err(HttpError(response)))
@@ -1424,7 +1604,7 @@ CreateVectorStoreResponse type {
 
 
 create-vector-store
-meta {doc: "POST /vector_stores - Create vector store"}
+meta {doc: """POST /vector_stores - Create a vector store for file search."""}
 fn (request: CreateVectorStoreRequest): CreateVectorStoreResponse {
   response api-request("POST", `${::openai/BASE_URL}/vector_stores`, {}, request)
   if(is-ok-response(response), CreateVectorStoreResponse(response.body), err(HttpError(response)))
@@ -1448,7 +1628,7 @@ CreateVectorStoreFileBatchResponse type {
 
 create-vector-store-file-batch
 meta {
-    doc: "POST /vector_stores/{vector_store_id}/file_batches - Create vector store file batch"
+    doc: """POST /vector_stores/{vector_store_id}/file_batches - Add a batch of files to a vector store."""
 }
 fn (vector-store-id: Str, request: CreateVectorStoreFileBatchRequest): CreateVectorStoreFileBatchResponse {
   response api-request("POST", `${::openai/BASE_URL}/vector_stores/${vector-store-id}/file_batches`, {}, request)
@@ -1475,7 +1655,9 @@ CreateVectorStoreFileResponse type {
 
 
 create-vector-store-file
-meta {doc: "POST /vector_stores/{vector_store_id}/files - Create vector store file"}
+meta {
+    doc: """POST /vector_stores/{vector_store_id}/files - Add a file to a vector store."""
+}
 fn (vector-store-id: Str, request: CreateVectorStoreFileRequest): CreateVectorStoreFileResponse {
   response api-request("POST", `${::openai/BASE_URL}/vector_stores/${vector-store-id}/files`, {}, request)
   if(is-ok-response(response), CreateVectorStoreFileResponse(response.body), err(HttpError(response)))

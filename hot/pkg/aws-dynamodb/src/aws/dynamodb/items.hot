@@ -38,7 +38,22 @@ UpdateItemResponse type {
 // Put an item into a DynamoDB table
 put-item
 meta {
-    doc: "Put an item into a DynamoDB table. Item should use DynamoDB attribute value format."
+    doc: """
+    Put an item into a DynamoDB table. Item should use DynamoDB attribute value format.
+
+    **Example**
+
+    ```hot
+    item {
+        pk: {S: "user-123"},
+        sk: {S: "profile"},
+        name: {S: "Alice"},
+        age: {N: "30"}
+    }
+
+    result ::aws::dynamodb::items/put-item("my-table", item)
+    ```
+    """
 }
 fn
 (table_name: Str, item: Map, condition_expression: Str, expression_attribute_values: Map): PutItemResponse | AwsError {
@@ -86,7 +101,18 @@ fn
 // Get an item from a DynamoDB table
 get-item
 meta {
-    doc: "Get an item from a DynamoDB table by its primary key."
+    doc: """
+    Get an item from a DynamoDB table by its primary key.
+
+    **Example**
+
+    ```hot
+    key {pk: {S: "user-123"}, sk: {S: "profile"}}
+    result ::aws::dynamodb::items/get-item("my-table", key)
+    result.item.name.S  // => "Alice"
+    result.item.age.N   // => "30"
+    ```
+    """
 }
 fn
 (table_name: Str, key: Map, consistent_read: Bool, projection_expression: Str): GetItemResponse | AwsError {
@@ -137,7 +163,16 @@ fn
 // Delete an item from a DynamoDB table
 delete-item
 meta {
-    doc: "Delete an item from a DynamoDB table by its primary key."
+    doc: """
+    Delete an item from a DynamoDB table by its primary key.
+
+    **Example**
+
+    ```hot
+    key {pk: {S: "user-123"}, sk: {S: "profile"}}
+    ::aws::dynamodb::items/delete-item("my-table", key)
+    ```
+    """
 }
 fn
 (table_name: Str, key: Map, condition_expression: Str, expression_attribute_values: Map): DeleteItemResponse | AwsError {
@@ -185,7 +220,24 @@ fn
 // Update an item in a DynamoDB table
 update-item
 meta {
-    doc: "Update an item in a DynamoDB table using update expressions."
+    doc: """
+    Update an item in a DynamoDB table using update expressions.
+
+    Returns the updated attributes (ALL_NEW).
+
+    **Example**
+
+    ```hot
+    key {pk: {S: "user-123"}, sk: {S: "profile"}}
+    result ::aws::dynamodb::items/update-item(
+        "my-table",
+        key,
+        "SET hit_count = hit_count + :inc, updated_at = :now",
+        {":inc": {N: "1"}, ":now": {S: "2026-02-16"}}
+    )
+    result.attributes.hit_count.N  // => "1"
+    ```
+    """
 }
 fn
 (table_name: Str, key: Map, update_expression: Str, expression_attribute_values: Map, expression_attribute_names: Map): UpdateItemResponse | AwsError {

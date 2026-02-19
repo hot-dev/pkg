@@ -1,6 +1,6 @@
 ::postmark::api ns
 meta {
-    doc: "Internal HTTP request utilities for Postmark API.",
+    doc: """Internal HTTP request utilities for Postmark API.""",
     ctx: {"postmark.server.token": {required: true}}
 }
 
@@ -28,7 +28,7 @@ HttpResponse -> HttpError fn (response: HttpResponse): HttpError {
 
 request
 meta {
-    doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."
+    doc: """Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."""
 }
 fn
 (method: Str, url: Str, additional-headers: Map, body: Any): HttpResponse {

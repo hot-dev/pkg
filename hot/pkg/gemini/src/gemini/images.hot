@@ -69,20 +69,22 @@ ImagePrediction type {
 
 generate
 meta {
-    doc: "Generate images using Imagen model.
+    doc: """
+    Generate images using Imagen model.
 
-Returns a list of generated images as base64-encoded data.
+    Returns a list of generated images as base64-encoded data.
 
-**Example**
-```hot
-response generate({
-    prompt: \"A serene lake at sunset\",
-    numberOfImages: 2,
-    aspectRatio: \"16:9\"
-})
+    **Example**
+    ```hot
+    response generate({
+        prompt: "A serene lake at sunset",
+        numberOfImages: 2,
+        aspectRatio: "16:9"
+    })
 
-images response.predictions
-```"
+    images response.predictions
+    ```
+    """
 }
 fn (request: GenerateImageRequest): GenerateImageResponse | HttpError {
     // Build the request body for Imagen
@@ -121,32 +123,34 @@ fn (request: GenerateImageRequest): GenerateImageResponse | HttpError {
 
 generate-to-file
 meta {
-    doc: "Generate an image and save it to a file.
+    doc: """
+    Generate an image and save it to a file.
 
-Returns an AIMedia.Image with file metadata and AI generation details.
+    Returns an AIMedia.Image with file metadata and AI generation details.
 
-**Example**
-```hot
-result generate-to-file(\"uploads/sunset.png\", \"A serene lake at sunset\")
+    **Example**
+    ```hot
+    result generate-to-file("uploads/sunset.png", "A serene lake at sunset")
 
-match result {
-    AIMedia.Image => {
-        println(result.media.file.path)  // \"uploads/sunset.png\"
-        println(result.prompt)           // \"A serene lake at sunset\"
+    match result {
+        AIMedia.Image => {
+            println(result.media.file.path)  // "uploads/sunset.png"
+            println(result.prompt)           // "A serene lake at sunset"
+        }
+
+        HttpError => { println("Error!") }
     }
+    ```
 
-    HttpError => { println(\"Error!\") }
-}
-```
-
-**With options**
-```hot
-result generate-to-file(\"output/city.png\", {
-    prompt: \"A futuristic city at night\",
-    aspectRatio: \"16:9\",
-    negativePrompt: \"blurry, low quality\"
-})
-```"
+    **With options**
+    ```hot
+    result generate-to-file("output/city.png", {
+        prompt: "A futuristic city at night",
+        aspectRatio: "16:9",
+        negativePrompt: "blurry, low quality"
+    })
+    ```
+    """
 }
 fn
 (path: Str, prompt: Str): AIMedia | HttpError {
@@ -210,20 +214,22 @@ fn
 
 generate-batch-to-files
 meta {
-    doc: "Generate multiple images and save them to files.
+    doc: """
+    Generate multiple images and save them to files.
 
-Returns an AIMediaBatch with all generated AIMedia.Image items.
+    Returns an AIMediaBatch with all generated AIMedia.Image items.
 
-**Example**
-```hot
-result generate-batch-to-files(\"output\", {
-    prompt: \"A magical forest\",
-    numberOfImages: 3,
-    aspectRatio: \"1:1\"
-})
+    **Example**
+    ```hot
+    result generate-batch-to-files("output", {
+        prompt: "A magical forest",
+        numberOfImages: 3,
+        aspectRatio: "1:1"
+    })
 
-println(`Generated ${result.succeeded} images`)
-```"
+    println(`Generated ${result.succeeded} images`)
+    ```
+    """
 }
 fn (directory: Str, request: GenerateImageRequest): AIMediaBatch | HttpError {
     response generate(request)
@@ -295,19 +301,21 @@ fn (directory: Str, request: GenerateImageRequest): AIMediaBatch | HttpError {
 
 generate-inline
 meta {
-    doc: "Generate images using Gemini 2.0 Flash's native image generation.
+    doc: """
+    Generate images using Gemini 2.0 Flash's native image generation.
 
-This uses the generateContent API with responseModalities set to IMAGE,
-allowing image generation within the chat context.
+    This uses the generateContent API with responseModalities set to IMAGE,
+    allowing image generation within the chat context.
 
-**Example**
-```hot
-response generate-inline(\"Draw a cute robot watering plants\")
+    **Example**
+    ```hot
+    response generate-inline("Draw a cute robot watering plants")
 
-// Response contains inline_data parts with base64 images
-parts response.candidates[0].content.parts
-images filter(parts, (p) { not(is-null(p.inlineData)) })
-```"
+    // Response contains inline_data parts with base64 images
+    parts response.candidates[0].content.parts
+    images filter(parts, (p) { not(is-null(p.inlineData)) })
+    ```
+    """
 }
 fn (prompt: Str): Map | HttpError {
     body {
@@ -325,19 +333,21 @@ fn (prompt: Str): Map | HttpError {
 
 generate-inline-to-file
 meta {
-    doc: "Generate an image using Gemini 2.0 Flash and save it to a file.
+    doc: """
+    Generate an image using Gemini 2.0 Flash and save it to a file.
 
-Uses native image generation in the chat context.
+    Uses native image generation in the chat context.
 
-**Example**
-```hot
-result generate-inline-to-file(\"output/robot.png\", \"Draw a cute robot\")
+    **Example**
+    ```hot
+    result generate-inline-to-file("output/robot.png", "Draw a cute robot")
 
-match result {
-    AIMedia.Image => { println(result.media.file.path) }
-    HttpError => { println(\"Error!\") }
-}
-```"
+    match result {
+        AIMedia.Image => { println(result.media.file.path) }
+        HttpError => { println("Error!") }
+    }
+    ```
+    """
 }
 fn (path: Str, prompt: Str): AIMedia | HttpError {
     response generate-inline(prompt)

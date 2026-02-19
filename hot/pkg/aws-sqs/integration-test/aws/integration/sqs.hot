@@ -66,7 +66,7 @@ meta ["test"]
 fn () {
     timestamp ::hot::time/epoch-millis(::hot::time/now())
     message-body `Hot test message ${timestamp}`
-    
+
     result ::aws::sqs::messages/send-message(test-queue-url, message-body)
     assert(not(is-err(result)), `send-message failed: ${result}`)
     assert(not(is-null(result.message_id)), "message_id should not be null")
@@ -78,23 +78,23 @@ meta ["test"]
 fn () {
     timestamp ::hot::time/epoch-millis(::hot::time/now())
     message-body `Hot integration test ${timestamp}`
-    
+
     // Send message
     send-result ::aws::sqs::messages/send-message(test-queue-url, message-body)
     assert(not(is-err(send-result)), `send-message failed: ${send-result}`)
     assert(not(is-null(send-result.message_id)), "message_id should not be null")
-    
+
     // Receive messages
     receive-result ::aws::sqs::messages/receive-messages(test-queue-url, 10, 5, 30)
     assert(not(is-err(receive-result)), `receive-messages failed: ${receive-result}`)
     assert(is-vec(receive-result.messages), "messages should be a Vec")
-    
+
     // Delete all received messages to clean up
     for-each(receive-result.messages, (msg) {
         delete-result ::aws::sqs::messages/delete-message(test-queue-url, msg.receipt_handle)
         assert(not(is-err(delete-result)), `delete-message failed: ${delete-result}`)
     })
-    
+
     // Verify we received at least one message
     assert(gte(length(receive-result.messages), 1), "Should receive at least 1 message")
 }
@@ -104,28 +104,28 @@ test-send-message-batch
 meta ["test"]
 fn () {
     timestamp ::hot::time/epoch-millis(::hot::time/now())
-    
+
     // Use package function to send batch
     entries [
         { Id: "msg1", MessageBody: `Batch 1 - ${timestamp}` },
         { Id: "msg2", MessageBody: `Batch 2 - ${timestamp}` },
         { Id: "msg3", MessageBody: `Batch 3 - ${timestamp}` }
     ]
-    
+
     result ::aws::sqs::messages/send-message-batch(test-queue-url, entries)
     assert(not(is-err(result)), `Send batch failed: ${result}`)
     assert-eq(3, length(result.successful), `Should have 3 successful sends, got ${length(result.successful)}`)
-    
+
     // Clean up - receive and delete messages using package functions
     receive-result ::aws::sqs::messages/receive-messages(test-queue-url, 10, 5)
-    
+
     cond {
         and(not(is-err(receive-result)), gt(length(receive-result.messages), 0)) => {
             // map-indexed passes (index, element)
             delete-entries map-indexed(receive-result.messages, (idx, msg) {
                 { Id: Str(idx), ReceiptHandle: msg.receipt_handle }
             })
-            
+
             del-result ::aws::sqs::messages/delete-message-batch(test-queue-url, delete-entries)
             assert(not(is-err(del-result)), `Delete batch failed: ${del-result}`)
         }
@@ -139,15 +139,15 @@ meta ["test"]
 fn () {
     // Send a message first
     ::aws::sqs::messages/send-message(test-queue-url, "Test for overloads")
-    
+
     // Test with 2 params
     result2 ::aws::sqs::messages/receive-messages(test-queue-url, 5)
     assert(not(is-err(result2)), `receive-messages(url, max) failed: ${result2}`)
-    
-    // Test with 3 params  
+
+    // Test with 3 params
     result3 ::aws::sqs::messages/receive-messages(test-queue-url, 5, 1)
     assert(not(is-err(result3)), `receive-messages(url, max, wait) failed: ${result3}`)
-    
+
     // Clean up
     all-messages concat(result2.messages, result3.messages)
     for-each(all-messages, (msg) {

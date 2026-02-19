@@ -1,5 +1,8 @@
 ::resend::api ns
-meta {ctx: {"resend.api.key": {required: true}}}
+meta {
+    doc: """Internal HTTP request utilities for the Resend API.""",
+    ctx: {"resend.api.key": {required: true}}
+}
 
 // Namespace alias for ctx module
 ::ctx ::hot::ctx
@@ -25,7 +28,7 @@ HttpResponse -> HttpError fn (response: HttpResponse): HttpError {
 
 request
 meta {
-    doc: "Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."
+    doc: """Make an HTTP request with pre-filled service headers. Additional headers can be provided to merge/override defaults."""
 }
 fn
 (method: Str, url: Str): HttpResponse {

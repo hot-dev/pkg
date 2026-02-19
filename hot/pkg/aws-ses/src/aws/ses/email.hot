@@ -60,7 +60,29 @@ SendEmailResponse type {
 // Send a simple email
 send-email
 meta {
-    doc: "Send an email via AWS SES v2 API."
+    doc: """
+    Send an email via AWS SES v2 API using a full SendEmailRequest.
+
+    For simple emails, prefer the `send-simple-email` convenience function.
+
+    **Example**
+
+    ```hot
+    destination Destination({to_addresses: ["user@example.com"], cc_addresses: null, bcc_addresses: null})
+    body Body({text: "Hello!", html: "<h1>Hello!</h1>"})
+    message Message({subject: "Test Subject", body: body})
+    content EmailContent({simple: message, raw: null, template: null})
+    request SendEmailRequest({
+        from_email_address: "sender@example.com",
+        destination: destination,
+        content: content,
+        reply_to_addresses: null,
+        configuration_set_name: null
+    })
+    result ::aws::ses::email/send-email(request)
+    result.message_id  // => "010001234567890-abcdef..."
+    ```
+    """
 }
 fn (request: SendEmailRequest): SendEmailResponse | AwsError {
     region get-region()
@@ -116,7 +138,30 @@ fn (request: SendEmailRequest): SendEmailResponse | AwsError {
 // Convenience function to send a simple email
 send-simple-email
 meta {
-    doc: "Send a simple email with just from, to, subject, and body."
+    doc: """
+    Send a simple email with just from, to, subject, and body.
+
+    **Example**
+
+    ```hot
+    result ::aws::ses::email/send-simple-email(
+        "sender@example.com",
+        ["user@example.com"],
+        "Welcome!",
+        "Hello from Hot!",
+        "<h1>Hello from Hot!</h1>"
+    )
+    result.message_id  // => "010001234567890-abcdef..."
+
+    // Text-only email (no HTML)
+    result ::aws::ses::email/send-simple-email(
+        "sender@example.com",
+        ["user@example.com"],
+        "Alert",
+        "Something happened"
+    )
+    ```
+    """
 }
 fn
 (from: Str, to: Vec<Str>, subject: Str, body_text: Str, body_html: Str): SendEmailResponse | AwsError {
@@ -149,7 +194,18 @@ fn
 // Send a raw email (for complex MIME messages)
 send-raw-email
 meta {
-    doc: "Send a raw MIME email via AWS SES."
+    doc: """
+    Send a raw MIME email via AWS SES.
+
+    Use this for complex email formats like multipart messages with attachments.
+
+    **Example**
+
+    ```hot
+    raw-message "From: sender@example.com\nTo: user@example.com\nSubject: Test\n\nBody"
+    result ::aws::ses::email/send-raw-email(raw-message)
+    ```
+    """
 }
 fn (raw_message: Str): SendEmailResponse | AwsError {
     region get-region()
@@ -184,7 +240,21 @@ fn (raw_message: Str): SendEmailResponse | AwsError {
 // Send a templated email
 send-templated-email
 meta {
-    doc: "Send an email using an SES template."
+    doc: """
+    Send an email using an SES template.
+
+    **Example**
+
+    ```hot
+    result ::aws::ses::email/send-templated-email(
+        "sender@example.com",
+        ["user@example.com"],
+        "WelcomeTemplate",
+        {name: "Alice", company: "Acme"}
+    )
+    result.message_id  // => "010001234567890-abcdef..."
+    ```
+    """
 }
 fn (from: Str, to: Vec<Str>, template_name: Str, template_data: Map): SendEmailResponse | AwsError {
     region get-region()

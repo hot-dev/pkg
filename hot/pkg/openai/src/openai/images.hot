@@ -89,30 +89,37 @@ CreateImageResponse type {
 
 generate
 meta {
-    doc: "Generate images from a text prompt using DALL-E.
+    doc: """
+    Generate images from a text prompt using DALL-E.
 
-Returns the raw API response with either URLs or base64 data.
+    Returns a CreateImageResponse with a `data` array containing either URLs or base64 data. Defaults to DALL-E 3 if no model is specified.
 
-**Example - URL response (default)**
-```hot
-response generate({
-    prompt: \"A futuristic city at sunset\",
-    model: \"dall-e-3\"
-})
+    **Example - URL response (default)**
 
-image-url response.data[0].url
-```
+    ```hot
+    response ::openai::images/generate(CreateImageRequest({
+        prompt: "A simple red circle on a white background",
+        model: "dall-e-2",
+        size: "256x256",
+        n: 1
+    }))
 
-**Example - Base64 response**
-```hot
-response generate({
-    prompt: \"A cat wearing a spacesuit\",
-    model: \"dall-e-3\",
-    response_format: \"b64_json\"
-})
+    image response.data[0]
+    image.url // => "https://oaidalleapi..."
+    ```
 
-base64-data response.data[0].b64_json
-```"
+    **Example - Base64 response**
+
+    ```hot
+    response ::openai::images/generate(CreateImageRequest({
+        prompt: "A cat wearing a spacesuit",
+        model: "dall-e-3",
+        response_format: "b64_json"
+    }))
+
+    base64-data response.data[0].b64_json
+    ```
+    """
 }
 fn (request: CreateImageRequest): CreateImageResponse | HttpError {
     // Default to dall-e-3 model if not specified
@@ -127,16 +134,18 @@ fn (request: CreateImageRequest): CreateImageResponse | HttpError {
 
 edit
 meta {
-    doc: "Edit an image with a prompt (inpainting).
+    doc: """
+    Edit an image with a prompt (inpainting).
 
-**Example**
-```hot
-response edit({
-    image: \"path/to/image.png\",
-    prompt: \"Add a red hat to the person\",
-    mask: \"path/to/mask.png\"
-})
-```"
+    **Example**
+    ```hot
+    response edit({
+        image: "path/to/image.png",
+        prompt: "Add a red hat to the person",
+        mask: "path/to/mask.png"
+    })
+    ```
+    """
 }
 fn (request: EditImageRequest): CreateImageResponse | HttpError {
     response api-request("POST", `${::openai/BASE_URL}/images/edits`, {}, request)
@@ -145,15 +154,17 @@ fn (request: EditImageRequest): CreateImageResponse | HttpError {
 
 variation
 meta {
-    doc: "Create variations of an image.
+    doc: """
+    Create variations of an image.
 
-**Example**
-```hot
-response variation({
-    image: \"path/to/image.png\",
-    n: 3
-})
-```"
+    **Example**
+    ```hot
+    response variation({
+        image: "path/to/image.png",
+        n: 3
+    })
+    ```
+    """
 }
 fn (request: VariationImageRequest): CreateImageResponse | HttpError {
     response api-request("POST", `${::openai/BASE_URL}/images/variations`, {}, request)
@@ -166,36 +177,36 @@ fn (request: VariationImageRequest): CreateImageResponse | HttpError {
 
 generate-to-file
 meta {
-    doc: "Generate an image and save it to a file.
+    doc: """
+    Generate an image and save it to a file.
 
-Returns an AIMedia.Image with file metadata and AI generation details.
+    Returns an AIMedia.Image with file metadata and AI generation details.
 
-**Example**
-```hot
-result generate-to-file(\"uploads/city.png\", \"A futuristic city at sunset\")
+    **Example**
+    ```hot
+    result generate-to-file("uploads/city.png", "A futuristic city at sunset")
 
-match result {
-    AIMedia.Image => {
-        println(result.media.file.path)  // \"uploads/city.png\"
-        println(result.media.file.size)  // 123456
-        println(result.prompt)           // \"A futuristic city at sunset\"
-        println(result.revised_prompt)   // \"A detailed futuristic city...\"
-        println(result.provider)         // \"openai\"
+    match result {
+        AIMedia.Image => {
+            result.media.file.path  // => "uploads/city.png"
+            result.media.file.size  // => 123456
+            result.prompt           // => "A futuristic city at sunset"
+            result.revised_prompt   // => "A detailed futuristic city..."
+            result.provider         // => "openai"
+        }
     }
+    ```
 
-    HttpError => { println(\"Error!\") }
-}
-```
-
-**With options**
-```hot
-result generate-to-file(\"output/cat.png\", {
-    prompt: \"A cat wearing a spacesuit\",
-    model: \"dall-e-3\",
-    quality: \"hd\",
-    style: \"vivid\"
-})
-```"
+    **With options**
+    ```hot
+    result generate-to-file("output/cat.png", {
+        prompt: "A cat wearing a spacesuit",
+        model: "dall-e-3",
+        quality: "hd",
+        style: "vivid"
+    })
+    ```
+    """
 }
 fn
 (path: Str, prompt: Str): AIMedia | HttpError {
@@ -256,24 +267,25 @@ fn
 
 generate-batch-to-files
 meta {
-    doc: "Generate multiple images and save them to files.
+    doc: """
+    Generate multiple images and save them to files.
 
-Returns an AIMediaBatch with all generated AIMedia.Image items.
+    Returns an AIMediaBatch with all generated AIMedia.Image items.
 
-The path should include a `{n}` placeholder that will be replaced with the image index.
+    The path should include a `{n}` placeholder that will be replaced with the image index.
 
-**Example**
-```hot
-batch generate-batch-to-files(\"uploads/image-{n}.png\", \"A beautiful landscape\", 3)
-// Generates: uploads/image-0.png, uploads/image-1.png, uploads/image-2.png
+    **Example**
+    ```hot
+    batch generate-batch-to-files("uploads/image-{n}.png", "A beautiful landscape", 3)
+    // Generates: uploads/image-0.png, uploads/image-1.png, uploads/image-2.png
 
-println(batch.succeeded)  // 3
-for-each(batch.items, (ai-media) {
-    println(ai-media.media.file.path)
-})
-```
+    batch.succeeded // => 3
+    batch.failed    // => 0
+    first(batch.items).media.file.path // => "uploads/image-0.png"
+    ```
 
-Note: DALL-E 3 only supports n=1, so this will make multiple API calls."
+    Note: DALL-E 3 only supports n=1, so this will make multiple API calls.
+    """
 }
 fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
     // DALL-E 3 only supports n=1, so we need multiple requests
@@ -310,13 +322,15 @@ fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
 
 create-image
 meta {
-    doc: "Simple image generation - returns the URL of the generated image.
+    doc: """
+    Simple image generation - returns the URL of the generated image.
 
-**Example**
-```hot
-url create-image(\"A sunset over mountains\")
-// \"https://...\"
-```"
+    **Example**
+    ```hot
+    url create-image("A sunset over mountains")
+    // "https://..."
+    ```
+    """
 }
 fn (prompt: Str): Str | HttpError {
     create-image(prompt, null)
@@ -351,7 +365,7 @@ fn (prompt: Str): Str | HttpError {
 // ============================================================================
 
 parse-size
-meta {doc: "Parse size string like '1024x1024' into width/height."}
+meta {doc: """Parse size string like '1024x1024' into width/height."""}
 fn (size: Str?): Map {
     cond {
         is-null(size) => { {width: null, height: null} }
@@ -371,7 +385,7 @@ fn (size: Str?): Map {
 }
 
 detect-format
-meta {doc: "Detect image format from file path extension."}
+meta {doc: """Detect image format from file path extension."""}
 fn (path: Str): Str? {
     // Use ::hot::mime to get the minor type (e.g., "png" from "image/png")
     mime ::hot::mime/from-path(path)

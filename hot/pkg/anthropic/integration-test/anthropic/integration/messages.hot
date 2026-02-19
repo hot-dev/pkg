@@ -84,13 +84,13 @@ fn () {
     // Collect events - SSE events have {event: "type", data: {...}} structure
     events collect(response.body)
     assert(gt(length(events), 0), "Should have events")
-    
+
     // Check that stream completed (has message_stop event)
     stop-events filter(events, (e) { eq(e.event, "message_stop") })
     assert(gt(length(stop-events), 0), "Stream should complete with message_stop event")
-    
+
     // Check we have some content events (content_block_start or content_block_delta)
-    content-events filter(events, (e) { 
+    content-events filter(events, (e) {
         or(eq(e.event, "content_block_start"), eq(e.event, "content_block_delta"))
     })
     assert(gt(length(content-events), 0), "Should have content events")
@@ -117,7 +117,7 @@ fn () {
 
     assert(response.id, "Response should have an id")
     assert(response.content, "Response should have content")
-    
+
     // The response should mention "Alice" since that was in the conversation
     first-block first(response.content)
     assert(first-block, "Should have at least one content block")

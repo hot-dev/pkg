@@ -36,7 +36,24 @@ POSTTemplatesResponse type {
 
 
 create-template
-meta {doc: "POST /templates - Create a Template"}
+meta {
+    doc: """
+    Create a new email template on the Postmark server.
+
+    **Example**
+
+    ```hot
+    created ::postmark::templates/create-template(::postmark::templates/POSTTemplatesRequest({
+        Name: "Welcome Email",
+        Subject: "Hello {{name}}",
+        HtmlBody: "<html><body><h1>Hello {{name}}</h1></body></html>",
+        TextBody: "Hello {{name}}"
+    }))
+    created.TemplateId // => 12345
+    created.Active     // => true
+    ```
+    """
+}
 fn (request: POSTTemplatesRequest): POSTTemplatesResponse {
   response api-request("POST", `${::postmark/BASE_URL}/templates`, {}, request)
   if(is-ok-response(response), POSTTemplatesResponse(response.body), err(HttpError(response)))

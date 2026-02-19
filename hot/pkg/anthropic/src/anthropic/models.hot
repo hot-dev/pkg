@@ -1,5 +1,5 @@
 ::anthropic::models ns
-meta {doc: "Anthropic Models API - List and retrieve available Claude models."}
+meta {doc: """Anthropic Models API - List and retrieve available Claude models."""}
 
 api-request ::anthropic::api/request
 HttpError ::anthropic::api/HttpError
@@ -29,16 +29,32 @@ ModelsListResponse type {
 
 list
 meta {
-    doc: "GET /v1/models - List available Claude models.
+    doc: """
+    GET /v1/models - List available Claude models.
 
-Returns a list of models available to your API key.
+    Returns a paginated list of models available to your API key. Each model
+    includes an `id`, `display_name`, `type`, and `created_at` timestamp.
+    Optionally pass a `limit` to control page size, and `after_id` for
+    cursor-based pagination.
 
-**Example**
+    **Example**
 
-```hot
-models ::anthropic::models/list()
-map(models.data, (m) { println(m.id) })
-```"
+    ```hot
+    // List all models
+    models ::anthropic::models/list()
+    first-model first(models.data)
+    first-model.id           // => "claude-sonnet-4-20250514"
+    first-model.display_name // => "Claude Sonnet 4"
+
+    // List with a limit
+    models ::anthropic::models/list(2)
+    assert(lte(length(models.data), 2))
+
+    // Paginate through results
+    page1 ::anthropic::models/list(10)
+    if(page1.has_more, ::anthropic::models/list(10, page1.last_id), page1)
+    ```
+    """
 }
 fn
 (): ModelsListResponse {
@@ -56,16 +72,21 @@ fn
 
 get
 meta {
-    doc: "GET /v1/models/{model_id} - Retrieve a specific model.
+    doc: """
+    GET /v1/models/{model_id} - Retrieve a specific model.
 
-Returns details about a specific model.
+    Returns details about a specific model, including its `id`, `display_name`,
+    `type`, and `created_at` timestamp.
 
-**Example**
+    **Example**
 
-```hot
-model ::anthropic::models/get(\"claude-3-haiku-20240307\")
-println(model.display_name)
-```"
+    ```hot
+    model ::anthropic::models/get("claude-sonnet-4-20250514")
+    model.id           // => "claude-sonnet-4-20250514"
+    model.display_name // => "Claude Sonnet 4"
+    model.created_at   // => "2025-05-14T..."
+    ```
+    """
 }
 fn (model_id: Str): Model {
     response api-request("GET", `${::anthropic/BASE_URL}/v1/models/${model_id}`)

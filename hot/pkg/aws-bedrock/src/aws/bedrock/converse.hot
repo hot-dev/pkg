@@ -58,7 +58,34 @@ ConverseStreamEvent type {
 // Converse with a model using the unified Converse API
 converse
 meta {
-    doc: "Use the Bedrock Converse API for a unified interface across all models."
+    doc: """
+    Use the Bedrock Converse API for a unified interface across all models.
+
+    The Converse API works with any Bedrock model (Claude, Titan, Llama, Mistral, etc.)
+    using the same message format.
+
+    **Example**
+
+    ```hot
+    // Simple text conversation
+    result ::aws::bedrock::converse/converse("us.amazon.nova-micro-v1:0", "What is 2+2?")
+    content result.output.message.content
+    text first(content).text
+    // => "4"
+
+    // With message history
+    messages [
+        {role: "user", content: [{text: "My name is Alice"}]},
+        {role: "assistant", content: [{text: "Hello Alice!"}]},
+        {role: "user", content: [{text: "What is my name?"}]}
+    ]
+    result ::aws::bedrock::converse/converse("us.amazon.nova-micro-v1:0", messages)
+
+    // Check usage metrics
+    result.usage.inputTokens   // => 15
+    result.usage.outputTokens  // => 5
+    ```
+    """
 }
 fn
 (model_id: Str, messages: Vec<Map>, system: Vec<Map>, inference_config: Map, tool_config: Map, guardrail_config: Map): ConverseResponse | AwsError {
@@ -129,7 +156,12 @@ fn
 // Converse with streaming response
 converse-stream
 meta {
-    doc: "Use the Bedrock Converse API with streaming response."
+    doc: """
+    Use the Bedrock Converse API with streaming response.
+
+    Returns the raw HTTP response with an event stream body.
+    Note: Streaming requires parsing the AWS Event Stream binary format.
+    """
 }
 fn
 (model_id: Str, messages: Vec<Map>, system: Vec<Map>, inference_config: Map, tool_config: Map): HttpResponse | AwsError {
@@ -182,7 +214,16 @@ fn
 // Helper to build a text content block
 text-content
 meta {
-    doc: "Helper to create a text content block for the Converse API."
+    doc: """
+    Helper to create a text content block for the Converse API.
+
+    **Example**
+
+    ```hot
+    block ::aws::bedrock::converse/text-content("Hello")
+    // => {text: "Hello"}
+    ```
+    """
 }
 fn (text: Str): Map {
     { text: text }
@@ -191,7 +232,16 @@ fn (text: Str): Map {
 // Helper to build an image content block
 image-content
 meta {
-    doc: "Helper to create an image content block for the Converse API."
+    doc: """
+    Helper to create an image content block for the Converse API.
+
+    **Example**
+
+    ```hot
+    block ::aws::bedrock::converse/image-content("png", base64-image-data)
+    // => {image: {format: "png", source: {bytes: "..."}}}
+    ```
+    """
 }
 fn (format: Str, source_bytes: Str): Map {
     {
@@ -207,7 +257,16 @@ fn (format: Str, source_bytes: Str): Map {
 // Helper to build a user message
 user-message
 meta {
-    doc: "Helper to create a user message for the Converse API."
+    doc: """
+    Helper to create a user message for the Converse API.
+
+    **Example**
+
+    ```hot
+    msg ::aws::bedrock::converse/user-message("What is the capital of France?")
+    // => Message({role: "user", content: [{text: "What is the capital of France?"}]})
+    ```
+    """
 }
 fn
 (content: Vec<Map>): Message {
@@ -220,7 +279,16 @@ fn
 // Helper to build an assistant message
 assistant-message
 meta {
-    doc: "Helper to create an assistant message for the Converse API."
+    doc: """
+    Helper to create an assistant message for the Converse API.
+
+    **Example**
+
+    ```hot
+    msg ::aws::bedrock::converse/assistant-message("The capital of France is Paris.")
+    // => Message({role: "assistant", content: [{text: "The capital of France is Paris."}]})
+    ```
+    """
 }
 fn
 (content: Vec<Map>): Message {
@@ -233,7 +301,21 @@ fn
 // Helper to build inference configuration
 inference-config
 meta {
-    doc: "Helper to create inference configuration for the Converse API."
+    doc: """
+    Helper to create inference configuration for the Converse API.
+
+    **Example**
+
+    ```hot
+    // Max tokens only
+    config ::aws::bedrock::converse/inference-config(100)
+    // => {maxTokens: 100}
+
+    // Max tokens with temperature
+    config ::aws::bedrock::converse/inference-config(200, 0.5)
+    // => {maxTokens: 200, temperature: 0.5}
+    ```
+    """
 }
 fn
 (max_tokens: Int, temperature: Dec, top_p: Dec, stop_sequences: Vec<Str>): Map {

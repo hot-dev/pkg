@@ -79,7 +79,27 @@ POSTEmailsResponse type {
 
 
 send-email
-meta {doc: "POST /emails - Send an email"}
+meta {
+    doc: """
+    Send a single email. Supports HTML and plain text bodies, tags, reply-to, and scheduled delivery.
+
+    **Example**
+
+    ```hot
+    response ::resend::emails/send-email(::resend::emails/POSTEmailsRequest({
+        from: "sender@example.com",
+        to: ["recipient@example.com"],
+        subject: "Welcome!",
+        html: "<html><body><p>Hello from <strong>Resend</strong>!</p></body></html>",
+        text: "Hello from Resend!",
+        tags: [
+            ::resend::emails/Tag({name: "source", value: "app"})
+        ]
+    }))
+    response.id // => "email-id-string"
+    ```
+    """
+}
 fn (request: POSTEmailsRequest): POSTEmailsResponse {
   response api-request("POST", `${::resend/BASE_URL}/emails`, {}, request)
   if(is-ok-response(response), POSTEmailsResponse(response.body), err(HttpError(response)))
@@ -106,7 +126,22 @@ GETEmailsEmailIdResponse type {
 
 
 retrieve-single-email
-meta {doc: "GET /emails/{email_id} - Retrieve a single email"}
+meta {
+    doc: """
+    Retrieve a previously sent email by its ID, including delivery status and content.
+
+    **Example**
+
+    ```hot
+    email ::resend::emails/retrieve-single-email(::resend::emails/GETEmailsEmailIdRequest({
+        email-id: "email-id-string"
+    }))
+    email.id      // => "email-id-string"
+    email.from    // => "sender@example.com"
+    email.subject // => "Welcome!"
+    ```
+    """
+}
 fn (request: GETEmailsEmailIdRequest): GETEmailsEmailIdResponse {
   response api-request("GET", `${::resend/BASE_URL}/emails/${request.email-id}`)
   if(is-ok-response(response), GETEmailsEmailIdResponse(response.body), err(HttpError(response)))
@@ -122,7 +157,9 @@ PATCHEmailsEmailIdResponse type {
 
 
 update-single-email
-meta {doc: "PATCH /emails/{email_id} - Update a single email"}
+meta {
+    doc: """Update a scheduled email. Only emails that have not yet been sent can be updated."""
+}
 fn (request: PATCHEmailsEmailIdRequest): PATCHEmailsEmailIdResponse {
   response api-request("PATCH", `${::resend/BASE_URL}/emails/${request.email-id}`)
   if(is-ok-response(response), PATCHEmailsEmailIdResponse(response.body), err(HttpError(response)))
@@ -149,7 +186,7 @@ POSTEmailsEmailIdCancelResponse type {
 
 
 cancel-schedule-email
-meta {doc: "POST /emails/{email_id}/cancel - Cancel the schedule of the e-mail."}
+meta {doc: """Cancel a scheduled email that has not yet been sent."""}
 fn (request: POSTEmailsEmailIdCancelRequest): POSTEmailsEmailIdCancelResponse {
   response api-request("POST", `${::resend/BASE_URL}/emails/${request.email-id}/cancel`)
   if(is-ok-response(response), POSTEmailsEmailIdCancelResponse(response.body), err(HttpError(response)))
@@ -161,7 +198,31 @@ POSTEmailsBatchResponse type {
 
 
 send-batch-emails
-meta {doc: "POST /emails/batch - Send up to 100 batch emails at once."}
+meta {
+    doc: """
+    Send up to 100 emails in a single batch API call. Accepts a Vec of SendEmailRequest objects directly.
+
+    **Example**
+
+    ```hot
+    response ::resend::emails/send-batch-emails([
+        ::resend::emails/SendEmailRequest({
+            from: "sender@example.com",
+            to: ["alice@example.com"],
+            subject: "Batch 1",
+            text: "First batch email."
+        }),
+        ::resend::emails/SendEmailRequest({
+            from: "sender@example.com",
+            to: ["bob@example.com"],
+            subject: "Batch 2",
+            text: "Second batch email."
+        })
+    ])
+    length(response.data) // => 2
+    ```
+    """
+}
 fn (emails: Vec<SendEmailRequest>): POSTEmailsBatchResponse {
   response api-request("POST", `${::resend/BASE_URL}/emails/batch`, {}, emails)
   if(is-ok-response(response), POSTEmailsBatchResponse(response.body), err(HttpError(response)))

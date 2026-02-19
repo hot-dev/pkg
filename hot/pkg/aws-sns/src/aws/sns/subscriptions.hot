@@ -39,22 +39,28 @@ GetSubscriptionAttributesResponse type {
 // Subscribe to a topic
 subscribe
 meta {
-    doc: "Subscribe an endpoint to an SNS topic.
-    
-Protocols:
-- 'http' / 'https': HTTP/HTTPS endpoints
-- 'email' / 'email-json': Email notifications
-- 'sms': SMS text messages
-- 'sqs': Amazon SQS queue
-- 'lambda': AWS Lambda function
-- 'application': Mobile app endpoint
-- 'firehose': Amazon Kinesis Data Firehose
+    doc: """
+    Subscribe an endpoint to an SNS topic.
 
-Attributes can include:
-- FilterPolicy: JSON filter policy for message filtering
-- FilterPolicyScope: 'MessageAttributes' or 'MessageBody'
-- RawMessageDelivery: 'true' for raw message delivery (SQS/HTTP)
-- RedrivePolicy: Dead letter queue ARN"
+    Supported protocols: "http", "https", "email", "email-json", "sms",
+    "sqs", "lambda", "application", "firehose".
+
+    **Example**
+
+    ```hot
+    // Subscribe an SQS queue
+    result ::aws::sns::subscriptions/subscribe(topic-arn, "sqs", queue-arn)
+    result.subscription_arn  // => "arn:aws:sns:us-east-1:123456:my-topic:abc-123..."
+
+    // Subscribe a Lambda function
+    ::aws::sns::subscriptions/subscribe(topic-arn, "lambda", lambda-arn)
+
+    // Subscribe with filter policy
+    ::aws::sns::subscriptions/subscribe(topic-arn, "sqs", queue-arn, {
+        FilterPolicy: to-json({event_type: ["order", "payment"]})
+    })
+    ```
+    """
 }
 fn
 (topic_arn: Str, protocol: Str, endpoint: Str, attributes: Map): SubscribeResponse | AwsError {
@@ -99,7 +105,15 @@ fn
 // Unsubscribe from a topic
 unsubscribe
 meta {
-    doc: "Unsubscribe from an SNS topic."
+    doc: """
+    Unsubscribe from an SNS topic.
+
+    **Example**
+
+    ```hot
+    ::aws::sns::subscriptions/unsubscribe(subscription-arn)
+    ```
+    """
 }
 fn (subscription_arn: Str): Map | AwsError {
     region get-region()
@@ -130,7 +144,18 @@ fn (subscription_arn: Str): Map | AwsError {
 // Confirm a subscription (for HTTP/HTTPS endpoints)
 confirm-subscription
 meta {
-    doc: "Confirm a pending subscription using the token from the confirmation message."
+    doc: """
+    Confirm a pending subscription using the token from the confirmation message.
+
+    Required for HTTP/HTTPS and email subscriptions.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::subscriptions/confirm-subscription(topic-arn, confirmation-token)
+    result.subscription_arn  // => "arn:aws:sns:us-east-1:123456:my-topic:abc-123..."
+    ```
+    """
 }
 fn (topic_arn: Str, token: Str): SubscribeResponse | AwsError {
     region get-region()
@@ -164,7 +189,17 @@ fn (topic_arn: Str, token: Str): SubscribeResponse | AwsError {
 // List all subscriptions
 list-subscriptions
 meta {
-    doc: "List all subscriptions. Supports pagination via next_token."
+    doc: """
+    List all subscriptions across all topics. Supports pagination via next_token.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::subscriptions/list-subscriptions()
+    result.subscriptions
+    // => [{subscription_arn: "arn:...", protocol: "sqs", endpoint: "arn:aws:sqs:...", ...}]
+    ```
+    """
 }
 fn
 (next_token: Str): ListSubscriptionsResponse | AwsError {
@@ -214,7 +249,16 @@ fn
 // List subscriptions by topic
 list-subscriptions-by-topic
 meta {
-    doc: "List all subscriptions for a specific topic. Supports pagination via next_token."
+    doc: """
+    List all subscriptions for a specific topic. Supports pagination via next_token.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::subscriptions/list-subscriptions-by-topic(topic-arn)
+    length(result.subscriptions)  // => 3
+    ```
+    """
 }
 fn
 (topic_arn: Str, next_token: Str): ListSubscriptionsResponse | AwsError {
@@ -266,7 +310,16 @@ fn
 // Get subscription attributes
 get-subscription-attributes
 meta {
-    doc: "Get attributes of an SNS subscription."
+    doc: """
+    Get attributes of an SNS subscription.
+
+    **Example**
+
+    ```hot
+    result ::aws::sns::subscriptions/get-subscription-attributes(subscription-arn)
+    result.attributes  // => {Protocol: "sqs", Endpoint: "arn:aws:sqs:...", ...}
+    ```
+    """
 }
 fn (subscription_arn: Str): GetSubscriptionAttributesResponse | AwsError {
     region get-region()
@@ -299,13 +352,25 @@ fn (subscription_arn: Str): GetSubscriptionAttributesResponse | AwsError {
 // Set subscription attributes
 set-subscription-attributes
 meta {
-    doc: "Set a single attribute of an SNS subscription.
-    
-Common attribute names:
-- FilterPolicy: JSON filter policy
-- FilterPolicyScope: 'MessageAttributes' or 'MessageBody'
-- RawMessageDelivery: 'true' or 'false'
-- RedrivePolicy: Dead letter queue policy"
+    doc: """
+    Set a single attribute of an SNS subscription.
+
+    Common attribute names: FilterPolicy, FilterPolicyScope, RawMessageDelivery, RedrivePolicy.
+
+    **Example**
+
+    ```hot
+    // Enable raw message delivery for SQS
+    ::aws::sns::subscriptions/set-subscription-attributes(subscription-arn, "RawMessageDelivery", "true")
+
+    // Set a filter policy
+    ::aws::sns::subscriptions/set-subscription-attributes(
+        subscription-arn,
+        "FilterPolicy",
+        to-json({event_type: ["order"]})
+    )
+    ```
+    """
 }
 fn (subscription_arn: Str, attribute_name: Str, attribute_value: Str): Map | AwsError {
     region get-region()

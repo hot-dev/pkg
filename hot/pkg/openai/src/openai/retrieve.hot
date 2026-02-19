@@ -111,9 +111,8 @@ FineTuneDPOHyperparameters type {
     n_epochs: Any?
 }
 
-Metadata type {
-
-}
+// Arbitrary key-value metadata associated with an API object
+Metadata type Map
 
 BatchRequestCounts type {
     total: Int,
@@ -157,7 +156,7 @@ RetrieveBatchResponse type {
 
 
 retrieve-batch
-meta {doc: "GET /batches/{batch_id} - Retrieve batch"}
+meta {doc: """GET /batches/{batch_id} - Retrieve the status and details of a batch."""}
 fn (request: RetrieveBatchRequest): RetrieveBatchResponse {
   response api-request("GET", `${::openai/BASE_URL}/batches/${request.batch-id}`)
   if(is-ok-response(response), RetrieveBatchResponse(response.body), err(HttpError(response)))
@@ -181,7 +180,7 @@ RetrieveFileResponse type {
 
 
 retrieve-file
-meta {doc: "GET /files/{file_id} - Retrieve file"}
+meta {doc: """GET /files/{file_id} - Retrieve metadata about an uploaded file."""}
 fn (request: RetrieveFileRequest): RetrieveFileResponse {
   response api-request("GET", `${::openai/BASE_URL}/files/${request.file-id}`)
   if(is-ok-response(response), RetrieveFileResponse(response.body), err(HttpError(response)))
@@ -215,7 +214,9 @@ RetrieveFineTuningJobResponse type {
 
 
 retrieve-finetuning-job
-meta {doc: "GET /fine_tuning/jobs/{fine_tuning_job_id} - Retrieve fine-tuning job"}
+meta {
+    doc: """GET /fine_tuning/jobs/{fine_tuning_job_id} - Retrieve the status and details of a fine-tuning job."""
+}
 fn (request: RetrieveFineTuningJobRequest): RetrieveFineTuningJobResponse {
   response api-request("GET", `${::openai/BASE_URL}/fine_tuning/jobs/${request.fine-tuning-job-id}`)
   if(is-ok-response(response), RetrieveFineTuningJobResponse(response.body), err(HttpError(response)))
@@ -234,7 +235,21 @@ RetrieveModelResponse type {
 
 
 retrieve-model
-meta {doc: "GET /models/{model} - Retrieve model"}
+meta {
+    doc: """
+    GET /models/{model} - Retrieve a specific model by ID.
+
+    For a more ergonomic API, see `::openai::models/get`.
+
+    **Example**
+
+    ```hot
+    model ::openai::retrieve/retrieve-model(RetrieveModelRequest({model: "gpt-4o"}))
+    model.id       // => "gpt-4o"
+    model.owned_by // => "system"
+    ```
+    """
+}
 fn (request: RetrieveModelRequest): RetrieveModelResponse {
   response api-request("GET", `${::openai/BASE_URL}/models/${request.model}`)
   if(is-ok-response(response), RetrieveModelResponse(response.body), err(HttpError(response)))
@@ -255,7 +270,7 @@ RetrieveVectorStoreFileContentResponse type {
 
 retrieve-vector-store-file-content
 meta {
-    doc: "GET /vector_stores/{vector_store_id}/files/{file_id}/content - Retrieve vector store file content"
+    doc: """GET /vector_stores/{vector_store_id}/files/{file_id}/content - Retrieve vector store file content"""
 }
 fn (request: RetrieveVectorStoreFileContentRequest): RetrieveVectorStoreFileContentResponse {
   response api-request("GET", `${::openai/BASE_URL}/vector_stores/${request.vector-store-id}/files/${request.file-id}/content`)

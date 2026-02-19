@@ -38,8 +38,8 @@ Content type {
 
 // Generation config
 GenerationConfig type {
-    temperature: Float?,
-    topP: Float?,
+    temperature: Dec?,
+    topP: Dec?,
     topK: Int?,
     maxOutputTokens: Int?,
     stopSequences: Vec<Str>?
@@ -97,15 +97,39 @@ StreamingGenerateResponse type {
 
 generate
 meta {
-    doc: "Generate content (non-streaming).
+    doc: """
+    Generate content (non-streaming). Sends a request to the Gemini API and returns the full response with candidates.
 
-**Example**
-```hot
-response generate(\"gemini-2.0-flash\", {
-    contents: [{role: \"user\", parts: [{text: \"Hello!\"}]}],
-    generationConfig: {maxOutputTokens: 1024}
-})
-```"
+    **Example**
+
+    ```hot
+    response ::gemini::chat/generate("gemini-2.0-flash", GenerateContentRequest({
+        contents: [Content({
+            role: "user",
+            parts: [Part({text: "Say hello!"})]
+        })],
+        generationConfig: GenerationConfig({maxOutputTokens: 50})
+    }))
+
+    text first(response.candidates).content.parts[0].text
+    ```
+
+    **With system instruction**
+
+    ```hot
+    response ::gemini::chat/generate("gemini-2.0-flash", GenerateContentRequest({
+        contents: [Content({
+            role: "user",
+            parts: [Part({text: "What is 2+2?"})]
+        })],
+        systemInstruction: Content({
+            role: "user",
+            parts: [Part({text: "You are a math assistant. Reply with just the answer."})]
+        }),
+        generationConfig: GenerationConfig({maxOutputTokens: 50})
+    }))
+    ```
+    """
 }
 fn (model: Str, request: GenerateContentRequest): GenerateContentResponse {
     // Use v1beta for systemInstruction support
@@ -119,25 +143,26 @@ fn (model: Str, request: GenerateContentRequest): GenerateContentResponse {
 
 generate-stream
 meta {
-    doc: "Generate content with streaming. Returns an iterator that yields SSE events.
+    doc: """
+    Generate content with streaming. Returns a response with status, headers, and an iterator body that yields SSE events.
 
-**Event Structure**
-Each event contains a partial GenerateContentResponse with:
-- `candidates[0].content.parts[0].text` - Text chunk
+    Each event contains a partial GenerateContentResponse with text chunks in `candidates[0].content.parts[0].text`. Use `extract-chunk-text` to extract text from each event.
 
-**Example**
-```hot
-response generate-stream(\"gemini-2.0-flash\", {
-    contents: [{role: \"user\", parts: [{text: \"Hello!\"}]}]
-})
+    **Example**
 
-for-each(response.body, (event) {
-    text extract-chunk-text(event)
-    cond {
-        gt(length(text), 0) => { print(text) }
-    }
-})
-```"
+    ```hot
+    response ::gemini::chat/generate-stream("gemini-2.0-flash", GenerateContentRequest({
+        contents: [Content({
+            role: "user",
+            parts: [Part({text: "Count from 1 to 5."})]
+        })],
+        generationConfig: GenerationConfig({maxOutputTokens: 100})
+    }))
+
+    response.status // => 200
+    events collect(response.body)
+    ```
+    """
 }
 fn (model: Str, request: GenerateContentRequest): StreamingGenerateResponse {
     // Use v1beta for systemInstruction support, alt=sse for SSE streaming
@@ -155,13 +180,31 @@ fn (model: Str, request: GenerateContentRequest): StreamingGenerateResponse {
 
 chat
 meta {
-    doc: "Simple chat - send a message and get a response string.
+    doc: """
+    Simple chat - send a message and get a response string. This is the highest-level convenience function for single-turn chat.
 
-**Example**
-```hot
-response chat(\"gemini-2.0-flash\", \"What is the capital of France?\")
-// Returns: \"The capital of France is Paris.\"
-```"
+    Accepts 2 to 4 arguments: model, message, optional system instruction, and optional max tokens.
+
+    **Example**
+
+    ```hot
+    answer ::gemini::chat/chat("gemini-2.0-flash", "What is the capital of France?")
+    // => "The capital of France is Paris."
+    ```
+
+    **With system instruction**
+
+    ```hot
+    answer ::gemini::chat/chat("gemini-2.0-flash", "What is 2+2?", "You are a math tutor. Reply concisely.")
+    // => "4"
+    ```
+
+    **With max tokens**
+
+    ```hot
+    answer ::gemini::chat/chat("gemini-2.0-flash", "Write a haiku about coding.", null, 100)
+    ```
+    """
 }
 fn
 (model: Str, message: Str): Str {
@@ -203,28 +246,74 @@ fn
 
 // Helper to build a text part
 text-part
-meta { doc: "Create a text content part" }
+meta {
+    doc: """
+    Create a text content part for use in Content messages.
+
+    **Example**
+
+    ```hot
+    part ::gemini::chat/text-part("Hello, world!")
+    part.text // => "Hello, world!"
+    ```
+    """
+}
 fn (text: Str): Part {
     Part({text: text})
 }
 
 // Helper to build an image part
 image-part
-meta { doc: "Create an image content part from base64 data" }
+meta {
+    doc: """
+    Create an image content part from base64-encoded data. Used for sending images inline in a Content message.
+
+    **Example**
+
+    ```hot
+    part ::gemini::chat/image-part("image/png", base64-data)
+    part.inlineData.mimeType // => "image/png"
+    ```
+    """
+}
 fn (mime-type: Str, base64-data: Str): Part {
     Part({inlineData: InlineData({mimeType: mime-type, data: base64-data})})
 }
 
 // Helper to build a user content
 user-content
-meta { doc: "Create user content with text" }
+meta {
+    doc: """
+    Create a Content message with the "user" role from a text string. Shorthand for building Content with a single text Part.
+
+    **Example**
+
+    ```hot
+    content ::gemini::chat/user-content("Hello world")
+    content.role              // => "user"
+    first(content.parts).text // => "Hello world"
+    ```
+    """
+}
 fn (text: Str): Content {
     Content({role: "user", parts: [Part({text: text})]})
 }
 
 // Helper to build a model content
 model-content
-meta { doc: "Create model (assistant) content with text" }
+meta {
+    doc: """
+    Create a Content message with the "model" role from a text string. Useful for building multi-turn conversation history.
+
+    **Example**
+
+    ```hot
+    content ::gemini::chat/model-content("Hello! How can I help?")
+    content.role              // => "model"
+    first(content.parts).text // => "Hello! How can I help?"
+    ```
+    """
+}
 fn (text: Str): Content {
     Content({role: "model", parts: [Part({text: text})]})
 }
@@ -264,8 +353,19 @@ extract-text-from-data fn (data): Str {
 // Extract text from a streaming chunk
 extract-chunk-text
 meta {
-    doc: "Extract the text content from a streaming SSE event. Returns empty string if no content.
-    Handles NDJSON format where multiple JSON objects are separated by newlines."
+    doc: """
+    Extract the text content from a streaming SSE event. Returns an empty string if no text content is found. Handles NDJSON format where multiple JSON objects are separated by newlines.
+
+    **Example**
+
+    ```hot
+    response ::gemini::chat/generate-stream("gemini-2.0-flash", request)
+    for-each(response.body, (event) {
+        text ::gemini::chat/extract-chunk-text(event)
+        // text contains the partial response text from this chunk
+    })
+    ```
+    """
 }
 fn (event): Str {
     cond {
@@ -320,7 +420,19 @@ is-data-done fn (data): Bool {
 // Check if a streaming chunk indicates completion
 is-stream-done
 meta {
-    doc: "Check if a streaming event indicates the stream is complete. Handles NDJSON format."
+    doc: """
+    Check if a streaming event indicates the stream is complete. Returns true when a candidate has a finishReason set (e.g. "STOP"). Handles NDJSON format.
+
+    **Example**
+
+    ```hot
+    response ::gemini::chat/generate-stream("gemini-2.0-flash", request)
+    for-each(response.body, (event) {
+        done ::gemini::chat/is-stream-done(event)
+        // done is true when the model has finished generating
+    })
+    ```
+    """
 }
 fn (event): Bool {
     cond {

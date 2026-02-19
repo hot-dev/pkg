@@ -39,7 +39,25 @@ TitanResponse type {
 // Invoke a Bedrock model with raw request body
 invoke-model
 meta {
-    doc: "Invoke a Bedrock foundation model with a raw request body."
+    doc: """
+    Invoke a Bedrock foundation model with a raw request body.
+
+    This is the low-level invocation API. For most use cases, prefer `converse`
+    which provides a unified interface across all models.
+
+    **Example**
+
+    ```hot
+    result ::aws::bedrock::invoke/invoke-model(
+        "amazon.titan-text-express-v1",
+        {inputText: "Hello", textGenerationConfig: {maxTokenCount: 100}},
+        "application/json",
+        "application/json"
+    )
+    result.body
+    // => {inputTextTokenCount: 1, results: [{outputText: "...", ...}]}
+    ```
+    """
 }
 fn (model_id: Str, body: Map, content_type: Str, accept: Str): InvokeModelResponse | AwsError {
     region get-region()
@@ -72,7 +90,26 @@ fn (model_id: Str, body: Map, content_type: Str, accept: Str): InvokeModelRespon
 // Invoke Claude models via Bedrock
 invoke-claude
 meta {
-    doc: "Invoke an Anthropic Claude model via Bedrock. Uses the Messages API format."
+    doc: """
+    Invoke an Anthropic Claude model via Bedrock using the Messages API format.
+
+    **Example**
+
+    ```hot
+    // Simple prompt with default model (Claude 3 Haiku)
+    result ::aws::bedrock::invoke/invoke-claude("What is 2+2?")
+    text first(result.content).text
+    // => "4"
+
+    // With specific model and system prompt
+    result ::aws::bedrock::invoke/invoke-claude(
+        "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        [{role: "user", content: "Explain quantum computing"}],
+        1024,
+        "You are a physics teacher"
+    )
+    ```
+    """
 }
 fn
 (model_id: Str, messages: Vec<Map>, max_tokens: Int, system: Str, temperature: Dec, top_p: Dec, stop_sequences: Vec<Str>): ClaudeResponse | AwsError {
@@ -154,7 +191,21 @@ fn
 // Invoke Amazon Titan models
 invoke-titan
 meta {
-    doc: "Invoke an Amazon Titan text model via Bedrock."
+    doc: """
+    Invoke an Amazon Titan text model via Bedrock.
+
+    **Example**
+
+    ```hot
+    // Simple prompt with default model (Titan Text Express)
+    result ::aws::bedrock::invoke/invoke-titan("Tell me about Hot language")
+    text first(result.results).outputText
+    // => "Hot is..."
+
+    // With specific model and token limit
+    result ::aws::bedrock::invoke/invoke-titan("amazon.titan-text-lite-v1", "Hello!", 512)
+    ```
+    """
 }
 fn
 (model_id: Str, input_text: Str, max_token_count: Int, temperature: Dec, top_p: Dec, stop_sequences: Vec<Str>): TitanResponse | AwsError {
@@ -212,7 +263,18 @@ fn
 // Invoke Meta Llama models
 invoke-llama
 meta {
-    doc: "Invoke a Meta Llama model via Bedrock."
+    doc: """
+    Invoke a Meta Llama model via Bedrock.
+
+    **Example**
+
+    ```hot
+    // Simple prompt with default model (Llama 3 8B)
+    result ::aws::bedrock::invoke/invoke-llama("What is functional programming?")
+    result.body.generation
+    // => "Functional programming is..."
+    ```
+    """
 }
 fn
 (model_id: Str, prompt: Str, max_gen_len: Int, temperature: Dec, top_p: Dec): InvokeModelResponse | AwsError {
@@ -263,7 +325,18 @@ fn
 // Invoke Mistral models
 invoke-mistral
 meta {
-    doc: "Invoke a Mistral AI model via Bedrock."
+    doc: """
+    Invoke a Mistral AI model via Bedrock.
+
+    **Example**
+
+    ```hot
+    // Simple prompt with default model (Mistral 7B)
+    result ::aws::bedrock::invoke/invoke-mistral("Write a haiku about coding")
+    result.body.outputs
+    // => [{text: "..."}]
+    ```
+    """
 }
 fn
 (model_id: Str, prompt: Str, max_tokens: Int, temperature: Dec, top_p: Dec, stop: Vec<Str>): InvokeModelResponse | AwsError {
