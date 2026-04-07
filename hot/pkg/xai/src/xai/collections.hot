@@ -136,7 +136,7 @@ fn
     // For GET/DELETE requests with no body, don't send Content-Type
     cond {
         or(eq(body, ""), is-null(body)) => {
-            final-headers merge(default-headers, additional-headers)
+            final-headers {...default-headers, ...additional-headers}
             ::hot::http/request(HttpRequest({
                 method: method,
                 url: url,
@@ -144,8 +144,8 @@ fn
             }))
         }
         => {
-            headers merge(default-headers, {Content-Type: "application/json"})
-            final-headers merge(headers, additional-headers)
+            headers {...default-headers, Content-Type: "application/json"}
+            final-headers {...headers, ...additional-headers}
             ::hot::http/request(HttpRequest({
                 method: method,
                 url: url,
@@ -201,7 +201,7 @@ meta {
     result list()
     result.collections // => [{id: "col_abc", name: "My Docs", ...}, ...]
 
-    names map(result.collections, (c) { c.name })
+    names map(result.collections, %.name)
     ```
     """
 }
@@ -366,12 +366,12 @@ fn (request: SearchRequest): SearchResponse | HttpError {
     // Add optional fields
     body-with-max cond {
         is-null(request.max_results) => { body }
-        => { merge(body, {max_results: request.max_results}) }
+        => { {...body, max_results: request.max_results} }
     }
 
     final-body cond {
         is-null(request.retrieval_mode) => { body-with-max }
-        => { merge(body-with-max, {retrieval_mode: request.retrieval_mode}) }
+        => { {...body-with-max, retrieval_mode: request.retrieval_mode} }
     }
 
     // Search uses regular API key, not management key

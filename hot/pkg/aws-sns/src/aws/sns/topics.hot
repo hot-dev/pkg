@@ -147,7 +147,7 @@ meta {
 
     ```hot
     result ::aws::sns::topics/list-topics()
-    topic-arns map(result.topics, (t) { t.topic_arn })
+    topic-arns map(result.topics, %.topic_arn)
     // => ["arn:aws:sns:us-east-1:123456:topic-1", "arn:aws:sns:us-east-1:123456:topic-2"]
     ```
     """
@@ -179,9 +179,7 @@ fn
 
     if(is-ok-response(response),
         ListTopicsResponse({
-            topics: if(is-null(response.body.Topics), [], map(response.body.Topics, (t) {
-                Topic({ topic_arn: t.TopicArn })
-            })),
+            topics: if(is-null(response.body.Topics), [], map(response.body.Topics, Topic({ topic_arn: %.TopicArn }))),
             next_token: response.body.NextToken
         }),
         err(AwsError(response))

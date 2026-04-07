@@ -72,23 +72,23 @@ fn
     }
 
     with-names if(is-null(expression_attribute_names), request-body,
-        merge(request-body, { ExpressionAttributeNames: expression_attribute_names })
+        {...request-body, ExpressionAttributeNames: expression_attribute_names}
     )
 
     with-filter if(is-null(filter_expression), with-names,
-        merge(with-names, { FilterExpression: filter_expression })
+        {...with-names, FilterExpression: filter_expression}
     )
 
     with-limit if(is-null(limit), with-filter,
-        merge(with-filter, { Limit: limit })
+        {...with-filter, Limit: limit}
     )
 
     with-start-key if(is-null(exclusive_start_key), with-limit,
-        merge(with-limit, { ExclusiveStartKey: exclusive_start_key })
+        {...with-limit, ExclusiveStartKey: exclusive_start_key}
     )
 
     with-index if(is-null(index_name), with-start-key,
-        merge(with-start-key, { IndexName: index_name })
+        {...with-start-key, IndexName: index_name}
     )
 
     body to-json(with-index)
@@ -185,22 +185,21 @@ fn
     }
 
     with-filter if(is-null(filter_expression), request-body,
-        merge(request-body, {
+        {...request-body,
             FilterExpression: filter_expression,
-            ExpressionAttributeValues: expression_attribute_values
-        })
+            ExpressionAttributeValues: expression_attribute_values}
     )
 
     with-names if(is-null(expression_attribute_names), with-filter,
-        merge(with-filter, { ExpressionAttributeNames: expression_attribute_names })
+        {...with-filter, ExpressionAttributeNames: expression_attribute_names}
     )
 
     with-limit if(is-null(limit), with-names,
-        merge(with-names, { Limit: limit })
+        {...with-names, Limit: limit}
     )
 
     with-start-key if(is-null(exclusive_start_key), with-limit,
-        merge(with-limit, { ExclusiveStartKey: exclusive_start_key })
+        {...with-limit, ExclusiveStartKey: exclusive_start_key}
     )
 
     body to-json(with-start-key)

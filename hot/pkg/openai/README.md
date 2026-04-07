@@ -7,7 +7,7 @@ openai API bindings for Hot.
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/openai": "1.0.5"
+"hot.dev/openai": "1.1.0"
 ```
 
 ## API Base URL

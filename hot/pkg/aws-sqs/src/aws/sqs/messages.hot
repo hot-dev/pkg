@@ -197,16 +197,14 @@ fn
 
     if(is-ok-response(response),
         ReceiveMessageResponse({
-            messages: if(is-null(response.body.Messages), [], map(response.body.Messages, (m) {
-                Message({
-                    message_id: m.MessageId,
-                    receipt_handle: m.ReceiptHandle,
-                    body: m.Body,
-                    md5_of_body: m.MD5OfBody,
-                    attributes: m.Attributes,
-                    message_attributes: m.MessageAttributes
-                })
-            }))
+            messages: if(is-null(response.body.Messages), [], map(response.body.Messages, Message({
+                message_id: %.MessageId,
+                receipt_handle: %.ReceiptHandle,
+                body: %.Body,
+                md5_of_body: %.MD5OfBody,
+                attributes: %.Attributes,
+                message_attributes: %.MessageAttributes
+            })))
         }),
         err(AwsError(response))
     )
@@ -397,21 +395,17 @@ fn (queue_url: Str, entries: Vec<Map>): SendMessageBatchResponse | AwsError {
 
     if(is-ok-response(response),
         SendMessageBatchResponse({
-            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, (s) {
-                BatchResultEntry({
-                    id: s.Id,
-                    message_id: s.MessageId,
-                    md5_of_message_body: s.MD5OfMessageBody
-                })
-            })),
-            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, (f) {
-                BatchErrorEntry({
-                    id: f.Id,
-                    sender_fault: f.SenderFault,
-                    code: f.Code,
-                    message: f.Message
-                })
-            }))
+            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, BatchResultEntry({
+                id: %.Id,
+                message_id: %.MessageId,
+                md5_of_message_body: %.MD5OfMessageBody
+            }))),
+            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, BatchErrorEntry({
+                id: %.Id,
+                sender_fault: %.SenderFault,
+                code: %.Code,
+                message: %.Message
+            })))
         }),
         err(AwsError(response))
     )
@@ -459,21 +453,17 @@ fn (queue_url: Str, entries: Vec<Map>): DeleteMessageBatchResponse | AwsError {
 
     if(is-ok-response(response),
         DeleteMessageBatchResponse({
-            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, (s) {
-                BatchResultEntry({
-                    id: s.Id,
-                    message_id: s.MessageId,
-                    md5_of_message_body: s.MD5OfMessageBody
-                })
-            })),
-            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, (f) {
-                BatchErrorEntry({
-                    id: f.Id,
-                    sender_fault: f.SenderFault,
-                    code: f.Code,
-                    message: f.Message
-                })
-            }))
+            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, BatchResultEntry({
+                id: %.Id,
+                message_id: %.MessageId,
+                md5_of_message_body: %.MD5OfMessageBody
+            }))),
+            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, BatchErrorEntry({
+                id: %.Id,
+                sender_fault: %.SenderFault,
+                code: %.Code,
+                message: %.Message
+            })))
         }),
         err(AwsError(response))
     )

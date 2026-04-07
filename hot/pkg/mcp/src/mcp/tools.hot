@@ -30,7 +30,7 @@ first(tools).name // => "get_weather"
 }
 fn (session: ::types/Session): Vec<::types/Tool> {
   result ::client/session-request(session, "tools/list", {})
-  map(get(result, "tools", []), (t) { ::types/Tool(t) })
+  map(get(result, "tools", []), ::types/Tool(%))
 }
 
 // List tools with explicit cursor for manual pagination.
@@ -56,10 +56,10 @@ next-page if(is-some(page.next-cursor), ::tools/list-page(session, page.next-cur
 """
 }
 fn (session: ::types/Session, cursor: Str?): Map {
-  params if(is-some(cursor), {cursor: cursor}, {})
+  params {} |> assoc-some("cursor", cursor)
   result ::client/session-request(session, "tools/list", params)
   {
-    tools: map(get(result, "tools", []), (t) { ::types/Tool(t) }),
+    tools: map(get(result, "tools", []), ::types/Tool(%)),
     next-cursor: get(result, "nextCursor", null)
   }
 }
@@ -90,9 +90,9 @@ fn (session: ::types/Session): Vec<::types/Tool> {
 // Recursive pagination helper (TCO).
 collect-pages fn cond (session: ::types/Session, method: Str, key: Str, cursor: Str?, acc: Vec): Vec {
   => {
-    params if(is-some(cursor), {cursor: cursor}, {})
+    params {} |> assoc-some("cursor", cursor)
     result ::client/session-request(session, method, params)
-    items map(get(result, key, []), (t) { ::types/Tool(t) })
+    items map(get(result, key, []), ::types/Tool(%))
     combined concat(acc, items)
     next-cursor get(result, "nextCursor", null)
     if(is-null(next-cursor),
@@ -133,7 +133,7 @@ fn (session: ::types/Session, name: Str, arguments: Map?): ::types/ToolResult {
     arguments: or(arguments, {})
   })
   ::types/ToolResult({
-    content: map(get(result, "content", []), (c) { ::types/ToolContent(c) }),
+    content: map(get(result, "content", []), ::types/ToolContent(%)),
     is-error: get(result, "isError", false),
     structured-content: get(result, "structuredContent", null)
   })

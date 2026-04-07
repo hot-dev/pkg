@@ -97,7 +97,7 @@ meta {
     // List all batches
     batches ::anthropic::batches/list()
     assert(is-vec(batches.data))
-    map(batches.data, (b) { b.processing_status })
+    map(batches.data, %.processing_status)
 
     // List with a limit
     batches ::anthropic::batches/list(5)

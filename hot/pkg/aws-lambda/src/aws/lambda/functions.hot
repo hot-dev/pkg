@@ -86,28 +86,26 @@ fn
 
     if(is-ok-response(response),
         ListFunctionsResponse({
-            functions: if(is-null(response.body.Functions), [], map(response.body.Functions, (f) {
-                FunctionConfiguration({
-                    function_name: f.FunctionName,
-                    function_arn: f.FunctionArn,
-                    runtime: f.Runtime,
-                    role: f.Role,
-                    handler: f.Handler,
-                    code_size: f.CodeSize,
-                    description: f.Description,
-                    timeout: f.Timeout,
-                    memory_size: f.MemorySize,
-                    last_modified: f.LastModified,
-                    code_sha256: f.CodeSha256,
-                    version: f.Version,
-                    vpc_config: f.VpcConfig,
-                    environment: f.Environment,
-                    state: f.State,
-                    state_reason: f.StateReason,
-                    state_reason_code: f.StateReasonCode,
-                    architectures: f.Architectures
-                })
-            })),
+            functions: if(is-null(response.body.Functions), [], map(response.body.Functions, FunctionConfiguration({
+                function_name: %.FunctionName,
+                function_arn: %.FunctionArn,
+                runtime: %.Runtime,
+                role: %.Role,
+                handler: %.Handler,
+                code_size: %.CodeSize,
+                description: %.Description,
+                timeout: %.Timeout,
+                memory_size: %.MemorySize,
+                last_modified: %.LastModified,
+                code_sha256: %.CodeSha256,
+                version: %.Version,
+                vpc_config: %.VpcConfig,
+                environment: %.Environment,
+                state: %.State,
+                state_reason: %.StateReason,
+                state_reason_code: %.StateReasonCode,
+                architectures: %.Architectures
+            }))),
             next_marker: response.body.NextMarker
         }),
         err(AwsError(response))

@@ -217,7 +217,7 @@ meta {
 }
 fn (request: ChatCompletionRequest): StreamingChatResponse {
     // Force stream: true
-    streaming-request merge(untype(request), {stream: true})
+    streaming-request {...untype(request), stream: true}
     response api-request-stream("POST", `${::openai/BASE_URL}/chat/completions`, {}, streaming-request, "sse")
     cond {
         gte(response.status, 400) => { err(HttpError(response)) }

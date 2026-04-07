@@ -290,13 +290,13 @@ meta {
     response post-stream(request)
     // response.body is an iterator of SSE events
     events collect(response.body)
-    text-events filter(events, (e) { eq(e.event, "content_block_delta") })
-    stop-events filter(events, (e) { eq(e.event, "message_stop") })
+    text-events filter(events, eq(%.event, "content_block_delta"))
+    stop-events filter(events, eq(%.event, "message_stop"))
     ```
     """
 }
 fn (request: MessagesPostRequest): StreamingMessagesResponse {
   // Force stream: true in the request
-  streaming-request merge(untype(request), {stream: true})
+  streaming-request {...untype(request), stream: true}
   api-request-stream("POST", `${::anthropic/BASE_URL}/v1/messages`, {}, streaming-request, "sse")
 }

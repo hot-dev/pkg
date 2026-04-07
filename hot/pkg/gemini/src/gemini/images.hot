@@ -280,8 +280,8 @@ fn (directory: Str, request: GenerateImageRequest): AIMediaBatch | HttpError {
                     })
 
                     // Separate successes and failures
-                    items map(filter(results, (r) { r.success }), (r) { r.media })
-                    errors map(filter(results, (r) { not(r.success) }), (r) { r.error })
+                    items map(filter(results, %.success), %.media)
+                    errors map(filter(results, not(%.success)), %.error)
 
                     AIMediaBatch({
                         items: items,
@@ -313,7 +313,7 @@ meta {
 
     // Response contains inline_data parts with base64 images
     parts response.candidates[0].content.parts
-    images filter(parts, (p) { not(is-null(p.inlineData)) })
+    images filter(parts, not(is-null(%.inlineData)))
     ```
     """
 }
@@ -370,7 +370,7 @@ fn (path: Str, prompt: Str): AIMedia | HttpError {
                     parts first-candidate.content.parts
 
                     // Find inline data parts (images)
-                    image-parts filter(parts, (p) { not(is-null(p.inlineData)) })
+                    image-parts filter(parts, not(is-null(%.inlineData)))
 
                     cond {
                         eq(count(image-parts), 0) => {

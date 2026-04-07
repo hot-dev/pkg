@@ -67,7 +67,7 @@ fn
     request-body if(is-null(limit), {}, { Limit: limit })
 
     with-start if(is-null(exclusive_start_table_name), request-body,
-        merge(request-body, { ExclusiveStartTableName: exclusive_start_table_name })
+        {...request-body, ExclusiveStartTableName: exclusive_start_table_name}
     )
 
     body to-json(with-start)

@@ -96,20 +96,18 @@ fn
 
     if(is-ok-response(response),
         ListFoundationModelsResponse({
-            models: if(is-null(response.body.modelSummaries), [], map(response.body.modelSummaries, (m) {
-                FoundationModel({
-                    model_arn: m.modelArn,
-                    model_id: m.modelId,
-                    model_name: m.modelName,
-                    provider_name: m.providerName,
-                    input_modalities: m.inputModalities,
-                    output_modalities: m.outputModalities,
-                    response_streaming_supported: m.responseStreamingSupported,
-                    customizations_supported: m.customizationsSupported,
-                    inference_types_supported: m.inferenceTypesSupported,
-                    model_lifecycle: m.modelLifecycle
-                })
-            }))
+            models: if(is-null(response.body.modelSummaries), [], map(response.body.modelSummaries, FoundationModel({
+                model_arn: %.modelArn,
+                model_id: %.modelId,
+                model_name: %.modelName,
+                provider_name: %.providerName,
+                input_modalities: %.inputModalities,
+                output_modalities: %.outputModalities,
+                response_streaming_supported: %.responseStreamingSupported,
+                customizations_supported: %.customizationsSupported,
+                inference_types_supported: %.inferenceTypesSupported,
+                model_lifecycle: %.modelLifecycle
+            })))
         }),
         err(AwsError(response))
     )

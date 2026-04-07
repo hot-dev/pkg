@@ -124,7 +124,7 @@ meta {
 fn (request: CreateImageRequest): CreateImageResponse | HttpError {
     // Default to dall-e-3 model if not specified
     final-request cond {
-        is-null(request.model) => { merge(untype(request), {model: "dall-e-3"}) }
+        is-null(request.model) => { {...untype(request), model: "dall-e-3"} }
         => { request }
     }
 
@@ -214,7 +214,7 @@ fn
 },
 (path: Str, request: CreateImageRequest): AIMedia | HttpError {
     // Force base64 response format for file writing
-    final-request merge(untype(request), {response_format: "b64_json"})
+    final-request {...untype(request), response_format: "b64_json"}
 
     response generate(CreateImageRequest(final-request))
 
@@ -302,16 +302,16 @@ fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
     })
 
     // Separate successes and failures
-    successes filter(results, (r) { r.success })
-    failures filter(results, (r) { not(r.success) })
+    successes filter(results, %.success)
+    failures filter(results, not(%.success))
 
     AIMediaBatch({
-        items: map(successes, (r) { r.media }),
+        items: map(successes, %.media),
         succeeded: length(successes),
         failed: length(failures),
         errors: cond {
             is-zero(length(failures)) => { null }
-            => { map(failures, (r) { r.error }) }
+            => { map(failures, %.error) }
         }
     })
 }
@@ -343,7 +343,7 @@ fn (prompt: Str): Str | HttpError {
 
     final-request cond {
         is-null(size) => { request }
-        => { merge(request, {size: size}) }
+        => { {...request, size: size} }
     }
 
     response generate(CreateImageRequest(final-request))

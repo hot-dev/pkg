@@ -66,10 +66,8 @@ fn (url: Str, client-info: ::types/ClientInfo, capabilities: ::types/ClientCapab
   session-id get(result, "sessionId", null)
 
   // Build session headers for all subsequent requests
-  base-headers {"Mcp-Protocol-Version": PROTOCOL_VERSION}
-  session-headers if(is-some(session-id),
-    assoc(base-headers, "Mcp-Session-Id", session-id),
-    base-headers)
+  session-headers {"Mcp-Protocol-Version": PROTOCOL_VERSION}
+    |> assoc-some("Mcp-Session-Id", session-id)
 
   // Step 2: Send initialized notification
   ::rpc/notify(url, session-headers, ::rpc/notification("notifications/initialized", null))

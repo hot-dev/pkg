@@ -30,7 +30,7 @@ first(prompts).name // => "code-review"
 }
 fn (session: ::types/Session): Vec<::types/Prompt> {
   result ::client/session-request(session, "prompts/list", {})
-  map(get(result, "prompts", []), (p) { ::types/Prompt(p) })
+  map(get(result, "prompts", []), ::types/Prompt(%))
 }
 
 // List prompts with explicit cursor for manual pagination.
@@ -53,10 +53,10 @@ page.next-cursor // => "cursor-abc" or null
 """
 }
 fn (session: ::types/Session, cursor: Str?): Map {
-  params if(is-some(cursor), {cursor: cursor}, {})
+  params {} |> assoc-some("cursor", cursor)
   result ::client/session-request(session, "prompts/list", params)
   {
-    prompts: map(get(result, "prompts", []), (p) { ::types/Prompt(p) }),
+    prompts: map(get(result, "prompts", []), ::types/Prompt(%)),
     next-cursor: get(result, "nextCursor", null)
   }
 }
@@ -86,9 +86,9 @@ fn (session: ::types/Session): Vec<::types/Prompt> {
 // Recursive pagination helper (TCO).
 collect-pages fn cond (session: ::types/Session, cursor: Str?, acc: Vec): Vec {
   => {
-    params if(is-some(cursor), {cursor: cursor}, {})
+    params {} |> assoc-some("cursor", cursor)
     result ::client/session-request(session, "prompts/list", params)
-    items map(get(result, "prompts", []), (p) { ::types/Prompt(p) })
+    items map(get(result, "prompts", []), ::types/Prompt(%))
     combined concat(acc, items)
     next-cursor get(result, "nextCursor", null)
     if(is-null(next-cursor),
@@ -129,5 +129,5 @@ fn (session: ::types/Session, name: Str, arguments: Map?): Vec<::types/PromptMes
     name: name,
     arguments: or(arguments, {})
   })
-  map(get(result, "messages", []), (m) { ::types/PromptMessage(m) })
+  map(get(result, "messages", []), ::types/PromptMessage(%))
 }

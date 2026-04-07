@@ -65,7 +65,7 @@ meta {
     // List all skills
     skills ::anthropic::skills/list()
     assert(is-vec(skills.data))
-    map(skills.data, (s) { s.display_title })
+    map(skills.data, %.display_title)
 
     // List with a limit
     skills ::anthropic::skills/list(5)

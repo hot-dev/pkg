@@ -73,12 +73,12 @@ fn
     anthropic-version: "2023-06-01"
   }
 
-  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-  final-headers merge(headers, additional-headers)
+  headers if(eq(body, ""), default-headers, {...default-headers, Content-Type: "application/json"})
+  final-headers {...headers, ...additional-headers}
 
   ::hot::http/request(HttpRequest({
-    method: method,
-    url: url,
+    method,
+    url,
     headers: final-headers,
     body: to-json(untype(body))
   }))
@@ -123,12 +123,12 @@ fn
     anthropic-version: "2023-06-01"
   }
 
-  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-  final-headers merge(headers, additional-headers)
+  headers if(eq(body, ""), default-headers, {...default-headers, Content-Type: "application/json"})
+  final-headers {...headers, ...additional-headers}
 
   ::hot::http/request-stream(HttpRequest({
-    method: method,
-    url: url,
+    method,
+    url,
     headers: final-headers,
     body: to-json(untype(body))
   }), format)

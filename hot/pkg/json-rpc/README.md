@@ -7,7 +7,7 @@ JSON-RPC 2.0 client for Hot. Supports standard request/response over HTTP and SS
 Add this to the `deps` in your `hot.hot` file:
 
 ```hot
-"hot.dev/json-rpc": "1.0.2"
+"hot.dev/json-rpc": "1.1.0"
 ```
 
 ## Usage

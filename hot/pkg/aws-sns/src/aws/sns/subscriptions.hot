@@ -74,7 +74,7 @@ fn
     }
 
     with-attributes if(is-empty(attributes), request-body,
-        merge(request-body, { Attributes: attributes })
+        {...request-body, Attributes: attributes}
     )
 
     body to-json(with-attributes)
@@ -209,7 +209,7 @@ fn
     request-body {}
 
     with-token if(is-null(next_token), request-body,
-        merge(request-body, { NextToken: next_token })
+        {...request-body, NextToken: next_token}
     )
 
     body to-json(with-token)
@@ -228,15 +228,13 @@ fn
 
     if(is-ok-response(response),
         ListSubscriptionsResponse({
-            subscriptions: if(is-null(response.body.Subscriptions), [], map(response.body.Subscriptions, (s) {
-                Subscription({
-                    subscription_arn: s.SubscriptionArn,
-                    owner: s.Owner,
-                    protocol: s.Protocol,
-                    endpoint: s.Endpoint,
-                    topic_arn: s.TopicArn
-                })
-            })),
+            subscriptions: if(is-null(response.body.Subscriptions), [], map(response.body.Subscriptions, Subscription({
+                subscription_arn: %.SubscriptionArn,
+                owner: %.Owner,
+                protocol: %.Protocol,
+                endpoint: %.Endpoint,
+                topic_arn: %.TopicArn
+            }))),
             next_token: response.body.NextToken
         }),
         err(AwsError(response))
@@ -270,7 +268,7 @@ fn
     }
 
     with-token if(is-null(next_token), request-body,
-        merge(request-body, { NextToken: next_token })
+        {...request-body, NextToken: next_token}
     )
 
     body to-json(with-token)
@@ -289,15 +287,13 @@ fn
 
     if(is-ok-response(response),
         ListSubscriptionsResponse({
-            subscriptions: if(is-null(response.body.Subscriptions), [], map(response.body.Subscriptions, (s) {
-                Subscription({
-                    subscription_arn: s.SubscriptionArn,
-                    owner: s.Owner,
-                    protocol: s.Protocol,
-                    endpoint: s.Endpoint,
-                    topic_arn: s.TopicArn
-                })
-            })),
+            subscriptions: if(is-null(response.body.Subscriptions), [], map(response.body.Subscriptions, Subscription({
+                subscription_arn: %.SubscriptionArn,
+                owner: %.Owner,
+                protocol: %.Protocol,
+                endpoint: %.Endpoint,
+                topic_arn: %.TopicArn
+            }))),
             next_token: response.body.NextToken
         }),
         err(AwsError(response))

@@ -2,15 +2,15 @@
 
 hot.pkg.mcp {
   name: "hot.dev/mcp",
-  version: "1.0.2",
-  hot-min-version: "1.1.0",
+  version: "1.1.0",
+  hot-min-version: "1.2.0",
   description: "MCP client for connecting to Model Context Protocol servers. Supports tools, resources, prompts, and SSE streaming.",
   author: "Hot Dev",
   email: "support@hot.dev",
   license: "Apache-2.0",
   tags: ["mcp", "ai", "tools", "model-context-protocol"],
   deps: {
-    "hot.dev/json-rpc": "1.0.0"
+    "hot.dev/json-rpc": "1.1.0"
   },
   src-paths: ["src/"],
   test-paths: ["test/"]

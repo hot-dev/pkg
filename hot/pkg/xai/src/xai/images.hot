@@ -96,7 +96,7 @@ meta {
 fn (request: CreateImageRequest): CreateImageResponse | HttpError {
     // Default to grok-imagine-image model if not specified
     final-request cond {
-        is-null(request.model) => { merge(untype(request), {model: "grok-imagine-image"}) }
+        is-null(request.model) => { {...untype(request), model: "grok-imagine-image"} }
         => { request }
     }
 
@@ -150,7 +150,7 @@ fn
 },
 (path: Str, request: CreateImageRequest): AIMedia | HttpError {
     // Force base64 response format for file writing
-    final-request merge(untype(request), {response_format: "b64_json"})
+    final-request {...untype(request), response_format: "b64_json"}
 
     response generate(CreateImageRequest(final-request))
 
@@ -218,7 +218,7 @@ meta {
     batch.succeeded // => 3
     batch.failed // => 0
 
-    paths map(batch.items, (item) { item.media.file.path })
+    paths map(batch.items, %.media.file.path)
     // => ["uploads/image-0.png", "uploads/image-1.png", "uploads/image-2.png"]
     ```
     """
@@ -276,16 +276,16 @@ fn (path-template: Str, prompt: Str, count: Int): AIMediaBatch {
             })
 
             // Separate successes and failures
-            successes filter(results, (r) { r.success })
-            failures filter(results, (r) { not(r.success) })
+            successes filter(results, %.success)
+            failures filter(results, not(%.success))
 
             AIMediaBatch({
-                items: map(successes, (r) { r.media }),
+                items: map(successes, %.media),
                 succeeded: length(successes),
                 failed: length(failures),
                 errors: cond {
                     is-zero(length(failures)) => { null }
-                    => { map(failures, (r) { r.error }) }
+                    => { map(failures, %.error) }
                 }
             })
         }
@@ -325,7 +325,7 @@ fn (prompt: Str): Str | HttpError {
 
     final-request cond {
         is-null(size) => { request }
-        => { merge(request, {size: size}) }
+        => { {...request, size: size} }
     }
 
     response generate(CreateImageRequest(final-request))

@@ -245,7 +245,7 @@ meta {
 }
 fn (request: CreateResponseRequest): StreamingResponseResponse {
     // Force stream: true
-    streaming-request merge(untype(request), {stream: true})
+    streaming-request {...untype(request), stream: true}
     response api-request-stream("POST", `${::xai/BASE_URL}/responses`, {}, streaming-request, "sse")
     cond {
         gte(response.status, 400) => { err(HttpError(response)) }
@@ -448,7 +448,7 @@ fn (response: CreateResponseResponse): Str {
         or(is-null(output), is-zero(length(output))) => { "" }
         => {
             // Find the first message output item
-            message-items filter(output, (item) { eq(item.type, "message") })
+            message-items filter(output, eq(%.type, "message"))
             cond {
                 is-zero(length(message-items)) => { "" }
                 => {
@@ -458,7 +458,7 @@ fn (response: CreateResponseResponse): Str {
                         or(is-null(content), is-zero(length(content))) => { "" }
                         => {
                             // Find first text content part
-                            text-parts filter(content, (part) { eq(part.type, "output_text") })
+                            text-parts filter(content, eq(%.type, "output_text"))
                             cond {
                                 is-zero(length(text-parts)) => { "" }
                                 => { or(first(text-parts).text, "") }
@@ -537,11 +537,7 @@ fn (event): Bool {
         is-null(event.data) => { false }
         => {
             data event.data
-            or(
-                eq(data.type, "response.completed"),
-                eq(data.type, "response.failed"),
-                eq(data.type, "response.incomplete")
-            )
+            in(data.type, ["response.completed", "response.failed", "response.incomplete"])
         }
     }
 }

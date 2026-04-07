@@ -70,19 +70,19 @@ fn
 
   cond {
     or(eq(body, ""), is-null(body)) => {
-      final-headers merge(default-headers, additional-headers)
+      final-headers {...default-headers, ...additional-headers}
       ::hot::http/request(HttpRequest({
-        method: method,
-        url: url,
+        method,
+        url,
         headers: final-headers
       }))
     }
     => {
-      headers merge(default-headers, {Content-Type: "application/json"})
-      final-headers merge(headers, additional-headers)
+      headers {...default-headers, Content-Type: "application/json"}
+      final-headers {...headers, ...additional-headers}
       ::hot::http/request(HttpRequest({
-        method: method,
-        url: url,
+        method,
+        url,
         headers: final-headers,
         body: to-json(untype(body))
       }))
@@ -130,12 +130,12 @@ fn
     Authorization: `Bearer ${api-key}`
   }
 
-  headers if(eq(body, ""), default-headers, merge(default-headers, {Content-Type: "application/json"}))
-  final-headers merge(headers, additional-headers)
+  headers if(eq(body, ""), default-headers, {...default-headers, Content-Type: "application/json"})
+  final-headers {...headers, ...additional-headers}
 
   ::hot::http/request-stream(HttpRequest({
-    method: method,
-    url: url,
+    method,
+    url,
     headers: final-headers,
     body: to-json(untype(body))
   }), format)

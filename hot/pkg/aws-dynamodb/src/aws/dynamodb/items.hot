@@ -68,10 +68,9 @@ fn
     }
 
     with-condition if(is-null(condition_expression), request-body,
-        merge(request-body, {
+        {...request-body,
             ConditionExpression: condition_expression,
-            ExpressionAttributeValues: expression_attribute_values
-        })
+            ExpressionAttributeValues: expression_attribute_values}
     )
 
     body to-json(with-condition)
@@ -128,9 +127,7 @@ fn
     }
 
     with-projection if(is-null(projection_expression), request-body,
-        merge(request-body, {
-            ProjectionExpression: projection_expression
-        })
+        {...request-body, ProjectionExpression: projection_expression}
     )
 
     body to-json(with-projection)
@@ -187,10 +184,9 @@ fn
     }
 
     with-condition if(is-null(condition_expression), request-body,
-        merge(request-body, {
+        {...request-body,
             ConditionExpression: condition_expression,
-            ExpressionAttributeValues: expression_attribute_values
-        })
+            ExpressionAttributeValues: expression_attribute_values}
     )
 
     body to-json(with-condition)
@@ -255,9 +251,7 @@ fn
     }
 
     with-names if(is-null(expression_attribute_names), request-body,
-        merge(request-body, {
-            ExpressionAttributeNames: expression_attribute_names
-        })
+        {...request-body, ExpressionAttributeNames: expression_attribute_names}
     )
 
     body to-json(with-names)

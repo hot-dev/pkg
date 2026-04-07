@@ -190,21 +190,17 @@ fn (topic_arn: Str, entries: Vec<Map>): PublishBatchResponse | AwsError {
 
     if(is-ok-response(response),
         PublishBatchResponse({
-            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, (s) {
-                PublishBatchResultEntry({
-                    id: s.Id,
-                    message_id: s.MessageId,
-                    sequence_number: s.SequenceNumber
-                })
-            })),
-            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, (f) {
-                PublishBatchFailureEntry({
-                    id: f.Id,
-                    code: f.Code,
-                    message: f.Message,
-                    sender_fault: f.SenderFault
-                })
-            }))
+            successful: if(is-null(response.body.Successful), [], map(response.body.Successful, PublishBatchResultEntry({
+                id: %.Id,
+                message_id: %.MessageId,
+                sequence_number: %.SequenceNumber
+            }))),
+            failed: if(is-null(response.body.Failed), [], map(response.body.Failed, PublishBatchFailureEntry({
+                id: %.Id,
+                code: %.Code,
+                message: %.Message,
+                sender_fault: %.SenderFault
+            })))
         }),
         err(AwsError(response))
     )

@@ -165,7 +165,7 @@ meta {
     """
 }
 fn (table_name: Str, items: Vec<Map>): Map {
-    requests map(items, (item) { { PutRequest: { Item: item } } })
+    requests map(items, { PutRequest: { Item: % } })
     Map([[table_name, requests]])
 }
 
@@ -187,6 +187,6 @@ meta {
     """
 }
 fn (table_name: Str, keys: Vec<Map>): Map {
-    requests map(keys, (key) { { DeleteRequest: { Key: key } } })
+    requests map(keys, { DeleteRequest: { Key: % } })
     Map([[table_name, requests]])
 }

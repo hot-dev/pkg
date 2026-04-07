@@ -50,7 +50,7 @@ meta {
     // List all files
     files ::anthropic::files/list()
     assert(is-vec(files.data))
-    map(files.data, (f) { f.filename })
+    map(files.data, %.filename)
 
     // List with a limit
     files ::anthropic::files/list(5)

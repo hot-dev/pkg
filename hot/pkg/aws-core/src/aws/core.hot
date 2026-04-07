@@ -80,11 +80,7 @@ fn (): Credentials {
     secret_access_key ::ctx/get("aws.secret-access-key")
     session_token ::ctx/get("aws.session-token")
 
-    Credentials({
-        access_key_id: access_key_id,
-        secret_access_key: secret_access_key,
-        session_token: session_token
-    })
+    Credentials({access_key_id, secret_access_key, session_token})
 }
 
 // Get AWS region from context
@@ -131,7 +127,7 @@ fn (url: Str): Map {
         `/${join(rest-parts, "/")}`
     )
 
-    {host: host, path: path, query: query}
+    {host, path, query}
 }
 
 // Get current UTC timestamp in AWS format
@@ -290,9 +286,7 @@ meta {
 fn (headers: Map): Str {
     // Get sorted lowercase header names and values
     // For now, just format the headers we have
-    header-lines map(keys(headers), (k) {
-        `${lowercase(k)}:${trim(Str(headers[k]))}`
-    })
+    header-lines map(keys(headers), `${lowercase(%)}:${trim(Str(headers[%]))}`)
     sorted-lines sort(header-lines)
     `${join(sorted-lines, "\n")}\n`
 }
@@ -361,20 +355,17 @@ fn (method: Str, url: Str, region: Str, service: Str, credentials: Credentials, 
     payload-hash sha256(if(is-null(payload), "", payload))
 
     // Build headers with required AWS headers
-    base-headers merge(headers, {
-        "x-amz-date": amz-date,
-        "x-amz-content-sha256": payload-hash
-    })
+    base-headers {...headers, "x-amz-date": amz-date, "x-amz-content-sha256": payload-hash}
 
     // Add session token if present (not null and not empty)
     with-token if(or(is-null(credentials.session_token), eq(credentials.session_token, "")),
         base-headers,
-        merge(base-headers, {"x-amz-security-token": credentials.session_token})
+        {...base-headers, "x-amz-security-token": credentials.session_token}
     )
 
     // Ensure host header is present
     all-headers if(is-null(with-token.Host),
-        merge(with-token, {"Host": url-parts.host}),
+        {...with-token, "Host": url-parts.host},
         with-token
     )
 
@@ -423,7 +414,7 @@ fn (method: Str, url: Str, region: Str, service: Str, credentials: Credentials, 
     authorization-header `AWS4-HMAC-SHA256 Credential=${credentials.access_key_id}/${credential-scope}, SignedHeaders=${signed-headers-str}, Signature=${signature}`
 
     // Return headers with authorization
-    merge(all-headers, {"Authorization": authorization-header})
+    {...all-headers, "Authorization": authorization-header}
 }
 
 // Make an authenticated AWS request
