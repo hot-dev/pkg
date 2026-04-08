@@ -1,0 +1,15 @@
+::hot::pkg ns
+
+hot.pkg.libreoffice {
+  name: "hot.dev/libreoffice",
+  version: "1.0.0",
+  hot-min-version: "1.2.0",
+  description: "LibreOffice headless document conversion via Hot Box containers. Convert between DOCX, PDF, XLSX, PPTX, and more.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["document", "office", "pdf", "convert", "box"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

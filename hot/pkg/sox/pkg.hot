@@ -1,0 +1,15 @@
+::hot::pkg ns
+
+hot.pkg.sox {
+  name: "hot.dev/sox",
+  version: "1.0.0",
+  hot-min-version: "1.2.0",
+  description: "SoX audio processing via Hot Box containers. Audio format conversion, effects, normalization, and info extraction.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["audio", "sound", "effects", "box"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}

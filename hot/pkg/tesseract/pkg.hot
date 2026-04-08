@@ -1,0 +1,15 @@
+::hot::pkg ns
+
+hot.pkg.tesseract {
+  name: "hot.dev/tesseract",
+  version: "1.0.0",
+  hot-min-version: "1.2.0",
+  description: "Tesseract OCR via Hot Box containers. Extract text from images with language support.",
+  author: "Hot Dev",
+  email: "support@hot.dev",
+  license: "Apache-2.0",
+  tags: ["ocr", "text", "image", "recognition", "box"],
+  deps: {},
+  src-paths: ["src/"],
+  test-paths: ["test/"]
+}
