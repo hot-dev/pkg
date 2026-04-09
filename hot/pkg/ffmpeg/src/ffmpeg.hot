@@ -251,8 +251,6 @@ run-ffmpeg-box fn (script: Str, box-size: Str, image: Str?, timeout: Int): Map {
         script: full-script,
         timeout: timeout,
         size: box-size,
-        network: "internet",
-        writable: true,
     })
     ::task/await(info.id)
 }
@@ -265,8 +263,6 @@ start-ffmpeg-box fn (script: Str, box-size: Str, image: Str?, timeout: Int): Map
         script: full-script,
         timeout: timeout,
         size: box-size,
-        network: "internet",
-        writable: true,
     })
 }
 
@@ -316,7 +312,7 @@ meta {
     info.streams             // [{codec_name: "h264", width: 1920, ...}, ...]
     ```
     """,
-    box: {min-size: "nano"}
+    box: {min-size: "small"}
 }
 fn (input: Str): Map {
     ext file-ext(input)
@@ -325,7 +321,7 @@ fn (input: Str): Map {
     probe-args join-args(build-probe-args(in-path))
     script `hotbox cp '${input}' ${in-path} && ffprobe ${probe-args}`
 
-    result run-ffmpeg-box(script, "nano", null, 300)
+    result run-ffmpeg-box(script, "small", null, 300)
     checked check-box-result(result, "ffprobe")
     parse-probe-output(checked.stdout)
 },
@@ -336,7 +332,7 @@ fn (input: Str): Map {
     probe-args join-args(build-probe-args(in-path))
     script `hotbox cp '${input}' ${in-path} && ffprobe ${probe-args}`
 
-    result run-ffmpeg-box(script, "nano", image, 300)
+    result run-ffmpeg-box(script, "small", image, 300)
     checked check-box-result(result, "ffprobe")
     parse-probe-output(checked.stdout)
 }
@@ -506,7 +502,7 @@ meta {
     ver.version
     ```
     """,
-    box: {min-size: "nano"}
+    box: {min-size: "small"}
 }
 fn (): Map {
     version(null)
@@ -514,7 +510,7 @@ fn (): Map {
 (image: Str?): Map {
     script `ffmpeg -version`
 
-    result run-ffmpeg-box(script, "nano", image, 300)
+    result run-ffmpeg-box(script, "small", image, 300)
     checked check-box-result(result, "ffmpeg")
 
     raw or(checked.stdout, "") |> trim()
@@ -531,7 +527,7 @@ fn (): Map {
 start-probe
 meta {
     doc: "Start a probe task without awaiting. Returns TaskInfo for use with ::hot::task/await.",
-    box: {min-size: "nano"}
+    box: {min-size: "small"}
 }
 fn (input: Str): Map {
     ext file-ext(input)
@@ -540,7 +536,7 @@ fn (input: Str): Map {
     probe-args join-args(build-probe-args(in-path))
     script `hotbox cp '${input}' ${in-path} && ffprobe ${probe-args}`
 
-    start-ffmpeg-box(script, "nano", null, 300)
+    start-ffmpeg-box(script, "small", null, 300)
 }
 
 start-thumbnail

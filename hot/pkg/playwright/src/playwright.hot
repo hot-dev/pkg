@@ -235,11 +235,9 @@ fn (js: Str, box-size: Str, image: Str?, sh-suffix: Str, timeout: Int): Map {
     full `${INSTALL_CMD} && NODE_PATH=/tmp/node_modules node -e "${escaped}"${sh-suffix}`
     info ::box/start({
         image: img,
-        cmd: ["sh", "-c", full],
+        script: full,
         timeout: timeout,
         size: box-size,
-        network: "internet",
-        writable: true,
     })
     ::task/await(info.id)
 }
@@ -254,11 +252,9 @@ fn (js: Str, box-size: Str, image: Str?, sh-suffix: Str, timeout: Int): Map {
     full `${INSTALL_CMD} && NODE_PATH=/tmp/node_modules node -e "${escaped}"${sh-suffix}`
     ::box/start({
         image: img,
-        cmd: ["sh", "-c", full],
+        script: full,
         timeout: timeout,
         size: box-size,
-        network: "internet",
-        writable: true,
     })
 }
 
