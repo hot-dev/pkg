@@ -13,6 +13,11 @@ meta {
     tap(result.text)
     tap(result.url)
 
+    // With explicit output path
+    result ::tesseract/ocr("hot://uploads/scan.png", {
+        output: "hot://ocr/scan-result.txt",
+    })
+
     ver ::tesseract/version()
     tap(ver.version)
     ```
@@ -42,6 +47,7 @@ meta {
     - `oem` — OCR engine mode (0–3)
     - `format` — Output: `"txt"`, `"hocr"`, `"tsv"`, `"pdf"` (default: `"txt"`)
     - `dpi` — DPI hint for the input image (`--dpi`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with tesseract (default: `alpine:3.21` + runtime install)
     - `size` — Box size override (default: `"small"`)
     """
@@ -53,6 +59,7 @@ type {
     format: Str?,
     dpi: Int?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -106,6 +113,16 @@ fn (format: Str, stdout: Str): Str {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 format-output-suffix fn (format: Str): Str {
     cond {
@@ -210,15 +227,15 @@ meta {
 fn (input: Str): Map {
     ocr(input, OcrOpts({
         language: null, psm: null, oem: null,
-        format: null, dpi: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        format: null, dpi: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: OcrOpts): Map {
     fmt or(opts.format, "txt")
     uuid Uuid()
     suffix format-output-suffix(fmt)
-    hot-output `hot://tesseract/${uuid}/ocr-output.${suffix}`
+    hot-output resolve-output(opts.output, `hot://tesseract/${uuid}/ocr-output.${suffix}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -285,15 +302,15 @@ meta {
 fn (input: Str): Map {
     start-ocr(input, OcrOpts({
         language: null, psm: null, oem: null,
-        format: null, dpi: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        format: null, dpi: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: OcrOpts): Map {
     fmt or(opts.format, "txt")
     uuid Uuid()
     suffix format-output-suffix(fmt)
-    hot-output `hot://tesseract/${uuid}/ocr-output.${suffix}`
+    hot-output resolve-output(opts.output, `hot://tesseract/${uuid}/ocr-output.${suffix}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -305,5 +322,6 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && tesseract ${tess-args}${text-capture} && hotbox cp ${disk-out} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-tesseract-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-tesseract-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }

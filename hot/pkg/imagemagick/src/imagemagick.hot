@@ -21,6 +21,12 @@ meta {
 
     small ::imagemagick/optimize("hot://uploads/photo.jpg")
     tap(small.url)
+
+    // With explicit output path
+    out ::imagemagick/resize("hot://uploads/photo.jpg", {
+        width: 800,
+        output: "hot://images/photo-800w.jpg",
+    })
     ```
     """
 }
@@ -46,6 +52,7 @@ meta {
     - `fit` — `"contain"` (default), `"cover"`, or `"fill"`
     - `quality` — Output quality for lossy formats (1–100)
     - `format` — Output format extension, e.g. `"png"`, `"jpg"` (default: input extension)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with ImageMagick pre-installed
     - `size` — Box size override (default: `"small"`)
     """
@@ -56,6 +63,7 @@ type {
     fit: Str?,
     quality: Int?,
     format: Str?,
+    output: Str?,
     image: Str?,
     size: Str?
 }
@@ -70,6 +78,7 @@ meta {
     - `quality` — Quality for lossy formats (1–100)
     - `density` — DPI for vector or PDF sources
     - `strip` — Strip metadata when `true`
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with ImageMagick
     - `size` — Box size override (default: `"small"`)
     """
@@ -79,6 +88,7 @@ type {
     quality: Int?,
     density: Int?,
     strip: Bool?,
+    output: Str?,
     image: Str?,
     size: Str?
 }
@@ -92,6 +102,7 @@ meta {
     - `quality` — JPEG/WebP quality (default: `85`)
     - `strip` — Strip metadata (default: `true`)
     - `format` — Output format (default: same as input)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with ImageMagick
     - `size` — Box size override (default: `"small"`)
     """
@@ -100,6 +111,7 @@ type {
     quality: Int?,
     strip: Bool?,
     format: Str?,
+    output: Str?,
     image: Str?,
     size: Str?
 }
@@ -219,6 +231,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 file-ext fn (path: Str): Str {
     parts split(path, ".")
@@ -343,7 +365,7 @@ meta {
 fn (input: Str, opts: ResizeOpts): Map {
     format or(opts.format, file-ext(input))
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/output.${format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/output.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -377,7 +399,7 @@ meta {
 }
 fn (input: Str, opts: ConvertOpts): Map {
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -411,13 +433,13 @@ meta {
 }
 fn (input: Str): Map {
     optimize(input, OptimizeOpts({
-        quality: null, strip: null, format: null, image: null, size: null,
+        quality: null, strip: null, format: null, output: null, image: null, size: null,
     }))
 },
 (input: Str, opts: OptimizeOpts): Map {
     format or(opts.format, file-ext(input))
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/optimized.${format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/optimized.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -467,7 +489,7 @@ meta {
 fn (input: Str, opts: ResizeOpts): Map {
     format or(opts.format, file-ext(input))
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/output.${format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/output.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -477,7 +499,8 @@ fn (input: Str, opts: ResizeOpts): Map {
     script `hotbox cp '${input}' ${in-path} && ${magick-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-magick-box(script, box-size, opts.image)
+    info start-magick-box(script, box-size, opts.image)
+    assoc(info, "data", {output: hot-output})
 }
 
 start-convert
@@ -491,7 +514,7 @@ meta {
 }
 fn (input: Str, opts: ConvertOpts): Map {
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -501,7 +524,8 @@ fn (input: Str, opts: ConvertOpts): Map {
     script `hotbox cp '${input}' ${in-path} && ${magick-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-magick-box(script, box-size, opts.image)
+    info start-magick-box(script, box-size, opts.image)
+    assoc(info, "data", {output: hot-output})
 }
 
 start-optimize
@@ -515,13 +539,13 @@ meta {
 }
 fn (input: Str): Map {
     start-optimize(input, OptimizeOpts({
-        quality: null, strip: null, format: null, image: null, size: null,
+        quality: null, strip: null, format: null, output: null, image: null, size: null,
     }))
 },
 (input: Str, opts: OptimizeOpts): Map {
     format or(opts.format, file-ext(input))
     uuid Uuid()
-    hot-output `hot://imagemagick/${uuid}/optimized.${format}`
+    hot-output resolve-output(opts.output, `hot://imagemagick/${uuid}/optimized.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -531,5 +555,6 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && ${magick-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-magick-box(script, box-size, opts.image)
+    info start-magick-box(script, box-size, opts.image)
+    assoc(info, "data", {output: hot-output})
 }

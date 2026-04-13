@@ -18,6 +18,13 @@ meta {
     page ::pandoc/convert-text("# Title\\n\\nHello.", {to: "html", from: "markdown"})
     tap(page.text)
 
+    // With explicit output path
+    out ::pandoc/convert("hot://docs/readme.md", {
+        to: "pdf",
+        from: "markdown",
+        output: "hot://docs/readme.pdf",
+    })
+
     // Pandoc version
     ver ::pandoc/version()
     tap(ver.version)
@@ -46,6 +53,7 @@ meta {
     - `template` — Custom template file path inside the container
     - `toc` — Include table of contents (default: `false` when omitted)
     - `extra-args` — Additional pandoc CLI arguments
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Override Docker image (must have `pandoc` in PATH)
     - `size` — Box size override (`convert` default `"small"`, `convert-text` default `"nano"`)
     """
@@ -57,6 +65,7 @@ type {
     template: Str?,
     toc: Bool?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -109,6 +118,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 format-output-ext fn (to-format: Str): Str {
     cond {
@@ -214,7 +233,7 @@ meta {
 fn (input: Str, opts: ConvertOpts): Map {
     out-ext format-output-ext(opts.to)
     uuid Uuid()
-    hot-output `hot://pandoc/${uuid}/output.${out-ext}`
+    hot-output resolve-output(opts.output, `hot://pandoc/${uuid}/output.${out-ext}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -252,7 +271,7 @@ meta {
 fn (text: Str, opts: ConvertOpts): Map {
     out-ext format-output-ext(opts.to)
     uuid Uuid()
-    hot-output `hot://pandoc/${uuid}/output.${out-ext}`
+    hot-output resolve-output(opts.output, `hot://pandoc/${uuid}/output.${out-ext}`)
 
     in-path "/data/input.dat"
     out-path `/data/output.${out-ext}`
@@ -322,7 +341,7 @@ meta {
 fn (input: Str, opts: ConvertOpts): Map {
     out-ext format-output-ext(opts.to)
     uuid Uuid()
-    hot-output `hot://pandoc/${uuid}/output.${out-ext}`
+    hot-output resolve-output(opts.output, `hot://pandoc/${uuid}/output.${out-ext}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -332,7 +351,8 @@ fn (input: Str, opts: ConvertOpts): Map {
     script `hotbox cp '${input}' ${in-path} && pandoc ${pandoc-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-pandoc-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-pandoc-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-convert-text
@@ -355,7 +375,7 @@ meta {
 fn (text: Str, opts: ConvertOpts): Map {
     out-ext format-output-ext(opts.to)
     uuid Uuid()
-    hot-output `hot://pandoc/${uuid}/output.${out-ext}`
+    hot-output resolve-output(opts.output, `hot://pandoc/${uuid}/output.${out-ext}`)
 
     in-path "/data/input.dat"
     out-path `/data/output.${out-ext}`
@@ -366,5 +386,6 @@ fn (text: Str, opts: ConvertOpts): Map {
     script `echo '${enc}' | base64 -d > ${in-path} && pandoc ${pandoc-args}${cat-step} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "nano")
-    start-pandoc-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-pandoc-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }

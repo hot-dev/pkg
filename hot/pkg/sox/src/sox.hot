@@ -17,6 +17,12 @@ meta {
 
     out ::sox/convert("hot://uploads/track.wav", {format: "mp3"})
     tap(out.url)
+
+    // With explicit output path
+    out ::sox/normalize("hot://uploads/track.wav", {
+        level: "-3",
+        output: "hot://audio/normalized.wav",
+    })
     ```
     """
 }
@@ -42,6 +48,7 @@ meta {
     - `sample-rate` — Output sample rate in Hz
     - `channels` — Channel count (1 mono, 2 stereo)
     - `bitrate` — Passed to SoX `-C` when set (codec-dependent)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with SoX pre-installed
     - `size` — Box size override (default: `"small"`)
     """
@@ -52,6 +59,7 @@ type {
     channels: Int?,
     bitrate: Str?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -65,6 +73,7 @@ meta {
     **Fields**
     - `effects` — Effect tokens, e.g. `["reverb", "50", "50"]`
     - `format` — Output format / extension (default: `"wav"`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with SoX
     - `size` — Box size override (default: `"small"`)
     """
@@ -73,6 +82,7 @@ type {
     effects: Vec<Str>,
     format: Str?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -86,6 +96,7 @@ meta {
     **Fields**
     - `level` — Headroom after normalize, e.g. `"-3"` for −3 dB (with `gain -n`)
     - `format` — Output format / extension (default: `"wav"`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with SoX
     - `size` — Box size override (default: `"small"`)
     """
@@ -94,6 +105,7 @@ type {
     level: Str?,
     format: Str?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -108,6 +120,7 @@ meta {
     - `start` — Start time, e.g. `"0:00"`
     - `end` — Absolute stop time, e.g. `"0:30"` (passed as `=end` to SoX)
     - `format` — Output format / extension (default: `"wav"`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with SoX
     - `size` — Box size override (default: `"small"`)
     """
@@ -117,6 +130,7 @@ type {
     end: Str,
     format: Str?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -215,6 +229,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 file-ext fn (path: Str): Str {
     parts split(path, ".")
@@ -315,14 +339,14 @@ meta {
 fn (input: Str): Map {
     convert(input, ConvertOpts({
         format: "wav", sample-rate: null, channels: null,
-        bitrate: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        bitrate: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: ConvertOpts): Map {
     format opts.format
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/output.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/output.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -351,14 +375,14 @@ meta {
 }
 fn (input: Str): Map {
     normalize(input, NormalizeOpts({
-        level: null, format: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        level: null, format: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: NormalizeOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/normalized.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/normalized.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -386,7 +410,7 @@ meta {
 fn (input: Str, opts: TrimOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/trim.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/trim.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -416,7 +440,7 @@ meta {
 fn (input: Str, opts: EffectOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/effect.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/effect.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -459,14 +483,14 @@ meta {
 fn (input: Str): Map {
     start-convert(input, ConvertOpts({
         format: "wav", sample-rate: null, channels: null,
-        bitrate: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        bitrate: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: ConvertOpts): Map {
     format opts.format
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/output.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/output.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -476,7 +500,8 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && sox ${sox-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-normalize
@@ -486,14 +511,14 @@ meta {
 }
 fn (input: Str): Map {
     start-normalize(input, NormalizeOpts({
-        level: null, format: null, extra-args: null, image: null, size: null,
-        timeout: null,
+        level: null, format: null, extra-args: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: NormalizeOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/normalized.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/normalized.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -503,7 +528,8 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && sox ${sox-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-audio-trim
@@ -514,7 +540,7 @@ meta {
 fn (input: Str, opts: TrimOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/trim.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/trim.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -524,7 +550,8 @@ fn (input: Str, opts: TrimOpts): Map {
     script `hotbox cp '${input}' ${in-path} && sox ${sox-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-effect
@@ -535,7 +562,7 @@ meta {
 fn (input: Str, opts: EffectOpts): Map {
     format or(opts.format, "wav")
     uuid Uuid()
-    hot-output `hot://sox/${uuid}/effect.${format}`
+    hot-output resolve-output(opts.output, `hot://sox/${uuid}/effect.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -545,5 +572,6 @@ fn (input: Str, opts: EffectOpts): Map {
     script `hotbox cp '${input}' ${in-path} && sox ${sox-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-sox-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }

@@ -13,6 +13,12 @@ meta {
     out ::whisper/transcribe("hot://uploads/recording.mp3")
     tap(out.text)
     tap(out.url)
+
+    // With explicit output path
+    out ::whisper/transcribe("hot://uploads/recording.mp3", {
+        model: "small",
+        output: "hot://transcripts/recording.json",
+    })
     ```
     """
 }
@@ -38,6 +44,7 @@ meta {
     - `format` — Output file format: `"txt"`, `"json"`, `"srt"`, `"vtt"` (default: `"json"`)
     - `task` — `"transcribe"` or `"translate"` (default: whisper default / transcribe)
     - `temperature` — Sampling temperature as string, e.g. `"0"`
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Custom Docker image with whisper CLI
     - `size` — Box size override (default: derived from model)
     """
@@ -50,6 +57,7 @@ type {
     temperature: Str?,
     word-timestamps: Bool?,
     initial-prompt: Str?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -99,6 +107,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 file-ext fn (path: Str): Str {
     parts split(path, ".")
@@ -207,7 +225,7 @@ fn (input: Str): Map {
     transcribe(input, TranscribeOpts({
         model: null, language: null, format: null, task: null,
         temperature: null, word-timestamps: null, initial-prompt: null,
-        image: null, size: null, timeout: null,
+        output: null, image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: TranscribeOpts): Map {
@@ -221,7 +239,7 @@ fn (input: Str): Map {
     box-size or(opts.size, model-to-min-size(model))
 
     uuid Uuid()
-    hot-output `hot://whisper/${uuid}/transcript.${fmt}`
+    hot-output resolve-output(opts.output, `hot://whisper/${uuid}/transcript.${fmt}`)
 
     whisper-args join-args(build-transcribe-args(in-path, out-dir, opts))
     out-file `${out-dir}/${stem}.${fmt}`
@@ -276,7 +294,7 @@ fn (input: Str): Map {
     start-transcribe(input, TranscribeOpts({
         model: null, language: null, format: null, task: null,
         temperature: null, word-timestamps: null, initial-prompt: null,
-        image: null, size: null, timeout: null,
+        output: null, image: null, size: null, timeout: null,
     }))
 },
 (input: Str, opts: TranscribeOpts): Map {
@@ -290,11 +308,12 @@ fn (input: Str): Map {
     box-size or(opts.size, model-to-min-size(model))
 
     uuid Uuid()
-    hot-output `hot://whisper/${uuid}/transcript.${fmt}`
+    hot-output resolve-output(opts.output, `hot://whisper/${uuid}/transcript.${fmt}`)
 
     whisper-args join-args(build-transcribe-args(in-path, out-dir, opts))
     out-file `${out-dir}/${stem}.${fmt}`
     script `mkdir -p ${out-dir} && hotbox cp '${input}' ${in-path} && whisper ${whisper-args} 1>&2 && cat ${out-file} && hotbox cp ${out-file} '${hot-output}'`
 
-    start-whisper-box(script, box-size, opts.image, or(opts.timeout, 1800))
+    info start-whisper-box(script, box-size, opts.image, or(opts.timeout, 1800))
+    assoc(info, "data", {output: hot-output})
 }

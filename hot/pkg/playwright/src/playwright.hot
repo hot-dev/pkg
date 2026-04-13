@@ -19,6 +19,11 @@ meta {
     page ::playwright/scrape("https://example.com")
     tap(page.title)
     tap(page.text)
+
+    // With explicit output path
+    shot ::playwright/screenshot("https://example.com", {
+        output: "hot://screenshots/example.png",
+    })
     ```
     """
 }
@@ -48,6 +53,7 @@ meta {
     - `quality` — JPEG quality 0–100 (JPEG only)
     - `wait-until` — Playwright `goto` waitUntil, e.g. `"load"`, `"networkidle"` (default: `"networkidle"`)
     - `delay` — Extra milliseconds to wait after navigation (default: `0`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Override Playwright Docker image
     - `size` — Box size preset override (default: `"medium"`)
     """
@@ -60,6 +66,7 @@ type {
     quality: Int?,
     wait-until: Str?,
     delay: Int?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -79,6 +86,7 @@ meta {
     - `print-background` — Print background graphics (default: `false`)
     - `wait-until` — Playwright `goto` waitUntil (default: `"networkidle"`)
     - `delay` — Extra milliseconds after navigation (default: `0`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Override Playwright Docker image
     - `size` — Box size preset override (default: `"medium"`)
     """
@@ -92,6 +100,7 @@ type {
     print-background: Bool?,
     wait-until: Str?,
     delay: Int?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -225,6 +234,16 @@ fn (url: Str, wait-until: Str, delay: Int, selector: Str?): Str {
 // Helpers
 // ============================================================================
 
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
+
 run-playwright-box
 meta {
     doc: "Run a one-line Node script in the Playwright image with internet access, then run optional shell suffix (e.g. hotbox copy)."
@@ -315,8 +334,8 @@ meta {
 fn (url: Str): Map {
     screenshot(url, ScreenshotOpts({
         width: null, height: null, full-page: null, format: null,
-        quality: null, wait-until: null, delay: null, image: null, size: null,
-        timeout: null,
+        quality: null, wait-until: null, delay: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (url: Str, opts: ScreenshotOpts): Map {
@@ -328,7 +347,7 @@ fn (url: Str): Map {
     delay or(opts.delay, 0)
     uuid Uuid()
     ext if(eq(format, "jpeg"), "jpg", "png")
-    hot-output `hot://playwright/${uuid}/screenshot.${ext}`
+    hot-output resolve-output(opts.output, `hot://playwright/${uuid}/screenshot.${ext}`)
     out-path `/data/screenshot.${ext}`
     js build-screenshot-script(url, out-path, width, height, full-p, format, opts.quality, wait-u, delay)
     suffix ` && hotbox cp ${out-path} '${hot-output}'`
@@ -358,7 +377,7 @@ fn (url: Str): Map {
     pdf(url, PdfOpts({
         width: null, height: null, format: null, landscape: null,
         margin: null, print-background: null, wait-until: null,
-        delay: null, image: null, size: null, timeout: null,
+        delay: null, output: null, image: null, size: null, timeout: null,
     }))
 },
 (url: Str, opts: PdfOpts): Map {
@@ -367,7 +386,7 @@ fn (url: Str): Map {
     land if(is-some(opts.landscape), opts.landscape, false)
     pb if(is-some(opts.print-background), opts.print-background, false)
     uuid Uuid()
-    hot-output `hot://playwright/${uuid}/page.pdf`
+    hot-output resolve-output(opts.output, `hot://playwright/${uuid}/page.pdf`)
     out-path "/data/page.pdf"
     js build-pdf-script(url, out-path, opts.width, opts.height, opts.format, land, pb, opts.margin, wait-u, delay)
     suffix ` && hotbox cp ${out-path} '${hot-output}'`
@@ -427,8 +446,8 @@ meta {
 fn (url: Str): Map {
     start-screenshot(url, ScreenshotOpts({
         width: null, height: null, full-page: null, format: null,
-        quality: null, wait-until: null, delay: null, image: null, size: null,
-        timeout: null,
+        quality: null, wait-until: null, delay: null, output: null,
+        image: null, size: null, timeout: null,
     }))
 },
 (url: Str, opts: ScreenshotOpts): Map {
@@ -440,12 +459,13 @@ fn (url: Str): Map {
     delay or(opts.delay, 0)
     uuid Uuid()
     ext if(eq(format, "jpeg"), "jpg", "png")
-    hot-output `hot://playwright/${uuid}/screenshot.${ext}`
+    hot-output resolve-output(opts.output, `hot://playwright/${uuid}/screenshot.${ext}`)
     out-path `/data/screenshot.${ext}`
     js build-screenshot-script(url, out-path, width, height, full-p, format, opts.quality, wait-u, delay)
     suffix ` && hotbox cp ${out-path} '${hot-output}'`
     box-size or(opts.size, "large")
-    start-playwright-box(js, box-size, opts.image, suffix, or(opts.timeout, 300))
+    info start-playwright-box(js, box-size, opts.image, suffix, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-pdf
@@ -461,7 +481,7 @@ fn (url: Str): Map {
     start-pdf(url, PdfOpts({
         width: null, height: null, format: null, landscape: null,
         margin: null, print-background: null, wait-until: null,
-        delay: null, image: null, size: null, timeout: null,
+        delay: null, output: null, image: null, size: null, timeout: null,
     }))
 },
 (url: Str, opts: PdfOpts): Map {
@@ -470,12 +490,13 @@ fn (url: Str): Map {
     land if(is-some(opts.landscape), opts.landscape, false)
     pb if(is-some(opts.print-background), opts.print-background, false)
     uuid Uuid()
-    hot-output `hot://playwright/${uuid}/page.pdf`
+    hot-output resolve-output(opts.output, `hot://playwright/${uuid}/page.pdf`)
     out-path "/data/page.pdf"
     js build-pdf-script(url, out-path, opts.width, opts.height, opts.format, land, pb, opts.margin, wait-u, delay)
     suffix ` && hotbox cp ${out-path} '${hot-output}'`
     box-size or(opts.size, "large")
-    start-playwright-box(js, box-size, opts.image, suffix, or(opts.timeout, 300))
+    info start-playwright-box(js, box-size, opts.image, suffix, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-scrape

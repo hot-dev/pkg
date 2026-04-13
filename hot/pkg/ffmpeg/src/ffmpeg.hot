@@ -28,6 +28,11 @@ meta {
     // Extract audio as mp3
     audio ::ffmpeg/extract-audio("hot://uploads/video.mp4")
     tap(audio.url)
+
+    // With explicit output path
+    thumb ::ffmpeg/thumbnail("hot://uploads/video.mp4", {
+        output: "hot://media/video-thumb.jpg",
+    })
     ```
     """
 }
@@ -55,6 +60,7 @@ meta {
     - `height` — Output height in pixels (default: source height)
     - `format` — Output format: `"jpg"`, `"png"`, `"webp"` (default: `"jpg"`)
     - `quality` — Quality 1–31, lower is better (default: `2`)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `extra-args` — Additional ffmpeg arguments
     - `image` — Custom Docker image with ffmpeg (default: alpine + ffmpeg)
     - `size` — Box size override (default: `"small"`)
@@ -67,6 +73,7 @@ type {
     height: Int?,
     format: Str?,
     quality: Int?,
+    output: Str?,
     extra-args: Vec<Str>?,
     image: Str?,
     size: Str?,
@@ -87,6 +94,7 @@ meta {
     - `resolution` — Output resolution, e.g. `"1280x720"`
     - `preset` — Encoding preset, e.g. `"fast"`, `"medium"`, `"slow"`
     - `crf` — Constant Rate Factor 0–51 (default: 23 for x264)
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `extra-args` — Additional ffmpeg arguments
     - `image` — Custom Docker image with ffmpeg
     - `size` — Box size override (default: `"medium"`)
@@ -102,6 +110,7 @@ type {
     resolution: Str?,
     preset: Str?,
     crf: Int?,
+    output: Str?,
     extra-args: Vec<Str>?,
     image: Str?,
     size: Str?,
@@ -118,6 +127,7 @@ meta {
     - `bitrate` — Bitrate, e.g. `"192k"`, `"320k"` (default: `"192k"`)
     - `sample-rate` — Sample rate in Hz, e.g. `44100`, `48000`
     - `channels` — Number of channels: `1` for mono, `2` for stereo
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `extra-args` — Additional ffmpeg arguments
     - `image` — Custom Docker image with ffmpeg
     - `size` — Box size override (default: `"small"`)
@@ -129,6 +139,7 @@ type {
     bitrate: Str?,
     sample-rate: Int?,
     channels: Int?,
+    output: Str?,
     extra-args: Vec<Str>?,
     image: Str?,
     size: Str?,
@@ -233,6 +244,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 file-ext fn (path: Str): Str {
     parts split(path, ".")
@@ -364,7 +385,7 @@ meta {
 fn (input: Str): Map {
     thumbnail(input, ThumbnailOpts({
         time: null, width: null, height: null,
-        format: null, quality: null, extra-args: null,
+        format: null, quality: null, output: null, extra-args: null,
         image: null, size: null, timeout: null,
     }))
 },
@@ -373,7 +394,7 @@ fn (input: Str): Map {
     time or(opts.time, "00:00:01")
     quality or(opts.quality, 2)
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/thumbnail.${format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/thumbnail.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -420,7 +441,7 @@ meta {
 }
 fn (input: Str, opts: TranscodeOpts): Map {
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -466,7 +487,7 @@ meta {
 fn (input: Str): Map {
     extract-audio(input, ExtractAudioOpts({
         format: null, bitrate: null, sample-rate: null,
-        channels: null, extra-args: null,
+        channels: null, output: null, extra-args: null,
         image: null, size: null, timeout: null,
     }))
 },
@@ -474,7 +495,7 @@ fn (input: Str): Map {
     format or(opts.format, "mp3")
     bitrate or(opts.bitrate, "192k")
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/audio.${format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/audio.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -547,7 +568,7 @@ meta {
 fn (input: Str): Map {
     start-thumbnail(input, ThumbnailOpts({
         time: null, width: null, height: null,
-        format: null, quality: null, extra-args: null,
+        format: null, quality: null, output: null, extra-args: null,
         image: null, size: null, timeout: null,
     }))
 },
@@ -556,7 +577,7 @@ fn (input: Str): Map {
     time or(opts.time, "00:00:01")
     quality or(opts.quality, 2)
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/thumbnail.${format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/thumbnail.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -566,7 +587,8 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && ffmpeg ${ffmpeg-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-transcode
@@ -576,7 +598,7 @@ meta {
 }
 fn (input: Str, opts: TranscodeOpts): Map {
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -586,7 +608,8 @@ fn (input: Str, opts: TranscodeOpts): Map {
     script `hotbox cp '${input}' ${in-path} && ffmpeg ${ffmpeg-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "medium")
-    start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }
 
 start-extract-audio
@@ -597,7 +620,7 @@ meta {
 fn (input: Str): Map {
     start-extract-audio(input, ExtractAudioOpts({
         format: null, bitrate: null, sample-rate: null,
-        channels: null, extra-args: null,
+        channels: null, output: null, extra-args: null,
         image: null, size: null, timeout: null,
     }))
 },
@@ -605,7 +628,7 @@ fn (input: Str): Map {
     format or(opts.format, "mp3")
     bitrate or(opts.bitrate, "192k")
     uuid Uuid()
-    hot-output `hot://ffmpeg/${uuid}/audio.${format}`
+    hot-output resolve-output(opts.output, `hot://ffmpeg/${uuid}/audio.${format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -615,5 +638,6 @@ fn (input: Str): Map {
     script `hotbox cp '${input}' ${in-path} && ffmpeg ${ffmpeg-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "small")
-    start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    info start-ffmpeg-box(script, box-size, opts.image, or(opts.timeout, 300))
+    assoc(info, "data", {output: hot-output})
 }

@@ -16,6 +16,12 @@ meta {
     out ::libreoffice/convert("hot://uploads/report.docx", {format: "pdf"})
     tap(out.url)
 
+    // With explicit output path
+    out ::libreoffice/convert("hot://uploads/report.docx", {
+        format: "pdf",
+        output: "hot://docs/report.pdf",
+    })
+
     ver ::libreoffice/version()
     tap(ver.version)
     ```
@@ -40,6 +46,7 @@ meta {
     **Fields**
     - `format` — Output format, e.g. `"pdf"`, `"docx"`, `"xlsx"`, `"html"`, `"txt"`
     - `filter` — Optional LibreOffice filter name, e.g. `"writer_pdf_Export"`; combined as `format:filter`
+    - `output` — Output `hot://` URL (default: auto-generated)
     - `image` — Override Docker image (must have `libreoffice` in PATH)
     - `size` — Box size override (default: `"medium"`)
     """
@@ -48,6 +55,7 @@ type {
     format: Str,
     filter: Str?,
     extra-args: Vec<Str>?,
+    output: Str?,
     image: Str?,
     size: Str?,
     timeout: Int?
@@ -105,6 +113,16 @@ fn (stdout: Str?): Map {
 // ============================================================================
 // Helpers
 // ============================================================================
+
+resolve-output fn (user-output: Str?, default: Str): Str {
+    cond {
+        is-null(user-output) => { default }
+        not(starts-with(user-output, "hot://")) => {
+            fail("output must be a hot:// URL", {output: user-output})
+        }
+        => { user-output }
+    }
+}
 
 file-ext fn (path: Str): Str {
     parts split(path, ".")
@@ -211,7 +229,7 @@ meta {
 }
 fn (input: Str, opts: ConvertOpts): Map {
     uuid Uuid()
-    hot-output `hot://libreoffice/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://libreoffice/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -276,7 +294,7 @@ meta {
 }
 fn (input: Str, opts: ConvertOpts): Map {
     uuid Uuid()
-    hot-output `hot://libreoffice/${uuid}/output.${opts.format}`
+    hot-output resolve-output(opts.output, `hot://libreoffice/${uuid}/output.${opts.format}`)
 
     ext file-ext(input)
     in-path `/data/input.${ext}`
@@ -289,5 +307,6 @@ fn (input: Str, opts: ConvertOpts): Map {
     script `mkdir -p ${out-dir} && hotbox cp '${input}' ${in-path} && libreoffice ${lo-args} && hotbox cp ${out-path} '${hot-output}'`
 
     box-size or(opts.size, "large")
-    start-libreoffice-box(script, box-size, opts.image, or(opts.timeout, 900))
+    info start-libreoffice-box(script, box-size, opts.image, or(opts.timeout, 900))
+    assoc(info, "data", {output: hot-output})
 }
