@@ -2,13 +2,13 @@
 
 hot.pkg.hot-ai {
   name: "hot.dev/hot-ai",
-  version: "1.1.0",
+  version: "1.2.0",
   hot-min-version: "1.2.0",
-  description: "AI types and utilities for Hot. Provides unified types for AI-generated content, chat, embeddings, and more.",
+  description: "Dependency-free building blocks for AI agents: sessions, identities, messages, scoped memory, RAG, context management, and inter-agent communication.",
   author: "Hot Dev",
   email: "hi@hot.dev",
   license: "Hot Dev Software License Agreement",
-  tags: ["ai", "hot"],
+  tags: ["ai", "agents", "rag", "memory", "hot"],
   deps: {},
   src-paths: ["src/"],
   test-paths: ["test/"]

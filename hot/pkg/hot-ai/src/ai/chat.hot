@@ -1,0 +1,59 @@
+::ai::chat ns
+meta {
+    doc: "Model registry and chat helpers. No provider dependencies. Maps model names to providers and defines ChatOptions for AI-consuming functions."
+}
+
+// ============================================================================
+// Provider Enum
+// ============================================================================
+
+Provider
+meta { doc: "Known AI chat completion providers." }
+enum { Anthropic, OpenAi, Xai, Gemini }
+
+// ============================================================================
+// Model Registry
+// ============================================================================
+
+MODEL_PREFIXES [
+    {prefix: "claude",  provider: Provider.Anthropic},
+    {prefix: "gpt",     provider: Provider.OpenAi},
+    {prefix: "o1",      provider: Provider.OpenAi},
+    {prefix: "o3",      provider: Provider.OpenAi},
+    {prefix: "o4",      provider: Provider.OpenAi},
+    {prefix: "grok",    provider: Provider.Xai},
+    {prefix: "gemini",  provider: Provider.Gemini},
+]
+
+detect-provider
+meta {
+    doc: "Map a model name to its Provider enum. Matches on known prefixes (claude, gpt, o1/o3/o4, grok, gemini). Returns Err for unrecognized models."
+}
+fn (model: Str): Provider {
+    name lowercase(model)
+    hit find-first(MODEL_PREFIXES, (entry) { starts-with(name, entry.prefix) })
+    if(is-null(hit), err(`Unknown model: ${model}`), hit.provider)
+}
+
+provider-name
+meta { doc: "Human-readable name for a Provider." }
+fn match (provider: Provider): Str {
+    Provider.Anthropic => { "Anthropic" }
+    Provider.OpenAi    => { "OpenAI" }
+    Provider.Xai       => { "xAI" }
+    Provider.Gemini    => { "Google Gemini" }
+}
+
+// ============================================================================
+// ChatOptions — standard options for AI-consuming functions
+// ============================================================================
+
+ChatOptions
+meta {
+    doc: "Standard options for functions that need an AI chat function. Fields: chat-fn, model, system."
+}
+type {
+    chat-fn: Fn,
+    model: Str,
+    system: Str?
+}

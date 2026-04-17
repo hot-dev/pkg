@@ -1,0 +1,41 @@
+::ai::session ns
+meta {
+    doc: "Session and Identity types for multi-tenant, multi-participant agents. Lightweight handles with scoping helpers for store names."
+}
+
+Session
+meta {
+    doc: "Conversation container. A Slack channel, Telegram group, DM thread, etc."
+}
+type {
+    id: Str,
+    meta: Map?
+}
+
+Identity
+meta { doc: "A specific participant. Persistent across sessions." }
+type {
+    id: Str,
+    name: Str?,
+    meta: Map?
+}
+
+session-key
+meta {
+    doc: "Build a session-scoped store name: `agent:{agent}:session:{sid}:{suffix}`."
+}
+fn (agent-name: Str, session: Session, suffix: Str): Str {
+    `agent:${agent-name}:session:${session.id}:${suffix}`
+}
+
+user-key
+meta { doc: "Build a user-scoped store name: `agent:{agent}:user:{uid}:{suffix}`." }
+fn (agent-name: Str, identity: Identity, suffix: Str): Str {
+    `agent:${agent-name}:user:${identity.id}:${suffix}`
+}
+
+agent-key
+meta { doc: "Build an agent-scoped store name: `agent:{agent}:{suffix}`." }
+fn (agent-name: Str, suffix: Str): Str {
+    `agent:${agent-name}:${suffix}`
+}
