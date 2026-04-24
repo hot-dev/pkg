@@ -25,10 +25,15 @@ chat  ::session/Session({id: "telegram:12345"})
 alice ::session/Identity({id: "u1", name: "alice"})
 
 // Scoped keys for store names
-::session/session-key("brain", chat, "memory")   // "brain:session:telegram:12345:memory"
-::session/user-key("brain", alice, "profile")    // "brain:user:u1:profile"
-::session/agent-key("brain", "kb")               // "brain:agent:kb"
+::session/session-key("brain", chat, "memory")             // "agent:brain:session:telegram:12345:memory"
+::session/user-key("brain", alice, "prefs")                // "agent:brain:user:u1:prefs" (cross-session)
+::session/session-user-key("brain", chat, alice, "thread") // "agent:brain:session:telegram:12345:user:u1:thread"
+::session/agent-key("brain", "kb")                         // "agent:brain:kb"
 ```
+
+Use `session-user-key` for anything tied to a specific conversation
+(per-chat threads, per-channel role) so a person who participates in
+multiple sessions doesn't collide with themselves.
 
 ### `::ai::message` — Normalized message types
 
@@ -86,8 +91,9 @@ results ::mem/recall(mem, "what did we decide?", {limit: 10, min-score: 0.3})
 // KB: shared, embedded knowledge
 ::mem/learn(mem, "onboarding", {content: "Welcome! Start with /help"})
 
-// Per-user multi-turn thread
-t ::mem/thread("brain", alice, {max-turns: 10})
+// Per-(session, user) multi-turn thread — same `chat` you used to
+// build `mem`, so memory and thread share the same scope.
+t ::mem/thread("brain", chat, alice, {max-turns: 10})
 ::mem/thread-add(t, Role.User, "hello")
 ::mem/thread-add(t, Role.Assistant, "hi alice")
 hist ::mem/thread-history(t, null)

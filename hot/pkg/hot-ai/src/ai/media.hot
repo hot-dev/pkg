@@ -118,7 +118,18 @@ meta {
     doc: """
     Unified enum for AI-generated media files.
 
-    Wraps pure media types with AI generation metadata.
+    Wraps pure media types with AI generation metadata. Declared
+    `enum open` so applications can register additional AI-generated
+    kinds (e.g., a custom `AIDocument` or `AI3DModel`) via arrow
+    enrollment without forking this type:
+
+    ```hot
+    AIDocument type { file: FileMeta, prompt: Str, model: Str }
+    AIDocument -> AIMedia.Document
+    ```
+
+    Because the variant set is open-ended, `match` on `AIMedia` MUST
+    include a `_` default arm (`open-enum-match-missing-default` otherwise).
 
     **Usage**
     ```hot
@@ -130,6 +141,7 @@ meta {
             AIMedia.Image => { `AI Image: ${ai.prompt} via ${ai.provider}` }
             AIMedia.Audio => { `AI Audio: ${ai.voice} voice via ${ai.provider}` }
             AIMedia.Video => { `AI Video: ${ai.prompt} via ${ai.provider}` }
+            _ => { "unknown AI media kind" }
         }
     }
 
@@ -138,7 +150,7 @@ meta {
     ```
     """
 }
-enum {
+enum open {
     Image(AIImage),
     Audio(AIAudio),
     Video(AIVideo)

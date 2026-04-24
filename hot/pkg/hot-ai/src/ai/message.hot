@@ -11,8 +11,17 @@ Identity ::ai::session/Identity
 // ============================================================================
 
 Role
-meta { doc: "The role of a message in an AI conversation." }
-enum { User, Assistant, System }
+meta {
+    doc: """
+    The role of a message in an AI conversation. The closed variant
+    set covers the standard chat-completion roles: `User`,
+    `Assistant`, `System`, and `Tool` (for tool/function call
+    results that are fed back to the model). `Tool` is the only
+    role recognized by every modern provider beyond the original
+    three; rather than open the enum, we add it explicitly.
+    """
+}
+enum { User, Assistant, System, Tool }
 
 // ============================================================================
 // ChatMessage — lightweight role + content for AI threads
@@ -41,6 +50,12 @@ system-msg
 meta { doc: "Create a ChatMessage with role System." }
 fn (content: Str): ChatMessage {
     ChatMessage({role: Role.System, content: content})
+}
+
+tool-msg
+meta { doc: "Create a ChatMessage with role Tool — used for tool/function call results fed back into the model." }
+fn (content: Str): ChatMessage {
+    ChatMessage({role: Role.Tool, content: content})
 }
 
 // ============================================================================
